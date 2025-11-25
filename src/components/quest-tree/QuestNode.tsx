@@ -1,6 +1,6 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useState } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { cn } from "@/lib/utils";
 import { getTraderColor, STATUS_COLORS } from "@/lib/trader-colors";
@@ -13,17 +13,23 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
   const { quest, onStatusChange, onClick } = data;
   const traderColor = getTraderColor(quest.traderId);
   const statusColor = STATUS_COLORS[quest.computedStatus];
+  const [isClicked, setIsClicked] = useState(false);
 
-  const handleClick = () => {
-    onClick(quest.id);
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    // Trigger click animation
+    setIsClicked(true);
+    setTimeout(() => setIsClicked(false), 150);
+
+    // Call the status change handler (parent handles the cycle logic)
+    onStatusChange(quest.id, quest.computedStatus);
   };
 
-  const handleDoubleClick = () => {
-    // Cycle through statuses on double-click
-    const statusOrder = ["locked", "available", "in_progress", "completed"] as const;
-    const currentIndex = statusOrder.indexOf(quest.computedStatus);
-    const nextIndex = (currentIndex + 1) % statusOrder.length;
-    onStatusChange(quest.id, statusOrder[nextIndex]);
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Right-click to select/view details
+    onClick(quest.id);
   };
 
   return (
@@ -35,15 +41,16 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
       />
       <div
         onClick={handleClick}
-        onDoubleClick={handleDoubleClick}
+        onContextMenu={handleContextMenu}
         className={cn(
-          "relative cursor-pointer rounded-lg border-2 p-3 transition-all duration-200",
-          "hover:shadow-md",
+          "relative cursor-pointer rounded-lg border-2 p-3 transition-all duration-150",
+          "hover:shadow-md active:scale-95",
+          isClicked && "scale-105",
           selected && "ring-2 ring-offset-2 ring-blue-500",
-          quest.computedStatus === "locked" && "opacity-50",
-          quest.computedStatus === "completed" && "opacity-70",
-          quest.computedStatus === "in_progress" && "animate-pulse",
-          quest.computedStatus === "available" && "shadow-sm"
+          quest.computedStatus === "locked" && "opacity-50 cursor-not-allowed",
+          quest.computedStatus === "completed" && "opacity-80",
+          quest.computedStatus === "in_progress" && "ring-2 ring-amber-400",
+          quest.computedStatus === "available" && "shadow-sm hover:shadow-lg"
         )}
         style={{
           width: QUEST_NODE_WIDTH,

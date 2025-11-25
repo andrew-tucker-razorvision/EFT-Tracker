@@ -1,0 +1,118 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { z } from "zod";
+
+// GET /api/progress - Get all progress for authenticated user
+export async function GET() {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const progress = await prisma.questProgress.findMany({
+      where: { userId: session.user.id },
+      include: {
+        quest: {
+          include: {
+            trader: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json({ progress });
+  } catch (error) {
+    console.error("Error fetching progress:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch progress" },
+      { status: 500 }
+    );
+  }
+}
+
+const initProgressSchema = z.object({
+  questId: z.string().min(1, "Quest ID is required"),
+});
+
+// POST /api/progress - Initialize progress for a quest
+export async function POST(request: Request) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { questId } = initProgressSchema.parse(body);
+
+    // Check if quest exists
+    const quest = await prisma.quest.findUnique({
+      where: { id: questId },
+      include: {
+        dependsOn: true,
+      },
+    });
+
+    if (!quest) {
+      return NextResponse.json({ error: "Quest not found" }, { status: 404 });
+    }
+
+    // Check if progress already exists
+    const existingProgress = await prisma.questProgress.findUnique({
+      where: {
+        userId_questId: {
+          userId: session.user.id,
+          questId,
+        },
+      },
+    });
+
+    if (existingProgress) {
+      return NextResponse.json({ progress: existingProgress });
+    }
+
+    // Determine initial status based on dependencies
+    let initialStatus: "LOCKED" | "AVAILABLE" = "AVAILABLE";
+
+    if (quest.dependsOn.length > 0) {
+      // Check if all dependencies are completed
+      const completedDeps = await prisma.questProgress.count({
+        where: {
+          userId: session.user.id,
+          questId: { in: quest.dependsOn.map((d) => d.requiredId) },
+          status: "COMPLETED",
+        },
+      });
+
+      if (completedDeps < quest.dependsOn.length) {
+        initialStatus = "LOCKED";
+      }
+    }
+
+    // Create progress entry
+    const progress = await prisma.questProgress.create({
+      data: {
+        userId: session.user.id,
+        questId,
+        status: initialStatus,
+      },
+    });
+
+    return NextResponse.json({ progress }, { status: 201 });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: error.issues[0].message },
+        { status: 400 }
+      );
+    }
+
+    console.error("Error creating progress:", error);
+    return NextResponse.json(
+      { error: "Failed to create progress" },
+      { status: 500 }
+    );
+  }
+}

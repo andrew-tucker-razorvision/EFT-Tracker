@@ -1,4 +1,4 @@
-import Dagre from "@dagrejs/dagre";
+import dagre from "dagre";
 import type { QuestWithProgress, QuestNode, QuestEdge, QuestStatus } from "@/types";
 import { QUEST_NODE_WIDTH, QUEST_NODE_HEIGHT } from "@/components/quest-tree/QuestNode";
 
@@ -31,7 +31,7 @@ export function buildQuestGraph(
   const questMap = new Map(quests.map((q) => [q.id, q]));
 
   // Create Dagre graph
-  const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
+  const g = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
   g.setGraph(LAYOUT_CONFIG);
 
   // Add nodes
@@ -74,7 +74,7 @@ export function buildQuestGraph(
   }
 
   // Run Dagre layout
-  Dagre.layout(g);
+  dagre.layout(g);
 
   // Convert to React Flow nodes
   const nodes: QuestNode[] = quests.map((quest) => {
