@@ -74,7 +74,7 @@ export async function GET(request: Request) {
     });
 
     // Transform to include computed status
-    const questsWithStatus = quests.map((quest) => {
+    const questsWithStatus = quests.map((quest: any) => {
       const progress = quest.progress?.[0] || null;
 
       // Compute status based on dependencies
@@ -84,8 +84,8 @@ export async function GET(request: Request) {
         computedStatus = progress.status.toLowerCase();
       } else {
         // Check if all dependencies are completed
-        const hasIncompleteDeps = quest.dependsOn.some((dep) => {
-          const depQuest = quests.find((q) => q.id === dep.requiredQuest.id);
+        const hasIncompleteDeps = quest.dependsOn.some((dep: any) => {
+          const depQuest = quests.find((q: any) => q.id === dep.requiredQuest.id);
           const depProgress = depQuest?.progress?.[0];
           return !depProgress || depProgress.status !== "COMPLETED";
         });

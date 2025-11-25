@@ -13,7 +13,7 @@ export async function GET() {
     });
 
     // Add quest count to response
-    const tradersWithCount = traders.map((trader) => ({
+    const tradersWithCount = traders.map((trader: any) => ({
       id: trader.id,
       name: trader.name,
       color: trader.color,

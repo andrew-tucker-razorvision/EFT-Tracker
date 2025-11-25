@@ -58,7 +58,7 @@ export async function PATCH(
         const completedDeps = await prisma.questProgress.count({
           where: {
             userId: session.user.id,
-            questId: { in: quest.dependsOn.map((d) => d.requiredId) },
+            questId: { in: quest.dependsOn.map((d: any) => d.requiredId) },
             status: "COMPLETED",
           },
         });
@@ -160,7 +160,7 @@ async function autoUnlockDependentQuests(
     // Check if ALL dependencies for this quest are now completed
     const allDepsCompleted = await checkAllDependenciesCompleted(
       userId,
-      quest.dependsOn.map((d) => d.requiredId)
+      quest.dependsOn.map((d: any) => d.requiredId)
     );
 
     if (allDepsCompleted) {
