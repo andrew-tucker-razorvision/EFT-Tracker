@@ -6,19 +6,31 @@ echo "=========================================="
 echo "Setting up development environment..."
 echo "=========================================="
 
-# Install 1Password CLI
+# Install 1Password CLI with GPG verification
 echo "Installing 1Password CLI..."
+# Download and verify GPG key
 curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor --output /usr/share/keyrings/1password-archive-keyring.gpg
+
+# Verify the GPG key fingerprint (3FEF9748469ADBE15DA7CA80AC2D62742012EA22)
+EXPECTED_FINGERPRINT="3FEF9748469ADBE15DA7CA80AC2D62742012EA22"
+ACTUAL_FINGERPRINT=$(gpg --no-default-keyring --keyring /usr/share/keyrings/1password-archive-keyring.gpg --fingerprint | grep -oP '(?<=\s{2})[A-F0-9]{40}' | tr -d ' ')
+if [ "$ACTUAL_FINGERPRINT" != "$EXPECTED_FINGERPRINT" ]; then
+    echo "ERROR: 1Password GPG key fingerprint mismatch!"
+    echo "Expected: $EXPECTED_FINGERPRINT"
+    echo "Got: $ACTUAL_FINGERPRINT"
+    exit 1
+fi
+
 echo "deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/amd64 stable main" | sudo tee /etc/apt/sources.list.d/1password.list
 sudo apt-get update && sudo apt-get install -y 1password-cli
 
 # Install Claude Code
 echo "Installing Claude Code..."
-npm install -g @anthropic-ai/claude-code
+npm install -g @anthropic-ai/claude-code@latest
 
-# Install common global npm packages
+# Install common global npm packages with version constraints
 echo "Installing global npm packages..."
-npm install -g typescript ts-node prettier eslint
+npm install -g typescript@5 ts-node@10 prettier@3 eslint@9
 
 # Fix permissions and create command history persistence
 sudo mkdir -p /commandhistory

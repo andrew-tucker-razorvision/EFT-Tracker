@@ -1,6 +1,7 @@
 # Universal Dev Container
 # Base image with common development tools
-FROM mcr.microsoft.com/devcontainers/base:ubuntu
+# Pinned to ubuntu-24.04 for stability and security
+FROM mcr.microsoft.com/devcontainers/base:ubuntu-24.04
 
 # Avoid prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
