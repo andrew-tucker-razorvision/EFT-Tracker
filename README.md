@@ -50,6 +50,81 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to view the app.
 
+### Development with VS Code Dev Containers (Recommended)
+
+The easiest way to get started is using the VS Code Dev Container, which provides a pre-configured development environment with all tools installed.
+
+#### Prerequisites
+- [Docker Desktop](https://www.docker.com/products/docker-desktop)
+- [VS Code](https://code.visualstudio.com/)
+- [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+- [1Password CLI](https://developer.1password.com/docs/cli) (for secret management)
+
+#### Quick Start
+1. Clone the repository
+2. Generate `.env` file on your host:
+   ```bash
+   op inject -i .env.template -o .env
+   ```
+3. Open in VS Code
+4. Click "Reopen in Container" when prompted (or use Command Palette: "Dev Containers: Reopen in Container")
+5. Wait for container setup to complete (~2-3 minutes first time)
+6. Start coding! All dependencies and tools are pre-installed.
+
+#### What's Included
+- Node.js LTS, TypeScript, ESLint, Prettier
+- 1Password CLI for secure secret management
+- Claude Code AI assistant
+- GitHub CLI
+- Persistent bash history and command history
+- Isolated `node_modules` (prevents WSL2 binary conflicts)
+
+See [.devcontainer/README.md](.devcontainer/README.md) for detailed configuration and troubleshooting.
+
+## Docker Deployment
+
+### Development Container
+The dev container is optimized for cross-platform development with:
+- **Security**: Pinned base image (`ubuntu-24.04`), version-locked packages, GPG verification
+- **Performance**: Volume mounts for node_modules (prevents cross-platform binary issues)
+- **Tooling**: Pre-configured VS Code extensions and CLI tools
+
+### Production Container
+Deploy to any container orchestrator with the production-ready Dockerfile:
+
+```bash
+# Build production image
+docker build -t eft-tracker:latest .
+
+# Run production container
+docker run -d \
+  -p 3000:3000 \
+  -e DATABASE_URL="postgresql://..." \
+  -e NEXTAUTH_SECRET="your-secret" \
+  -e NEXTAUTH_URL="https://your-domain.com" \
+  eft-tracker:latest
+```
+
+#### Production Features
+- **Multi-stage build**: Optimized image size (~150MB with Alpine Linux)
+- **Security**: Non-root user, minimal attack surface
+- **Health checks**: Built-in endpoint at `/api/health`
+- **Orchestration ready**: Works with Kubernetes, ECS, Docker Compose
+
+See [docs/PRODUCTION_DEPLOYMENT.md](docs/PRODUCTION_DEPLOYMENT.md) for comprehensive deployment guide including:
+- Container registry setup
+- Kubernetes manifests
+- AWS ECS task definitions
+- Environment variable configuration
+- Security best practices
+- Monitoring and troubleshooting
+
+### Security Scanning
+Automated security scanning runs on every PR and weekly via GitHub Actions:
+- **Trivy**: Vulnerability scanning for container images
+- **Hadolint**: Dockerfile best practices linting
+- Results integrated with GitHub Security tab
+
 ## Project Structure
 
 ```
