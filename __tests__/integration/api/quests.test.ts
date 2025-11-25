@@ -132,7 +132,7 @@ describe("/api/quests", () => {
 
   describe("GET", () => {
     it("should return all quests without filters", async () => {
-      vi.mocked(auth).mockResolvedValue(null);
+      vi.mocked(auth).mockResolvedValue(null as any);
       vi.mocked(prisma.quest.findMany).mockResolvedValue(mockQuests as never);
 
       const request = new Request("http://localhost:3000/api/quests");
@@ -145,7 +145,7 @@ describe("/api/quests", () => {
     });
 
     it("should filter quests by trader", async () => {
-      vi.mocked(auth).mockResolvedValue(null);
+      vi.mocked(auth).mockResolvedValue(null as any);
       vi.mocked(prisma.quest.findMany).mockResolvedValue([
         mockQuests[0],
         mockQuests[1],
@@ -176,7 +176,7 @@ describe("/api/quests", () => {
     });
 
     it("should filter quests by kappa requirement", async () => {
-      vi.mocked(auth).mockResolvedValue(null);
+      vi.mocked(auth).mockResolvedValue(null as any);
       vi.mocked(prisma.quest.findMany).mockResolvedValue([
         mockQuests[0],
         mockQuests[1],
@@ -202,7 +202,7 @@ describe("/api/quests", () => {
     });
 
     it("should filter quests by map", async () => {
-      vi.mocked(auth).mockResolvedValue(null);
+      vi.mocked(auth).mockResolvedValue(null as any);
       vi.mocked(prisma.quest.findMany).mockResolvedValue([
         mockQuests[1],
       ] as never);
@@ -232,7 +232,7 @@ describe("/api/quests", () => {
     });
 
     it("should filter quests by search term", async () => {
-      vi.mocked(auth).mockResolvedValue(null);
+      vi.mocked(auth).mockResolvedValue(null as any);
       vi.mocked(prisma.quest.findMany).mockResolvedValue([
         mockQuests[0],
       ] as never);
@@ -261,7 +261,7 @@ describe("/api/quests", () => {
     });
 
     it("should combine multiple filters", async () => {
-      vi.mocked(auth).mockResolvedValue(null);
+      vi.mocked(auth).mockResolvedValue(null as any);
       vi.mocked(prisma.quest.findMany).mockResolvedValue([
         mockQuests[1],
       ] as never);
@@ -345,7 +345,7 @@ describe("/api/quests", () => {
     });
 
     it("should handle database errors gracefully", async () => {
-      vi.mocked(auth).mockResolvedValue(null);
+      vi.mocked(auth).mockResolvedValue(null as any);
       vi.mocked(prisma.quest.findMany).mockRejectedValue(
         new Error("Database connection failed")
       );
@@ -359,7 +359,7 @@ describe("/api/quests", () => {
     });
 
     it("should order quests by level and title", async () => {
-      vi.mocked(auth).mockResolvedValue(null);
+      vi.mocked(auth).mockResolvedValue(null as any);
       vi.mocked(prisma.quest.findMany).mockResolvedValue(mockQuests as never);
 
       const request = new Request("http://localhost:3000/api/quests");
