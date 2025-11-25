@@ -22,7 +22,7 @@ interface UseProgressReturn {
 }
 
 export function useProgress(): UseProgressReturn {
-  const { data: session, status: sessionStatus } = useSession();
+  const { status: sessionStatus } = useSession();
   const [progress, setProgress] = useState<Map<string, QuestStatus>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

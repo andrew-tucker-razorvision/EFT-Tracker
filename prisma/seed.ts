@@ -160,7 +160,7 @@ async function main() {
         kappaRequired: kappaQuestIds.has(quest.id),
         traderId: traderId,
         objectives: {
-          create: (quest.objectives || []).map((obj, idx) => {
+          create: (quest.objectives || []).map((obj) => {
             // Convert description to string (some objectives have numeric values)
             const desc = obj.hint || obj.target || obj.type || "Complete objective";
             return {

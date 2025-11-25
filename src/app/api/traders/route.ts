@@ -1,5 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
+
+type TraderWithCount = Prisma.TraderGetPayload<{
+  include: {
+    _count: {
+      select: { quests: true };
+    };
+  };
+}>;
 
 export async function GET() {
   try {
@@ -13,7 +22,7 @@ export async function GET() {
     });
 
     // Add quest count to response
-    const tradersWithCount = traders.map((trader: any) => ({
+    const tradersWithCount = traders.map((trader: TraderWithCount) => ({
       id: trader.id,
       name: trader.name,
       color: trader.color,

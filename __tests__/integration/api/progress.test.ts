@@ -10,6 +10,7 @@ import {
   PATCH,
 } from "@/app/api/progress/[questId]/route";
 import { prisma } from "@/lib/prisma";
+import type { Session } from "next-auth";
 
 // Mock prisma
 vi.mock("@/lib/prisma", () => ({
@@ -78,7 +79,7 @@ describe("/api/progress", () => {
 
   describe("GET /api/progress", () => {
     it("should return 401 when not authenticated", async () => {
-      vi.mocked(auth).mockResolvedValue(null as any);
+      vi.mocked(auth).mockResolvedValue(null);
 
       const response = await GET();
       const data = await response.json();
@@ -88,7 +89,7 @@ describe("/api/progress", () => {
     });
 
     it("should return all progress for authenticated user", async () => {
-      vi.mocked(auth).mockResolvedValue(mockSession as any);
+      vi.mocked(auth).mockResolvedValue(mockSession as Session);
       vi.mocked(prisma.questProgress.findMany).mockResolvedValue(
         mockProgress as never
       );
@@ -111,7 +112,7 @@ describe("/api/progress", () => {
     });
 
     it("should handle empty progress list", async () => {
-      vi.mocked(auth).mockResolvedValue(mockSession as any);
+      vi.mocked(auth).mockResolvedValue(mockSession as Session);
       vi.mocked(prisma.questProgress.findMany).mockResolvedValue([]);
 
       const response = await GET();
@@ -122,7 +123,7 @@ describe("/api/progress", () => {
     });
 
     it("should handle database errors", async () => {
-      vi.mocked(auth).mockResolvedValue(mockSession as any);
+      vi.mocked(auth).mockResolvedValue(mockSession as Session);
       vi.mocked(prisma.questProgress.findMany).mockRejectedValue(
         new Error("Database error")
       );
@@ -137,7 +138,7 @@ describe("/api/progress", () => {
 
   describe("POST /api/progress", () => {
     it("should return 401 when not authenticated", async () => {
-      vi.mocked(auth).mockResolvedValue(null as any);
+      vi.mocked(auth).mockResolvedValue(null);
 
       const request = new Request("http://localhost:3000/api/progress", {
         method: "POST",
@@ -152,7 +153,7 @@ describe("/api/progress", () => {
     });
 
     it("should return 404 when quest does not exist", async () => {
-      vi.mocked(auth).mockResolvedValue(mockSession as any);
+      vi.mocked(auth).mockResolvedValue(mockSession as Session);
       vi.mocked(prisma.quest.findUnique).mockResolvedValue(null);
 
       const request = new Request("http://localhost:3000/api/progress", {
@@ -168,7 +169,7 @@ describe("/api/progress", () => {
     });
 
     it("should return existing progress if already exists", async () => {
-      vi.mocked(auth).mockResolvedValue(mockSession as any);
+      vi.mocked(auth).mockResolvedValue(mockSession as Session);
       vi.mocked(prisma.quest.findUnique).mockResolvedValue({
         id: "quest-1",
         dependsOn: [],
@@ -191,7 +192,7 @@ describe("/api/progress", () => {
     });
 
     it("should create AVAILABLE progress for quest without dependencies", async () => {
-      vi.mocked(auth).mockResolvedValue(mockSession as any);
+      vi.mocked(auth).mockResolvedValue(mockSession as Session);
       vi.mocked(prisma.quest.findUnique).mockResolvedValue({
         id: "quest-1",
         dependsOn: [],
@@ -224,7 +225,7 @@ describe("/api/progress", () => {
     });
 
     it("should create LOCKED progress when dependencies are not completed", async () => {
-      vi.mocked(auth).mockResolvedValue(mockSession as any);
+      vi.mocked(auth).mockResolvedValue(mockSession as Session);
       vi.mocked(prisma.quest.findUnique).mockResolvedValue({
         id: "quest-2",
         dependsOn: [{ requiredId: "quest-1" }],
@@ -251,7 +252,7 @@ describe("/api/progress", () => {
     });
 
     it("should create AVAILABLE progress when all dependencies are completed", async () => {
-      vi.mocked(auth).mockResolvedValue(mockSession as any);
+      vi.mocked(auth).mockResolvedValue(mockSession as Session);
       vi.mocked(prisma.quest.findUnique).mockResolvedValue({
         id: "quest-2",
         dependsOn: [{ requiredId: "quest-1" }],
@@ -278,7 +279,7 @@ describe("/api/progress", () => {
     });
 
     it("should return 400 for invalid request body", async () => {
-      vi.mocked(auth).mockResolvedValue(mockSession as any);
+      vi.mocked(auth).mockResolvedValue(mockSession as Session);
 
       const request = new Request("http://localhost:3000/api/progress", {
         method: "POST",
@@ -305,7 +306,7 @@ describe("/api/progress/[questId]", () => {
 
   describe("GET", () => {
     it("should return 401 when not authenticated", async () => {
-      vi.mocked(auth).mockResolvedValue(null as any);
+      vi.mocked(auth).mockResolvedValue(null);
 
       const request = new Request(
         "http://localhost:3000/api/progress/quest-1"
@@ -320,7 +321,7 @@ describe("/api/progress/[questId]", () => {
     });
 
     it("should return 404 when progress not found", async () => {
-      vi.mocked(auth).mockResolvedValue(mockSession as any);
+      vi.mocked(auth).mockResolvedValue(mockSession as Session);
       vi.mocked(prisma.questProgress.findUnique).mockResolvedValue(null);
 
       const request = new Request(
@@ -336,7 +337,7 @@ describe("/api/progress/[questId]", () => {
     });
 
     it("should return progress with quest details", async () => {
-      vi.mocked(auth).mockResolvedValue(mockSession as any);
+      vi.mocked(auth).mockResolvedValue(mockSession as Session);
       vi.mocked(prisma.questProgress.findUnique).mockResolvedValue({
         ...mockProgress[0],
         quest: {
@@ -363,7 +364,7 @@ describe("/api/progress/[questId]", () => {
 
   describe("PATCH", () => {
     it("should return 401 when not authenticated", async () => {
-      vi.mocked(auth).mockResolvedValue(null as any);
+      vi.mocked(auth).mockResolvedValue(null);
 
       const request = new Request(
         "http://localhost:3000/api/progress/quest-1",
@@ -382,7 +383,7 @@ describe("/api/progress/[questId]", () => {
     });
 
     it("should update status for valid transition (AVAILABLE -> IN_PROGRESS)", async () => {
-      vi.mocked(auth).mockResolvedValue(mockSession as any);
+      vi.mocked(auth).mockResolvedValue(mockSession as Session);
       vi.mocked(prisma.questProgress.findUnique).mockResolvedValue({
         id: "progress-1",
         userId: "user-123",
@@ -413,7 +414,7 @@ describe("/api/progress/[questId]", () => {
     });
 
     it("should reject invalid status transition (AVAILABLE -> COMPLETED)", async () => {
-      vi.mocked(auth).mockResolvedValue(mockSession as any);
+      vi.mocked(auth).mockResolvedValue(mockSession as Session);
       vi.mocked(prisma.questProgress.findUnique).mockResolvedValue({
         id: "progress-1",
         userId: "user-123",
@@ -438,7 +439,7 @@ describe("/api/progress/[questId]", () => {
     });
 
     it("should allow IN_PROGRESS -> COMPLETED transition", async () => {
-      vi.mocked(auth).mockResolvedValue(mockSession as any);
+      vi.mocked(auth).mockResolvedValue(mockSession as Session);
       vi.mocked(prisma.questProgress.findUnique).mockResolvedValue({
         id: "progress-1",
         userId: "user-123",
@@ -470,7 +471,7 @@ describe("/api/progress/[questId]", () => {
     });
 
     it("should auto-unlock dependent quests when quest is completed", async () => {
-      vi.mocked(auth).mockResolvedValue(mockSession as any);
+      vi.mocked(auth).mockResolvedValue(mockSession as Session);
       vi.mocked(prisma.questProgress.findUnique)
         .mockResolvedValueOnce({
           id: "progress-1",
@@ -529,7 +530,7 @@ describe("/api/progress/[questId]", () => {
     });
 
     it("should create progress if it does not exist", async () => {
-      vi.mocked(auth).mockResolvedValue(mockSession as any);
+      vi.mocked(auth).mockResolvedValue(mockSession as Session);
       vi.mocked(prisma.questProgress.findUnique).mockResolvedValue(null);
       vi.mocked(prisma.quest.findUnique).mockResolvedValue({
         id: "quest-1",
@@ -558,14 +559,14 @@ describe("/api/progress/[questId]", () => {
       const response = await PATCH(request, {
         params: Promise.resolve({ questId: "quest-1" }),
       });
-      const data = await response.json();
+      await response.json();
 
       expect(response.status).toBe(200);
       expect(prisma.questProgress.create).toHaveBeenCalled();
     });
 
     it("should return 404 if quest does not exist when creating progress", async () => {
-      vi.mocked(auth).mockResolvedValue(mockSession as any);
+      vi.mocked(auth).mockResolvedValue(mockSession as Session);
       vi.mocked(prisma.questProgress.findUnique).mockResolvedValue(null);
       vi.mocked(prisma.quest.findUnique).mockResolvedValue(null);
 
@@ -586,7 +587,7 @@ describe("/api/progress/[questId]", () => {
     });
 
     it("should return 400 for invalid status value", async () => {
-      vi.mocked(auth).mockResolvedValue(mockSession as any);
+      vi.mocked(auth).mockResolvedValue(mockSession as Session);
 
       const request = new Request(
         "http://localhost:3000/api/progress/quest-1",
@@ -605,7 +606,7 @@ describe("/api/progress/[questId]", () => {
     });
 
     it("should allow LOCKED -> AVAILABLE for auto-unlock", async () => {
-      vi.mocked(auth).mockResolvedValue(mockSession as any);
+      vi.mocked(auth).mockResolvedValue(mockSession as Session);
       vi.mocked(prisma.questProgress.findUnique).mockResolvedValue({
         id: "progress-1",
         userId: "user-123",

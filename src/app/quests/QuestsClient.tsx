@@ -17,13 +17,6 @@ const STATUS_CYCLE: Record<QuestStatus, QuestStatus | null> = {
   completed: "available", // Reset
 };
 
-const STATUS_LABELS: Record<QuestStatus, string> = {
-  locked: "Locked",
-  available: "Available",
-  in_progress: "In Progress",
-  completed: "Completed",
-};
-
 export function QuestsClient() {
   const { status: sessionStatus } = useSession();
   const { quests, traders, loading, error, filters, setFilters, refetch } =
@@ -71,7 +64,7 @@ export function QuestsClient() {
   }, []);
 
   const handleStatusChange = useCallback(
-    async (questId: string, clickedStatus: QuestStatus) => {
+    async (questId: string) => {
       const quest = questsWithProgress.find((q) => q.id === questId);
       if (!quest) return;
 

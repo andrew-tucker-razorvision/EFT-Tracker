@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
+
+type QuestDependency = Prisma.QuestDependencyGetPayload<{
+  select: { requiredId: true };
+}>;
 
 // GET /api/progress - Get all progress for authenticated user
 export async function GET() {
@@ -81,7 +86,7 @@ export async function POST(request: Request) {
       const completedDeps = await prisma.questProgress.count({
         where: {
           userId: session.user.id,
-          questId: { in: quest.dependsOn.map((d: any) => d.requiredId) },
+          questId: { in: quest.dependsOn.map((d: QuestDependency) => d.requiredId) },
           status: "COMPLETED",
         },
       });

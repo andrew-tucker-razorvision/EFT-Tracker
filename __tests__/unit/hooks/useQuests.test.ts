@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { renderHook, waitFor, act } from "@testing-library/react";
 import { useQuests, useQuestProgress } from "@/hooks/useQuests";
 import { server } from "../../../test/setup/msw-server";

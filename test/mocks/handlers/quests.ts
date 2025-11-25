@@ -1,7 +1,6 @@
 import { http, HttpResponse } from "msw";
 import { mockQuestsWithProgress } from "../../fixtures/quests";
 import { mockTraders } from "../../fixtures/traders";
-import type { QuestFilters } from "@/types";
 
 // Base URL for API routes
 const API_BASE = "/api";

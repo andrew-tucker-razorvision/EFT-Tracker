@@ -49,45 +49,23 @@ interface QuestFiltersProps {
   onFilterChange: (filters: Partial<Filters>) => void;
 }
 
-export function QuestFilters({
+interface FilterControlsProps {
+  isMobile?: boolean;
+  traders: Trader[];
+  filters: Filters;
+  onFilterChange: (filters: Partial<Filters>) => void;
+  activeFilterCount: number;
+  handleReset: () => void;
+}
+
+const FilterControls = ({
+  isMobile = false,
   traders,
   filters,
   onFilterChange,
-}: QuestFiltersProps) {
-  const [searchValue, setSearchValue] = useState(filters.search);
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  // Debounce search input
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchValue !== filters.search) {
-        onFilterChange({ search: searchValue });
-      }
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchValue, filters.search, onFilterChange]);
-
-  const handleReset = () => {
-    setSearchValue("");
-    onFilterChange({
-      traderId: null,
-      status: null,
-      search: "",
-      kappaOnly: false,
-      map: null,
-    });
-  };
-
-  const activeFilterCount = [
-    filters.traderId,
-    filters.status,
-    filters.search,
-    filters.kappaOnly,
-    filters.map,
-  ].filter(Boolean).length;
-
-  const FilterControls = ({ isMobile = false }: { isMobile?: boolean }) => (
+  activeFilterCount,
+  handleReset,
+}: FilterControlsProps) => (
     <div
       className={
         isMobile
@@ -202,6 +180,44 @@ export function QuestFilters({
     </div>
   );
 
+export function QuestFilters({
+  traders,
+  filters,
+  onFilterChange,
+}: QuestFiltersProps) {
+  const [searchValue, setSearchValue] = useState(filters.search);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchValue !== filters.search) {
+        onFilterChange({ search: searchValue });
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchValue, filters.search, onFilterChange]);
+
+  const handleReset = () => {
+    setSearchValue("");
+    onFilterChange({
+      traderId: null,
+      status: null,
+      search: "",
+      kappaOnly: false,
+      map: null,
+    });
+  };
+
+  const activeFilterCount = [
+    filters.traderId,
+    filters.status,
+    filters.search,
+    filters.kappaOnly,
+    filters.map,
+  ].filter(Boolean).length;
+
   return (
     <div className="flex flex-wrap items-end gap-2 md:gap-4 p-3 md:p-4 bg-background border-b">
       {/* Search - always visible */}
@@ -223,7 +239,13 @@ export function QuestFilters({
       </div>
 
       {/* Desktop Filters */}
-      <FilterControls />
+      <FilterControls
+        traders={traders}
+        filters={filters}
+        onFilterChange={onFilterChange}
+        activeFilterCount={activeFilterCount}
+        handleReset={handleReset}
+      />
 
       {/* Mobile Filter Button */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -242,7 +264,14 @@ export function QuestFilters({
             <SheetTitle>Filter Quests</SheetTitle>
           </SheetHeader>
           <div className="py-4">
-            <FilterControls isMobile />
+            <FilterControls
+              isMobile
+              traders={traders}
+              filters={filters}
+              onFilterChange={onFilterChange}
+              activeFilterCount={activeFilterCount}
+              handleReset={handleReset}
+            />
           </div>
         </SheetContent>
       </Sheet>

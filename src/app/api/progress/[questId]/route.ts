@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
+
+type QuestDependency = Prisma.QuestDependencyGetPayload<{
+  select: { requiredId: true };
+}>;
 
 // Valid status transitions
 const VALID_TRANSITIONS: Record<string, string[]> = {
@@ -58,7 +63,7 @@ export async function PATCH(
         const completedDeps = await prisma.questProgress.count({
           where: {
             userId: session.user.id,
-            questId: { in: quest.dependsOn.map((d: any) => d.requiredId) },
+            questId: { in: quest.dependsOn.map((d: QuestDependency) => d.requiredId) },
             status: "COMPLETED",
           },
         });
@@ -160,7 +165,7 @@ async function autoUnlockDependentQuests(
     // Check if ALL dependencies for this quest are now completed
     const allDepsCompleted = await checkAllDependenciesCompleted(
       userId,
-      quest.dependsOn.map((d: any) => d.requiredId)
+      quest.dependsOn.map((d: QuestDependency) => d.requiredId)
     );
 
     if (allDepsCompleted) {

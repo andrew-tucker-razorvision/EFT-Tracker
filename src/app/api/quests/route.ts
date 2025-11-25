@@ -1,6 +1,43 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { Prisma } from "@prisma/client";
+
+type QuestWithRelations = Prisma.QuestGetPayload<{
+  include: {
+    trader: true;
+    objectives: true;
+    dependsOn: {
+      include: {
+        requiredQuest: {
+          include: {
+            trader: true;
+          };
+        };
+      };
+    };
+    dependedOnBy: {
+      include: {
+        dependentQuest: {
+          include: {
+            trader: true;
+          };
+        };
+      };
+    };
+    progress: true;
+  };
+}>;
+
+type QuestDependency = Prisma.QuestDependencyGetPayload<{
+  include: {
+    requiredQuest: {
+      include: {
+        trader: true;
+      };
+    };
+  };
+}>;
 
 export async function GET(request: Request) {
   try {
@@ -74,7 +111,7 @@ export async function GET(request: Request) {
     });
 
     // Transform to include computed status
-    const questsWithStatus = quests.map((quest: any) => {
+    const questsWithStatus = quests.map((quest: QuestWithRelations) => {
       const progress = quest.progress?.[0] || null;
 
       // Compute status based on dependencies
@@ -84,8 +121,8 @@ export async function GET(request: Request) {
         computedStatus = progress.status.toLowerCase();
       } else {
         // Check if all dependencies are completed
-        const hasIncompleteDeps = quest.dependsOn.some((dep: any) => {
-          const depQuest = quests.find((q: any) => q.id === dep.requiredQuest.id);
+        const hasIncompleteDeps = quest.dependsOn.some((dep: QuestDependency) => {
+          const depQuest = quests.find((q: QuestWithRelations) => q.id === dep.requiredQuest.id);
           const depProgress = depQuest?.progress?.[0];
           return !depProgress || depProgress.status !== "COMPLETED";
         });
