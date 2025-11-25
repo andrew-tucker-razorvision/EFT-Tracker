@@ -1,0 +1,213 @@
+import { describe, it, expect, vi } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
+import { ReactFlowProvider } from "@xyflow/react";
+import { QuestNode, QUEST_NODE_WIDTH, QUEST_NODE_HEIGHT } from "@/components/quest-tree/QuestNode";
+import { createQuestWithProgress, mockQuests } from "../../../test/fixtures/quests";
+import type { QuestNodeData, QuestStatus, QuestWithProgress } from "@/types";
+
+// Wrapper to provide React Flow context
+function renderWithReactFlow(ui: React.ReactElement) {
+  return render(<ReactFlowProvider>{ui}</ReactFlowProvider>);
+}
+
+// Create mock node props
+function createNodeProps(
+  quest: QuestWithProgress,
+  overrides: Partial<{
+    onStatusChange: (questId: string, status: QuestStatus) => void;
+    onClick: (questId: string) => void;
+    isSelected: boolean;
+  }> = {}
+) {
+  const onStatusChange = overrides.onStatusChange ?? vi.fn();
+  const onClick = overrides.onClick ?? vi.fn();
+
+  const data: QuestNodeData = {
+    quest,
+    isSelected: overrides.isSelected ?? false,
+    onStatusChange,
+    onClick,
+  };
+
+  return {
+    id: quest.id,
+    type: "quest" as const,
+    data,
+    selected: overrides.isSelected ?? false,
+    isConnectable: true,
+    positionAbsoluteX: 0,
+    positionAbsoluteY: 0,
+    zIndex: 0,
+    dragging: false,
+    deletable: true,
+    selectable: true,
+    parentId: undefined,
+    sourcePosition: undefined,
+    targetPosition: undefined,
+  };
+}
+
+describe("QuestNode", () => {
+  describe("rendering", () => {
+    it("should render quest title", () => {
+      const quest = createQuestWithProgress(mockQuests[0], "available");
+      const props = createNodeProps(quest);
+
+      renderWithReactFlow(<QuestNode {...props} />);
+
+      expect(screen.getByText(quest.title)).toBeInTheDocument();
+    });
+
+    it("should render level requirement badge", () => {
+      const quest = createQuestWithProgress(mockQuests[0], "available");
+      const props = createNodeProps(quest);
+
+      renderWithReactFlow(<QuestNode {...props} />);
+
+      expect(screen.getByText(`Lv. ${quest.levelRequired}`)).toBeInTheDocument();
+    });
+
+    it("should render trader name", () => {
+      const quest = createQuestWithProgress(mockQuests[0], "available");
+      const props = createNodeProps(quest);
+
+      renderWithReactFlow(<QuestNode {...props} />);
+
+      expect(screen.getByText(quest.trader.name)).toBeInTheDocument();
+    });
+
+    it("should show Kappa badge when kappaRequired is true", () => {
+      const quest = createQuestWithProgress(mockQuests[0], "available");
+      expect(quest.kappaRequired).toBe(true); // Verify our test quest requires Kappa
+      const props = createNodeProps(quest);
+
+      renderWithReactFlow(<QuestNode {...props} />);
+
+      expect(screen.getByText("K")).toBeInTheDocument();
+      expect(screen.getByTitle("Required for Kappa")).toBeInTheDocument();
+    });
+
+    it("should hide Kappa badge when kappaRequired is false", () => {
+      // BP Depot doesn't require Kappa
+      const quest = createQuestWithProgress(mockQuests[4], "available");
+      expect(quest.kappaRequired).toBe(false);
+      const props = createNodeProps(quest);
+
+      renderWithReactFlow(<QuestNode {...props} />);
+
+      expect(screen.queryByText("K")).not.toBeInTheDocument();
+    });
+
+    it("should export node dimensions", () => {
+      expect(QUEST_NODE_WIDTH).toBe(180);
+      expect(QUEST_NODE_HEIGHT).toBe(68);
+    });
+  });
+
+  describe("status styling", () => {
+    it("should apply locked status styling", () => {
+      const quest = createQuestWithProgress(mockQuests[0], "locked");
+      const props = createNodeProps(quest);
+
+      const { container } = renderWithReactFlow(<QuestNode {...props} />);
+
+      // Locked quests have opacity-50 and cursor-not-allowed classes
+      const nodeDiv = container.querySelector(".cursor-not-allowed");
+      expect(nodeDiv).toBeInTheDocument();
+    });
+
+    it("should apply available status styling", () => {
+      const quest = createQuestWithProgress(mockQuests[0], "available");
+      const props = createNodeProps(quest);
+
+      const { container } = renderWithReactFlow(<QuestNode {...props} />);
+
+      // Available quests should have shadow styling
+      const nodeDiv = container.querySelector(".shadow-sm");
+      expect(nodeDiv).toBeInTheDocument();
+    });
+
+    it("should apply in_progress status styling", () => {
+      const quest = createQuestWithProgress(mockQuests[0], "in_progress");
+      const props = createNodeProps(quest);
+
+      const { container } = renderWithReactFlow(<QuestNode {...props} />);
+
+      // In progress quests have amber ring
+      const nodeDiv = container.querySelector(".ring-amber-400");
+      expect(nodeDiv).toBeInTheDocument();
+    });
+
+    it("should show checkmark for completed quests", () => {
+      const quest = createQuestWithProgress(mockQuests[0], "completed");
+      const props = createNodeProps(quest);
+
+      const { container } = renderWithReactFlow(<QuestNode {...props} />);
+
+      // Completed quests have SVG checkmark
+      const checkmark = container.querySelector("svg");
+      expect(checkmark).toBeInTheDocument();
+    });
+  });
+
+  describe("click handling", () => {
+    it("should call onStatusChange when clicked", () => {
+      const quest = createQuestWithProgress(mockQuests[0], "available");
+      const onStatusChange = vi.fn();
+      const props = createNodeProps(quest, { onStatusChange });
+
+      const { container } = renderWithReactFlow(<QuestNode {...props} />);
+
+      const nodeDiv = container.querySelector(".cursor-pointer");
+      if (nodeDiv) {
+        fireEvent.click(nodeDiv);
+      }
+
+      expect(onStatusChange).toHaveBeenCalledWith(quest.id, "available");
+    });
+
+    it("should call onClick on right-click (context menu)", () => {
+      const quest = createQuestWithProgress(mockQuests[0], "available");
+      const onClick = vi.fn();
+      const props = createNodeProps(quest, { onClick });
+
+      const { container } = renderWithReactFlow(<QuestNode {...props} />);
+
+      const nodeDiv = container.querySelector(".cursor-pointer");
+      if (nodeDiv) {
+        fireEvent.contextMenu(nodeDiv);
+      }
+
+      expect(onClick).toHaveBeenCalledWith(quest.id);
+    });
+
+    it("should pass current status to onStatusChange", () => {
+      const quest = createQuestWithProgress(mockQuests[0], "in_progress");
+      const onStatusChange = vi.fn();
+      const props = createNodeProps(quest, { onStatusChange });
+
+      const { container } = renderWithReactFlow(<QuestNode {...props} />);
+
+      const nodeDiv = container.querySelector(".cursor-pointer");
+      if (nodeDiv) {
+        fireEvent.click(nodeDiv);
+      }
+
+      // Should pass the current status, not the next one
+      expect(onStatusChange).toHaveBeenCalledWith(quest.id, "in_progress");
+    });
+  });
+
+  describe("selection", () => {
+    it("should apply selected ring when selected", () => {
+      const quest = createQuestWithProgress(mockQuests[0], "available");
+      const props = createNodeProps(quest, { isSelected: true });
+
+      const { container } = renderWithReactFlow(<QuestNode {...props} />);
+
+      // Selected nodes have ring-blue-500
+      const nodeDiv = container.querySelector(".ring-blue-500");
+      expect(nodeDiv).toBeInTheDocument();
+    });
+  });
+});

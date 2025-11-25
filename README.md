@@ -62,8 +62,69 @@ EFT-Tracker/
 ├── prisma/
 │   └── schema.prisma     # Database schema
 ├── public/               # Static assets
+├── __tests__/            # Test files
+│   ├── unit/             # Unit tests (hooks, utilities)
+│   ├── components/       # Component tests
+│   ├── integration/      # API integration tests
+│   └── e2e/              # End-to-end tests
 └── docs/                 # Documentation
 ```
+
+## Testing
+
+The project uses **Vitest** for testing with **React Testing Library** for component tests.
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm test -- --watch
+
+# Run tests with coverage
+npm test -- --coverage
+
+# Run specific test type
+npm test -- --testPathPattern="__tests__/unit"
+npm test -- --testPathPattern="__tests__/components"
+npm test -- --testPathPattern="__tests__/integration"
+```
+
+### Test Structure
+
+| Type | Location | Description |
+|------|----------|-------------|
+| Unit | `__tests__/unit/` | Hooks, utilities, pure functions |
+| Component | `__tests__/unit/components/` | React component rendering & interactions |
+| Integration | `__tests__/integration/api/` | API endpoint tests with mocked database |
+| E2E | `__tests__/e2e/` | Browser automation tests |
+
+### Test Configuration
+
+- **Framework**: Vitest (v4.x)
+- **React Testing**: @testing-library/react
+- **Mocking**: Vitest mocks for Prisma, bcryptjs, NextAuth
+- **Coverage Provider**: V8
+
+### Coverage Goals
+
+- Statements: 80%+
+- Branches: 75%+
+- Functions: 80%+
+- Lines: 80%+
+
+### Visual Regression Baselines
+
+Visual baselines for responsive design testing are stored in:
+- `.claude/qa/baselines/desktop/` - Desktop (1280x720)
+- `.claude/qa/baselines/tablet/` - Tablet (768x1024)
+- `.claude/qa/baselines/mobile/` - Mobile (375x667)
+
+### Claude Code Integration
+
+Use the `/run-qa` slash command to execute the full test suite with detailed output.
 
 ## Data Sources
 
