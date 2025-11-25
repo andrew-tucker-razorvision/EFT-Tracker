@@ -295,7 +295,7 @@ describe("/api/quests", () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: "user-123", email: "test@example.com" },
         expires: new Date(Date.now() + 86400000).toISOString(),
-      });
+      } as any);
 
       const questsWithProgress = mockQuests.map((q) => ({
         ...q,
@@ -328,7 +328,7 @@ describe("/api/quests", () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: "user-123", email: "test@example.com" },
         expires: new Date(Date.now() + 86400000).toISOString(),
-      });
+      } as any);
 
       // Quest 1 not completed, quest 2 depends on quest 1
       vi.mocked(prisma.quest.findMany).mockResolvedValue(mockQuests as never);

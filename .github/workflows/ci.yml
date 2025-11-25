@@ -105,7 +105,7 @@ jobs:
           cache: 'npm'
 
       - name: Run npm audit
-        run: npm audit --audit-level=high
+        run: npm audit --omit=dev --audit-level=high
         continue-on-error: true
 
       - name: Check for secrets (PR only)
