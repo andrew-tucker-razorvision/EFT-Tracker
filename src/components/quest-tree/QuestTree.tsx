@@ -18,7 +18,6 @@ import { TraderNode } from "./TraderNode";
 import { buildTraderLaneGraph, getQuestChain } from "@/lib/quest-layout";
 import { getTraderColor } from "@/lib/trader-colors";
 import { Button } from "@/components/ui/button";
-import { Target } from "lucide-react";
 import type {
   QuestWithProgress,
   QuestStatus,
@@ -174,29 +173,6 @@ function QuestTreeInner({
     }
   }, [focusedQuestId]);
 
-  // Fit view to available quests only
-  const handleFitToAvailable = useCallback(() => {
-    const availableNodes = nodes.filter((n) => {
-      const data = n.data as QuestNodeData | undefined;
-      if (!data?.quest) return false;
-      const isAvailable = data.quest.computedStatus === "available";
-      // If player level set, also filter by level
-      if (playerLevel) {
-        return isAvailable && data.quest.levelRequired <= playerLevel;
-      }
-      return isAvailable;
-    });
-
-    if (availableNodes.length > 0) {
-      fitView({
-        nodes: availableNodes,
-        duration: 500,
-        padding: 0.3,
-        maxZoom: 1,
-      });
-    }
-  }, [nodes, playerLevel, fitView]);
-
   // MiniMap node color based on trader
   const getNodeColor = useCallback(
     (node: { data: Record<string, unknown> }) => {
@@ -238,17 +214,6 @@ function QuestTreeInner({
             </button>
           </div>
         )}
-        {/* Fit to Available button */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleFitToAvailable}
-          className="bg-background shadow-md"
-          title="Focus on available quests"
-        >
-          <Target className="h-4 w-4 mr-1" />
-          <span className="hidden sm:inline">Available</span>
-        </Button>
       </div>
       <ReactFlow
         nodes={nodes}
