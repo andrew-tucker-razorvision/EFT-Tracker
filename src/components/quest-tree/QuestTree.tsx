@@ -234,6 +234,7 @@ function QuestTreeInner({
         fitView
         fitViewOptions={{
           padding: isMobile ? 0.1 : 0.2,
+          minZoom: 0.5, // Don't zoom out past readable level
           maxZoom: isMobile ? 0.8 : 1,
         }}
         minZoom={0.05}
