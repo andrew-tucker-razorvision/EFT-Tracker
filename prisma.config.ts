@@ -1,5 +1,4 @@
-// @ts-nocheck
-import path from "node:path";
+import * as path from "node:path";
 import { defineConfig } from "prisma/config";
 
 export default defineConfig({
@@ -7,6 +6,7 @@ export default defineConfig({
   datasource: {
     url: process.env.DATABASE_URL!,
   },
+  // @ts-expect-error - migrate.adapter is a valid config but not yet in types
   migrate: {
     async adapter() {
       const { Pool } = await import("pg");

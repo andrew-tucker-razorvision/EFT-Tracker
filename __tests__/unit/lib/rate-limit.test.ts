@@ -7,7 +7,7 @@
  * - IP extraction from various headers
  * - Predefined rate limit configurations
  */
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   rateLimit,
   getClientIp,

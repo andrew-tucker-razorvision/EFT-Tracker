@@ -464,8 +464,15 @@ export function layoutTraderLane(
   options: BuildQuestGraphOptions,
   globalDepths: Map<string, number>
 ): TraderLaneLayout {
-  const { onStatusChange, onClick, onFocus, selectedQuestId, focusedQuestId, focusChain, playerLevel } =
-    options;
+  const {
+    onStatusChange,
+    onClick,
+    onFocus,
+    selectedQuestId,
+    focusedQuestId,
+    focusChain,
+    playerLevel,
+  } = options;
   const hasFocusMode = focusedQuestId !== null && focusedQuestId !== undefined;
 
   // Create Dagre graph for this trader only
@@ -576,7 +583,11 @@ export function layoutTraderLane(
                 : targetQuest.computedStatus === "locked"
                   ? "#6B7280"
                   : "#9CA3AF",
-          strokeWidth: isEdgeInFocusChain ? 3 : targetQuest.kappaRequired ? 3 : 2,
+          strokeWidth: isEdgeInFocusChain
+            ? 3
+            : targetQuest.kappaRequired
+              ? 3
+              : 2,
           opacity: shouldDimEdge
             ? 0.2
             : targetQuest.computedStatus === "locked"
@@ -609,7 +620,8 @@ export function layoutTraderLane(
   }
 
   // Calculate lane height based on actual content
-  const contentHeight = group.quests.length > 0 ? maxY - minY : QUEST_NODE_HEIGHT;
+  const contentHeight =
+    group.quests.length > 0 ? maxY - minY : QUEST_NODE_HEIGHT;
   const laneHeight = Math.max(LANE_CONFIG.BASE_LANE_HEIGHT, contentHeight + 20);
 
   // Find root quests for visual indicator
@@ -760,7 +772,8 @@ export function buildCrossTraderEdges(
       seenEdges.add(edgeId);
 
       const isInFocusChain =
-        focusChain?.has(dep.sourceQuestId) && focusChain?.has(dep.targetQuestId);
+        focusChain?.has(dep.sourceQuestId) &&
+        focusChain?.has(dep.targetQuestId);
       const shouldDim = hasFocusMode && !isInFocusChain;
 
       crossEdges.push({
@@ -802,9 +815,6 @@ export function buildTraderLaneGraph(
   traders: Trader[],
   options: BuildQuestGraphOptions
 ): TraderLaneGraph {
-  const { focusedQuestId, focusChain } = options;
-  const hasFocusMode = focusedQuestId !== null && focusedQuestId !== undefined;
-
   // Step 1: Calculate global depths for all quests
   const globalDepths = calculateGlobalDepths(quests);
 

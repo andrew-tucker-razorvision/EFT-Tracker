@@ -8,7 +8,6 @@ import { LANE_CONFIG } from "@/lib/quest-layout";
 
 function TraderNodeComponent({ data }: NodeProps<TraderNodeType>) {
   const { traderName, color, questCount, completedCount } = data;
-  const progress = questCount > 0 ? (completedCount / questCount) * 100 : 0;
 
   return (
     <>
