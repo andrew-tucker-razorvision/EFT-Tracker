@@ -159,14 +159,15 @@ jobs:
           BRANCH="${{ github.head_ref }}"
 
           # Valid prefixes from BRANCH_STRATEGY.md
-          VALID_PREFIXES="^(feature|bugfix|hotfix|docs|refactor|test|chore)/"
+          VALID_PREFIXES="^(feature|fix|bugfix|hotfix|docs|refactor|test|chore)/"
 
           if [[ ! $BRANCH =~ $VALID_PREFIXES ]]; then
             echo "❌ Invalid branch name: $BRANCH"
             echo ""
             echo "Branch names must start with one of:"
             echo "  - feature/  (new features)"
-            echo "  - bugfix/   (bug fixes)"
+            echo "  - fix/      (bug fixes - short form)"
+            echo "  - bugfix/   (bug fixes - long form)"
             echo "  - hotfix/   (critical production fixes)"
             echo "  - docs/     (documentation only)"
             echo "  - refactor/ (code refactoring)"
