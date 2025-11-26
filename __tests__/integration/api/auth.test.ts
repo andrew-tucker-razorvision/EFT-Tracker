@@ -25,6 +25,31 @@ vi.mock("bcryptjs", () => ({
   },
 }));
 
+// Mock rate limiting
+vi.mock("@/lib/rate-limit", () => ({
+  rateLimit: vi.fn(() => ({
+    success: true,
+    limit: 3,
+    remaining: 2,
+    reset: Date.now() + 3600000,
+  })),
+  getClientIp: vi.fn(() => "127.0.0.1"),
+  RATE_LIMITS: {
+    AUTH_REGISTER: {
+      limit: 3,
+      window: 3600000,
+    },
+    AUTH_LOGIN: {
+      limit: 5,
+      window: 900000,
+    },
+    API_GENERAL: {
+      limit: 30,
+      window: 60000,
+    },
+  },
+}));
+
 describe("/api/auth/register", () => {
   beforeEach(() => {
     vi.clearAllMocks();
