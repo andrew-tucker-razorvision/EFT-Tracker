@@ -19,7 +19,12 @@ import { buildTraderLaneGraph, getQuestChain } from "@/lib/quest-layout";
 import { getTraderColor } from "@/lib/trader-colors";
 import { Button } from "@/components/ui/button";
 import { Target } from "lucide-react";
-import type { QuestWithProgress, QuestStatus, QuestNodeData, Trader } from "@/types";
+import type {
+  QuestWithProgress,
+  QuestStatus,
+  QuestNodeData,
+  Trader,
+} from "@/types";
 
 // Register custom node types
 const nodeTypes: NodeTypes = {
@@ -249,7 +254,7 @@ function QuestTreeInner({
         zoomOnPinch={true}
         zoomOnDoubleClick={false}
       >
-                <Controls
+        <Controls
           showInteractive={false}
           className="!shadow-md"
           position={isMobile ? "bottom-left" : "bottom-left"}

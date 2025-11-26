@@ -30,8 +30,12 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
   const [isClicked, setIsClicked] = useState(false);
 
   // Level-based highlighting
-  const isLevelAppropriate = playerLevel !== null && quest.levelRequired <= playerLevel;
-  const isUpcoming = playerLevel !== null && quest.levelRequired > playerLevel && quest.levelRequired <= playerLevel + 5;
+  const isLevelAppropriate =
+    playerLevel !== null && quest.levelRequired <= playerLevel;
+  const isUpcoming =
+    playerLevel !== null &&
+    quest.levelRequired > playerLevel &&
+    quest.levelRequired <= playerLevel + 5;
 
   // Find cross-trader dependencies (prereqs from different traders)
   const crossTraderDeps = useMemo(() => {
@@ -113,7 +117,8 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
             "opacity-50 cursor-not-allowed",
           quest.computedStatus === "completed" && !isDimmed && "opacity-60",
           // in_progress treated same as available (no special styling)
-          (quest.computedStatus === "available" || quest.computedStatus === "in_progress") &&
+          (quest.computedStatus === "available" ||
+            quest.computedStatus === "in_progress") &&
             !isDimmed &&
             "shadow-sm hover:shadow-lg",
           // Visual hierarchy indicators (only when not dimmed)
@@ -125,8 +130,16 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
           isInFocusChain && !isFocused && "ring-2 ring-blue-300",
           isDimmed && "opacity-20 grayscale pointer-events-auto",
           // Level-based highlighting (only for available quests)
-          isLevelAppropriate && quest.computedStatus === "available" && !isDimmed && !isFocused && "ring-2 ring-emerald-400 shadow-emerald-100",
-          isUpcoming && quest.computedStatus !== "completed" && !isDimmed && !isFocused && "ring-1 ring-amber-300"
+          isLevelAppropriate &&
+            quest.computedStatus === "available" &&
+            !isDimmed &&
+            !isFocused &&
+            "ring-2 ring-emerald-400 shadow-emerald-100",
+          isUpcoming &&
+            quest.computedStatus !== "completed" &&
+            !isDimmed &&
+            !isFocused &&
+            "ring-1 ring-amber-300"
         )}
         style={{
           width: QUEST_NODE_WIDTH,
@@ -202,11 +215,16 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
         </div>
 
         {/* Level badge */}
-        <div className={cn(
-          "text-[9px] mt-0.5",
-          isLevelAppropriate ? "text-emerald-600 font-medium" :
-          isUpcoming ? "text-amber-600" : "text-gray-500"
-        )}>
+        <div
+          className={cn(
+            "text-[9px] mt-0.5",
+            isLevelAppropriate
+              ? "text-emerald-600 font-medium"
+              : isUpcoming
+                ? "text-amber-600"
+                : "text-gray-500"
+          )}
+        >
           Lv.{quest.levelRequired}
         </div>
       </div>

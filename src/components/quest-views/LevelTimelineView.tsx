@@ -58,14 +58,19 @@ export function LevelTimelineView({
 
   // Calculate stats for each bracket
   const bracketStats = useMemo(() => {
-    const stats = new Map<string, { total: number; completed: number; available: number }>();
+    const stats = new Map<
+      string,
+      { total: number; completed: number; available: number }
+    >();
 
     for (const bracket of LEVEL_BRACKETS) {
       const questList = questsByBracket.get(bracket.label) || [];
       stats.set(bracket.label, {
         total: questList.length,
-        completed: questList.filter((q) => q.computedStatus === "completed").length,
-        available: questList.filter((q) => q.computedStatus === "available").length,
+        completed: questList.filter((q) => q.computedStatus === "completed")
+          .length,
+        available: questList.filter((q) => q.computedStatus === "available")
+          .length,
       });
     }
 
@@ -90,10 +95,7 @@ export function LevelTimelineView({
           const isCurrentBracket = bracket.label === currentBracketLabel;
 
           return (
-            <div
-              key={bracket.label}
-              className="flex-shrink-0 w-48"
-            >
+            <div key={bracket.label} className="flex-shrink-0 w-48">
               {/* Column header */}
               <div
                 className={`sticky top-0 z-10 p-2 rounded-t-lg border-b-2 ${

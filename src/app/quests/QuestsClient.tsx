@@ -143,7 +143,8 @@ export function QuestsClient() {
       (q) => q.computedStatus === "completed"
     ).length,
     available: questsWithProgress.filter(
-      (q) => q.computedStatus === "available" || q.computedStatus === "in_progress"
+      (q) =>
+        q.computedStatus === "available" || q.computedStatus === "in_progress"
     ).length,
     locked: questsWithProgress.filter((q) => q.computedStatus === "locked")
       .length,

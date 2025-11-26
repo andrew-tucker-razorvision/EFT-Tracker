@@ -20,7 +20,12 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { getTraderColor } from "@/lib/trader-colors";
-import type { Trader, QuestFilters as Filters, QuestStatus, LevelRange } from "@/types";
+import type {
+  Trader,
+  QuestFilters as Filters,
+  QuestStatus,
+  LevelRange,
+} from "@/types";
 
 const LEVEL_RANGES: LevelRange[] = [
   { min: 1, max: 10, label: "Level 1-10" },
@@ -196,12 +201,18 @@ const FilterControls = ({
     <div className={isMobile ? "w-full" : "w-[140px]"}>
       <Label className="text-xs text-muted-foreground">Level Range</Label>
       <Select
-        value={filters.levelRange ? `${filters.levelRange.min}-${filters.levelRange.max}` : "all"}
+        value={
+          filters.levelRange
+            ? `${filters.levelRange.min}-${filters.levelRange.max}`
+            : "all"
+        }
         onValueChange={(value) => {
           if (value === "all") {
             onFilterChange({ levelRange: null });
           } else {
-            const range = LEVEL_RANGES.find(r => `${r.min}-${r.max}` === value);
+            const range = LEVEL_RANGES.find(
+              (r) => `${r.min}-${r.max}` === value
+            );
             onFilterChange({ levelRange: range || null });
           }
         }}
@@ -212,7 +223,10 @@ const FilterControls = ({
         <SelectContent>
           <SelectItem value="all">All Levels</SelectItem>
           {LEVEL_RANGES.map((range) => (
-            <SelectItem key={`${range.min}-${range.max}`} value={`${range.min}-${range.max}`}>
+            <SelectItem
+              key={`${range.min}-${range.max}`}
+              value={`${range.min}-${range.max}`}
+            >
               {range.label}
             </SelectItem>
           ))}

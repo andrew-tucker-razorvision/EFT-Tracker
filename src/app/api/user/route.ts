@@ -60,7 +60,9 @@ export async function PATCH(request: Request) {
     const user = await prisma.user.update({
       where: { id: session.user.id },
       data: {
-        ...(data.playerLevel !== undefined && { playerLevel: data.playerLevel }),
+        ...(data.playerLevel !== undefined && {
+          playerLevel: data.playerLevel,
+        }),
         ...(data.name !== undefined && { name: data.name }),
       },
       select: {

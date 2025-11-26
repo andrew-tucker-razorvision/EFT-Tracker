@@ -21,8 +21,15 @@ export function LevelQuestCard({
   const [isClicked, setIsClicked] = useState(false);
 
   // Level-based highlighting
-  const isLevelAppropriate = playerLevel !== null && playerLevel !== undefined && quest.levelRequired <= playerLevel;
-  const isUpcoming = playerLevel !== null && playerLevel !== undefined && quest.levelRequired > playerLevel && quest.levelRequired <= playerLevel + 5;
+  const isLevelAppropriate =
+    playerLevel !== null &&
+    playerLevel !== undefined &&
+    quest.levelRequired <= playerLevel;
+  const isUpcoming =
+    playerLevel !== null &&
+    playerLevel !== undefined &&
+    quest.levelRequired > playerLevel &&
+    quest.levelRequired <= playerLevel + 5;
 
   // Find cross-trader dependencies
   const crossTraderBadges = useMemo(() => {
@@ -30,13 +37,19 @@ export function LevelQuestCard({
 
     const byTrader = new Map<string, { name: string; count: number }>();
     for (const dep of quest.dependsOn) {
-      if (dep.requiredQuest.traderId.toLowerCase() !== quest.traderId.toLowerCase()) {
+      if (
+        dep.requiredQuest.traderId.toLowerCase() !==
+        quest.traderId.toLowerCase()
+      ) {
         const traderId = dep.requiredQuest.traderId.toLowerCase();
         const existing = byTrader.get(traderId);
         if (existing) {
           existing.count++;
         } else {
-          byTrader.set(traderId, { name: dep.requiredQuest.trader.name, count: 1 });
+          byTrader.set(traderId, {
+            name: dep.requiredQuest.trader.name,
+            count: 1,
+          });
         }
       }
     }
@@ -66,12 +79,19 @@ export function LevelQuestCard({
         quest.computedStatus === "completed" && "opacity-70",
         quest.computedStatus === "available" && "shadow-sm hover:shadow-lg",
         // Level-based highlighting
-        isLevelAppropriate && quest.computedStatus === "available" && "ring-2 ring-emerald-400",
-        isUpcoming && quest.computedStatus !== "completed" && "ring-1 ring-amber-300"
+        isLevelAppropriate &&
+          quest.computedStatus === "available" &&
+          "ring-2 ring-emerald-400",
+        isUpcoming &&
+          quest.computedStatus !== "completed" &&
+          "ring-1 ring-amber-300"
       )}
       style={{
         backgroundColor: statusColor.bg,
-        borderColor: quest.computedStatus === "available" ? traderColor.primary : statusColor.border,
+        borderColor:
+          quest.computedStatus === "available"
+            ? traderColor.primary
+            : statusColor.border,
         borderLeftWidth: 4,
         borderLeftColor: traderColor.primary,
       }}
@@ -130,8 +150,11 @@ export function LevelQuestCard({
         <span
           className={cn(
             "text-[10px]",
-            isLevelAppropriate ? "text-emerald-600 font-medium" :
-            isUpcoming ? "text-amber-600" : "text-gray-500"
+            isLevelAppropriate
+              ? "text-emerald-600 font-medium"
+              : isUpcoming
+                ? "text-amber-600"
+                : "text-gray-500"
           )}
         >
           Lv.{quest.levelRequired}

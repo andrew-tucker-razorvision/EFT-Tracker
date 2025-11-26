@@ -17,15 +17,15 @@
 
 ## Tech Stack
 
-| Layer     | Technology                       |
-| --------- | -------------------------------- |
-| Framework | Next.js 16 (App Router)          |
-| Language  | TypeScript                       |
-| Styling   | Tailwind CSS, shadcn/ui          |
-| Database  | PostgreSQL (Neon)                |
-| ORM       | Prisma                           |
-| Auth      | NextAuth.js v5.0.0-beta.30       |
-| Hosting   | Vercel (planned)                 |
+| Layer     | Technology                 |
+| --------- | -------------------------- |
+| Framework | Next.js 16 (App Router)    |
+| Language  | TypeScript                 |
+| Styling   | Tailwind CSS, shadcn/ui    |
+| Database  | PostgreSQL (Neon)          |
+| ORM       | Prisma                     |
+| Auth      | NextAuth.js v5.0.0-beta.30 |
+| Hosting   | Vercel (planned)           |
 
 ## Environment Variables
 
@@ -38,18 +38,18 @@
 
 ## MCP Servers Configured
 
-| Server       | Status               | Notes                                    |
-| ------------ | -------------------- | ---------------------------------------- |
+| Server       | Status               | Notes                                     |
+| ------------ | -------------------- | ----------------------------------------- |
 | GitHub       | ✅ Working           | Uses GITHUB_PERSONAL_ACCESS_TOKEN env var |
-| Context7     | ✅ Working           |                                          |
-| Brave Search | ✅ Working           |                                          |
-| Playwright   | ✅ Working           |                                          |
-| Memory       | ✅ Tested & Working  |                                          |
-| Git          | ✅ Working           |                                          |
-| Filesystem   | ✅ Working           |                                          |
-| Docker       | ✅ Ready             |                                          |
-| SQLite       | ✅ Ready             |                                          |
-| Postgres     | ✅ Configured (Neon) |                                          |
+| Context7     | ✅ Working           |                                           |
+| Brave Search | ✅ Working           |                                           |
+| Playwright   | ✅ Working           |                                           |
+| Memory       | ✅ Tested & Working  |                                           |
+| Git          | ✅ Working           |                                           |
+| Filesystem   | ✅ Working           |                                           |
+| Docker       | ✅ Ready             |                                           |
+| SQLite       | ✅ Ready             |                                           |
+| Postgres     | ✅ Configured (Neon) |                                           |
 
 ## Memory MCP Workflow
 
@@ -67,40 +67,48 @@ The Memory MCP server persists knowledge across Claude Code sessions using a gra
 ### Available Operations
 
 1. **Create Entities** - Store project components, features, or concepts
+
    ```typescript
    mcp__memory__create_entities({
-     entities: [{
-       name: "Component Name",
-       entityType: "Feature|Bug|Task|Decision",
-       observations: ["key fact 1", "key fact 2"]
-     }]
-   })
+     entities: [
+       {
+         name: "Component Name",
+         entityType: "Feature|Bug|Task|Decision",
+         observations: ["key fact 1", "key fact 2"],
+       },
+     ],
+   });
    ```
 
 2. **Create Relations** - Link entities together
+
    ```typescript
    mcp__memory__create_relations({
-     relations: [{
-       from: "Entity A",
-       to: "Entity B",
-       relationType: "implements|depends-on|fixes|relates-to"
-     }]
-   })
+     relations: [
+       {
+         from: "Entity A",
+         to: "Entity B",
+         relationType: "implements|depends-on|fixes|relates-to",
+       },
+     ],
+   });
    ```
 
 3. **Search Nodes** - Find entities by keyword
+
    ```typescript
-   mcp__memory__search_nodes({ query: "authentication" })
+   mcp__memory__search_nodes({ query: "authentication" });
    ```
 
 4. **Read Graph** - View entire knowledge graph
    ```typescript
-   mcp__memory__read_graph()
+   mcp__memory__read_graph();
    ```
 
 ### What to Store
 
 **DO Store:**
+
 - Major architectural decisions and rationale
 - Complex features and their implementations
 - Known bugs and workarounds
@@ -109,6 +117,7 @@ The Memory MCP server persists knowledge across Claude Code sessions using a gra
 - Important file locations and purposes
 
 **DON'T Store:**
+
 - Temporary debugging info
 - Simple one-off tasks
 - Information already in code comments
@@ -128,6 +137,7 @@ The Memory MCP server persists knowledge across Claude Code sessions using a gra
 ## Current Status
 
 ### Completed
+
 - [x] Repository created and made public
 - [x] MCP servers configured and tested
 - [x] Next.js 16 project initialized
@@ -140,9 +150,11 @@ The Memory MCP server persists knowledge across Claude Code sessions using a gra
 - [x] CI/CD pipeline configured (GitHub Actions)
 
 ### In Progress
+
 - [ ] Issue #55: CORS configuration (optional)
 
 ### Recent Commits
+
 - `939b498` - Added rate limiting for auth endpoints
 - `27dd6b1` - Added AUTH_SECRET configuration
 - `e865b0a` - Fixed CodeQL warnings
