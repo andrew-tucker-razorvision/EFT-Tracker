@@ -28,7 +28,9 @@
       "transport": "stdio",
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-memory"],
-      "env": {}
+      "env": {
+        "MEMORY_FILE_PATH": "${PWD}/.claude/memory.jsonl"
+      }
     },
     "context7": {
       "transport": "stdio",

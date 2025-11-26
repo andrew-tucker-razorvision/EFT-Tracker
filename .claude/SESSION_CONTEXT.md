@@ -27,24 +27,42 @@
 | Auth      | NextAuth.js v5.0.0-beta.30       |
 | Hosting   | Vercel (planned)                 |
 
+## Environment Variables
+
+**IMPORTANT:** The following environment variables are available and should be used:
+
+- **GITHUB_PERSONAL_ACCESS_TOKEN**: GitHub PAT for API access (already set in environment)
+  - Use with GitHub MCP tools: `mcp__github__*`
+  - Required for creating issues, PRs, and other GitHub operations
+  - Token is already configured - DO NOT ask user for it
+
 ## MCP Servers Configured
 
-| Server       | Status               |
-| ------------ | -------------------- |
-| GitHub       | ✅ Working           |
-| Context7     | ✅ Working           |
-| Brave Search | ✅ Working           |
-| Playwright   | ✅ Working           |
-| Memory       | ✅ Tested & Working  |
-| Git          | ✅ Working           |
-| Filesystem   | ✅ Working           |
-| Docker       | ✅ Ready             |
-| SQLite       | ✅ Ready             |
-| Postgres     | ✅ Configured (Neon) |
+| Server       | Status               | Notes                                    |
+| ------------ | -------------------- | ---------------------------------------- |
+| GitHub       | ✅ Working           | Uses GITHUB_PERSONAL_ACCESS_TOKEN env var |
+| Context7     | ✅ Working           |                                          |
+| Brave Search | ✅ Working           |                                          |
+| Playwright   | ✅ Working           |                                          |
+| Memory       | ✅ Tested & Working  |                                          |
+| Git          | ✅ Working           |                                          |
+| Filesystem   | ✅ Working           |                                          |
+| Docker       | ✅ Ready             |                                          |
+| SQLite       | ✅ Ready             |                                          |
+| Postgres     | ✅ Configured (Neon) |                                          |
 
 ## Memory MCP Workflow
 
 The Memory MCP server persists knowledge across Claude Code sessions using a graph-based approach.
+
+### Storage Configuration
+
+**Storage Location:** `.claude/memory.jsonl` (in workspace)
+
+- Configured via `MEMORY_FILE_PATH` environment variable in `.mcp.json`
+- Stored in workspace, gitignored to prevent accidental commits
+- Survives Claude Code restarts and devcontainer rebuilds
+- **Manual sync needed:** Copy/backup this file to sync across computers
 
 ### Available Operations
 

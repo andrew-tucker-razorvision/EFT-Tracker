@@ -124,6 +124,18 @@ This template includes sixteen MCP servers for enhanced development capabilities
 - **Purpose:** Knowledge graph-based persistent memory
 - **Transport:** stdio (local process)
 - **Command:** `npx -y @modelcontextprotocol/server-memory`
+- **Configuration:**
+  ```json
+  "memory": {
+    "transport": "stdio",
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-memory"],
+    "env": {
+      "MEMORY_FILE_PATH": "${PWD}/.claude/memory.jsonl"
+    }
+  }
+  ```
+- **Storage:** `.claude/memory.jsonl` (workspace, gitignored)
 - **Capabilities:**
   - Store and retrieve information across sessions
   - Build knowledge graphs of project context
@@ -131,6 +143,7 @@ This template includes sixteen MCP servers for enhanced development capabilities
   - Maintain conversation history
   - Create relationships between entities
   - Query stored knowledge
+- **Cross-Computer Sync:** Memory file must be manually copied/synced between computers
 
 #### 5. Context7 MCP Server
 
