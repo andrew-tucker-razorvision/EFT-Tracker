@@ -9,6 +9,7 @@
     "lint": "eslint",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
+    "postinstall": "prisma generate",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:test": "tsx prisma/seed-test.ts",
     "test": "vitest",
