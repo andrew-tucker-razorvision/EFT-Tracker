@@ -193,6 +193,7 @@ export function QuestsClient() {
         {questsWithProgress.length > 0 ? (
           <QuestTree
             quests={questsWithProgress}
+            traders={traders}
             selectedQuestId={selectedQuestId}
             onQuestSelect={handleQuestSelect}
             onStatusChange={handleStatusChange}

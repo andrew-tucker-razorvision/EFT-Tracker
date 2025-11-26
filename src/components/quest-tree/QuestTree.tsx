@@ -16,13 +16,15 @@ import {
 import "@xyflow/react/dist/style.css";
 
 import { QuestNode } from "./QuestNode";
-import { buildQuestGraph, getQuestChain } from "@/lib/quest-layout";
+import { TraderNode } from "./TraderNode";
+import { buildTraderLaneGraph, getQuestChain } from "@/lib/quest-layout";
 import { getTraderColor } from "@/lib/trader-colors";
-import type { QuestWithProgress, QuestStatus, QuestNodeData } from "@/types";
+import type { QuestWithProgress, QuestStatus, QuestNodeData, Trader } from "@/types";
 
 // Register custom node types
 const nodeTypes: NodeTypes = {
   quest: QuestNode,
+  trader: TraderNode,
 };
 
 // Hook to detect mobile screens
@@ -41,6 +43,7 @@ function useIsMobile() {
 
 interface QuestTreeProps {
   quests: QuestWithProgress[];
+  traders: Trader[];
   selectedQuestId?: string | null;
   onQuestSelect: (questId: string) => void;
   onStatusChange: (questId: string, status: QuestStatus) => void;
@@ -48,6 +51,7 @@ interface QuestTreeProps {
 
 function QuestTreeInner({
   quests,
+  traders,
   selectedQuestId,
   onQuestSelect,
   onStatusChange,
@@ -83,7 +87,7 @@ function QuestTreeInner({
 
   // Build graph with layout
   const { initialNodes, initialEdges } = useMemo(() => {
-    const graph = buildQuestGraph(quests, {
+    const graph = buildTraderLaneGraph(quests, traders, {
       onStatusChange,
       onClick: onQuestSelect,
       onFocus: handleFocus,
@@ -97,6 +101,7 @@ function QuestTreeInner({
     };
   }, [
     quests,
+    traders,
     selectedQuestId,
     focusedQuestId,
     focusChain,

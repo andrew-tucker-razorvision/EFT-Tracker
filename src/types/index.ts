@@ -111,3 +111,36 @@ export interface ProgressUpdateResponse {
   progress: QuestProgress;
   unlockedQuests?: string[];
 }
+
+// Trader lane layout types
+export interface TraderNodeData extends Record<string, unknown> {
+  traderId: string;
+  traderName: string;
+  color: string;
+  questCount: number;
+  completedCount: number;
+}
+
+export type TraderNode = Node<TraderNodeData, "trader">;
+
+// Cross-trader dependency edge data
+export interface CrossTraderEdgeData extends QuestEdgeData {
+  isCrossTrader: true;
+  sourceTraderId: string;
+  targetTraderId: string;
+}
+
+// Trader quest group for layout
+export interface TraderQuestGroup {
+  traderId: string;
+  trader: Trader;
+  quests: QuestWithProgress[];
+  rootQuests: QuestWithProgress[];
+  intraTraderDeps: Array<{ sourceId: string; targetId: string }>;
+  crossTraderDeps: Array<{
+    sourceQuestId: string;
+    sourceTraderId: string;
+    targetQuestId: string;
+    targetTraderId: string;
+  }>;
+}
