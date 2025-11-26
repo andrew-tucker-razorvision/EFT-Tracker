@@ -3,7 +3,7 @@
  *
  * Tests that rate limiting is properly applied to API endpoints
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { POST as RegisterPOST } from "@/app/api/auth/register/route";
 
 // Mock dependencies but NOT rate-limit (we want to test it)
