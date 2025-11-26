@@ -707,15 +707,12 @@ export function buildTraderLaneGraph(
   // Step 4: Stack lanes vertically
   const stackedLayout = stackTraderLanes(laneLayouts, traderOrder, groups);
 
-  // Step 5: Build cross-trader edges
-  const crossEdges = buildCrossTraderEdges(groups, { focusChain, hasFocusMode });
-
-  // Combine all edges
-  const allEdges = [...stackedLayout.edges, ...crossEdges];
+  // Note: Cross-trader edges removed - they create confusing long paths.
+  // Cross-trader dependencies are shown via badges on QuestNode instead.
 
   return {
     nodes: stackedLayout.nodes,
-    edges: allEdges,
+    edges: stackedLayout.edges,
     laneYOffsets: stackedLayout.laneYOffsets,
     traderOrder,
   };

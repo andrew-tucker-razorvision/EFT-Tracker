@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState } from "react";
+import { memo, useState, useMemo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { cn } from "@/lib/utils";
 import { getTraderColor, STATUS_COLORS } from "@/lib/trader-colors";
@@ -27,6 +27,39 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
   const traderColor = getTraderColor(quest.traderId);
   const statusColor = STATUS_COLORS[quest.computedStatus];
   const [isClicked, setIsClicked] = useState(false);
+
+  // Find cross-trader dependencies (prereqs from different traders)
+  const crossTraderDeps = useMemo(() => {
+    if (!quest.dependsOn) return [];
+    return quest.dependsOn
+      .filter(
+        (dep) =>
+          dep.requiredQuest.traderId.toLowerCase() !==
+          quest.traderId.toLowerCase()
+      )
+      .map((dep) => ({
+        traderId: dep.requiredQuest.traderId.toLowerCase(),
+        traderName: dep.requiredQuest.trader.name,
+        questTitle: dep.requiredQuest.title,
+      }));
+  }, [quest.dependsOn, quest.traderId]);
+
+  // Group by trader for display
+  const crossTraderBadges = useMemo(() => {
+    const byTrader = new Map<string, { name: string; count: number }>();
+    for (const dep of crossTraderDeps) {
+      const existing = byTrader.get(dep.traderId);
+      if (existing) {
+        existing.count++;
+      } else {
+        byTrader.set(dep.traderId, { name: dep.traderName, count: 1 });
+      }
+    }
+    return Array.from(byTrader.entries()).map(([traderId, info]) => ({
+      traderId,
+      ...info,
+    }));
+  }, [crossTraderDeps]);
 
   // Should this node be dimmed? (focus mode active but not in chain)
   const isDimmed = hasFocusMode && !isInFocusChain && !isFocused;
@@ -108,6 +141,30 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
             title="Required for Kappa"
           >
             K
+          </div>
+        )}
+
+        {/* Cross-trader dependency badges */}
+        {crossTraderBadges.length > 0 && !isDimmed && (
+          <div className="absolute -top-2 left-2 flex gap-0.5">
+            {crossTraderBadges.slice(0, 3).map((badge) => {
+              const badgeColor = getTraderColor(badge.traderId);
+              return (
+                <div
+                  key={badge.traderId}
+                  className="px-1.5 py-0.5 rounded text-[9px] font-medium text-white shadow-sm"
+                  style={{ backgroundColor: badgeColor.primary }}
+                  title={`Requires quest(s) from ${badge.name}`}
+                >
+                  {badge.name.slice(0, 3)}
+                </div>
+              );
+            })}
+            {crossTraderBadges.length > 3 && (
+              <div className="px-1 py-0.5 rounded text-[9px] font-medium bg-gray-500 text-white">
+                +{crossTraderBadges.length - 3}
+              </div>
+            )}
           </div>
         )}
 
