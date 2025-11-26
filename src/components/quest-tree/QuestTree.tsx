@@ -13,7 +13,11 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
-import { QuestNode } from "./QuestNode";
+import {
+  QuestNode,
+  QUEST_NODE_WIDTH,
+  QUEST_NODE_HEIGHT,
+} from "./QuestNode";
 import { TraderNode } from "./TraderNode";
 import { buildTraderLaneGraph, getQuestChain } from "@/lib/quest-layout";
 import { getTraderColor } from "@/lib/trader-colors";
