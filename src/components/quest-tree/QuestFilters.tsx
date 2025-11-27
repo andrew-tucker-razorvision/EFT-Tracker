@@ -247,13 +247,7 @@ const FilterControls = ({
       size="sm"
       onClick={onApplyFilters}
       disabled={!hasPendingChanges}
-      className={
-        hasPendingChanges
-          ? `animate-pulse ${isMobile ? "w-full" : ""}`
-          : isMobile
-            ? "w-full"
-            : ""
-      }
+      className={isMobile ? "w-full" : ""}
     >
       Apply Filters
       {hasPendingChanges && <Badge className="ml-1 bg-white text-primary">!</Badge>}

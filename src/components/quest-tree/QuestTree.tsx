@@ -229,7 +229,7 @@ function QuestTreeInner({
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}
-        defaultViewport={{ x: 0, y: 0, zoom: isMobile ? 1.5 : 2 }}
+        defaultViewport={{ x: 0, y: 0, zoom: 1.5 }}
         translateExtent={translateExtent}
         minZoom={0.1}
         maxZoom={isMobile ? 2 : 4}
