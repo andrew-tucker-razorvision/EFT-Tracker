@@ -133,6 +133,7 @@ export interface TraderNodeData extends Record<string, unknown> {
   color: string;
   questCount: number;
   completedCount: number;
+  laneHeight?: number; // Height of the trader's lane for full-height rendering
 }
 
 export type TraderNode = Node<TraderNodeData, "trader">;

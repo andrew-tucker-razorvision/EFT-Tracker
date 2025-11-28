@@ -734,12 +734,13 @@ export function stackTraderLanes(
       (q) => q.computedStatus === "completed"
     ).length;
 
+    // Create trader node on the left, spanning full lane height
     const traderNode: TraderNode = {
       id: `trader-${traderId}`,
       type: "trader",
       position: {
-        x: LAYOUT_CONFIG.marginx,
-        y: currentY + lane.laneHeight / 2 - LANE_CONFIG.TRADER_NODE_HEIGHT / 2,
+        x: 0, // Will be at left edge after normalization
+        y: currentY,
       },
       data: {
         traderId,
@@ -747,15 +748,14 @@ export function stackTraderLanes(
         color: traderColor.primary,
         questCount: group.quests.length,
         completedCount,
+        laneHeight: lane.laneHeight, // Pass lane height for full-height rendering
       },
     };
     allNodes.push(traderNode);
 
-    // Offset quest nodes for this lane
+    // Offset quest nodes to the right of trader
     const xOffset =
-      LAYOUT_CONFIG.marginx +
-      LANE_CONFIG.TRADER_NODE_WIDTH +
-      LANE_CONFIG.TRADER_TO_QUEST_GAP;
+      LANE_CONFIG.TRADER_NODE_WIDTH + LANE_CONFIG.TRADER_TO_QUEST_GAP;
 
     for (const node of lane.nodes) {
       allNodes.push({
@@ -774,10 +774,10 @@ export function stackTraderLanes(
     currentY += lane.laneHeight + LANE_CONFIG.LANE_SPACING;
   }
 
-  // Normalize positions so first quest starts near (0, 0) with padding
-  const questNodes = allNodes.filter((n) => n.type === "quest");
-  if (questNodes.length > 0) {
-    const minX = Math.min(...questNodes.map((n) => n.position.x));
+  // Normalize positions so content starts near (0, 0) with padding
+  // Include ALL nodes (traders + quests) in minX calculation so traders don't end up negative
+  if (allNodes.length > 0) {
+    const minX = Math.min(...allNodes.map((n) => n.position.x));
     const minY = Math.min(...allNodes.map((n) => n.position.y));
 
     // Normalize all nodes

@@ -126,20 +126,17 @@ function QuestTreeInner({
     setEdges(initialEdges);
   }, [initialNodes, initialEdges, setNodes, setEdges]);
 
-  // Calculate bounds to constrain panning
+  // Calculate bounds to constrain panning - include ALL nodes (traders + quests)
   const translateExtent = useMemo(() => {
     if (nodes.length === 0) return undefined;
 
     const padding = 50; // Padding around all nodes
-    const questNodes = nodes.filter((n) => n.type === "quest");
 
-    if (questNodes.length === 0) return undefined;
-
-    const minX = Math.min(...questNodes.map((n) => n.position.x)) - padding;
+    // Use ALL nodes for bounds calculation so traders are included
+    const minX = Math.min(...nodes.map((n) => n.position.x)) - padding;
     const minY = Math.min(...nodes.map((n) => n.position.y)) - padding;
     const maxX =
-      Math.max(...questNodes.map((n) => n.position.x + QUEST_NODE_WIDTH)) +
-      padding;
+      Math.max(...nodes.map((n) => n.position.x + QUEST_NODE_WIDTH)) + padding;
     const maxY =
       Math.max(...nodes.map((n) => n.position.y + QUEST_NODE_HEIGHT)) + padding;
 
@@ -251,7 +248,7 @@ function QuestTreeInner({
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}
-        defaultViewport={{ x: 0, y: 0, zoom: 1.5 }}
+        defaultViewport={{ x: 20, y: 20, zoom: 1 }}
         translateExtent={translateExtent}
         minZoom={0.1}
         maxZoom={isMobile ? 2 : 4}
