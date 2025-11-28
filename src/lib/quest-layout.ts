@@ -17,10 +17,10 @@ import { getTraderColor } from "@/lib/trader-colors";
 
 const LAYOUT_CONFIG = {
   rankdir: "LR" as const, // Left-to-right layout
-  nodesep: 2, // Minimal vertical spacing
-  ranksep: 8, // Minimal horizontal spacing
-  marginx: 10, // Small padding from left edge
-  marginy: 10, // Small padding from top edge
+  nodesep: 10, // Comfortable vertical spacing between nodes
+  ranksep: 20, // Comfortable horizontal spacing between ranks
+  marginx: 20, // Padding from left edge
+  marginy: 20, // Padding from top edge
 };
 
 // Lane-based layout configuration
@@ -28,8 +28,8 @@ export const LANE_CONFIG = {
   TRADER_NODE_WIDTH: 60,
   TRADER_NODE_HEIGHT: 40,
   BASE_LANE_HEIGHT: 45, // Minimum lane height
-  LANE_SPACING: 2, // Minimal gap between lanes
-  TRADER_TO_QUEST_GAP: 8, // Minimal gap after trader header
+  LANE_SPACING: 10, // Comfortable gap between lanes
+  TRADER_TO_QUEST_GAP: 15, // Comfortable gap after trader header
   QUEST_VERTICAL_GAP: 2, // Minimal gap between quests
 };
 
@@ -45,6 +45,27 @@ const TRADER_ORDER = [
   "fence",
   "lightkeeper",
 ];
+
+/**
+ * Calculate dynamic node height based on quest title length
+ * Allows quest names to span multiple lines instead of truncating
+ */
+export function calculateNodeHeight(title: string): number {
+  const baseHeight = 38;
+  const nodeWidth = 110;
+  const padding = 16; // Total horizontal padding
+  const maxWidth = nodeWidth - padding;
+
+  // Approximate characters per line at 10px font
+  const charsPerLine = 20;
+  const estimatedLines = Math.ceil(title.length / charsPerLine);
+
+  // Cap at 3 lines maximum
+  const lines = Math.min(estimatedLines, 3);
+
+  // 12px per additional line
+  return baseHeight + (lines - 1) * 12;
+}
 
 interface BuildQuestGraphOptions {
   onStatusChange: (questId: string, status: QuestStatus) => void;
@@ -493,11 +514,12 @@ export function layoutTraderLane(
   }
   if (minDepthInLane === Infinity) minDepthInLane = 0;
 
-  // Add quest nodes
+  // Add quest nodes with dynamic heights
   for (const quest of group.quests) {
+    const nodeHeight = calculateNodeHeight(quest.title);
     g.setNode(quest.id, {
       width: QUEST_NODE_WIDTH,
-      height: QUEST_NODE_HEIGHT,
+      height: nodeHeight,
     });
   }
 
@@ -638,6 +660,9 @@ export function layoutTraderLane(
     const nodeWithPosition = g.node(quest.id);
     const isInFocusChain = focusChain?.has(quest.id) ?? false;
 
+    // Calculate dynamic height for this quest
+    const nodeHeight = calculateNodeHeight(quest.title);
+
     // Normalize Y position relative to lane center
     const normalizedY = nodeWithPosition.y - minY;
 
@@ -650,6 +675,7 @@ export function layoutTraderLane(
       },
       data: {
         quest,
+        nodeHeight, // Pass dynamic height to component
         isSelected: quest.id === selectedQuestId,
         isRoot: rootQuestIds.has(quest.id),
         isLeaf: leafQuestIds.has(quest.id),

@@ -1,10 +1,16 @@
 "use client";
 
-import { memo, useState, useMemo } from "react";
+import { memo, useMemo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getTraderColor, STATUS_COLORS } from "@/lib/trader-colors";
 import type { QuestNode as QuestNodeType } from "@/types";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 
 // Responsive node sizes
 export const QUEST_NODE_WIDTH = 110;
@@ -15,6 +21,7 @@ export const QUEST_NODE_HEIGHT_MOBILE = 34;
 function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
   const {
     quest,
+    nodeHeight = QUEST_NODE_HEIGHT, // Use dynamic height if provided, otherwise default
     onStatusChange,
     onClick,
     onFocus,
@@ -27,7 +34,6 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
   } = data;
   const traderColor = getTraderColor(quest.traderId);
   const statusColor = STATUS_COLORS[quest.computedStatus];
-  const [isClicked, setIsClicked] = useState(false);
 
   // Level-based highlighting
   const isLevelAppropriate =
@@ -73,27 +79,23 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
   // Should this node be dimmed? (focus mode active but not in chain)
   const isDimmed = hasFocusMode && !isInFocusChain && !isFocused;
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    // Trigger click animation
-    setIsClicked(true);
-    setTimeout(() => setIsClicked(false), 150);
-
-    // Call the status change handler (parent handles the cycle logic)
-    onStatusChange(quest.id, quest.computedStatus);
-  };
-
-  const handleDoubleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    // Double-click to focus on this quest's chain
-    onFocus(quest.id);
-  };
-
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     // Right-click to select/view details
     onClick(quest.id);
+  };
+
+  const handleWikiLinkClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation(); // Prevents node click/status change
+
+    if (quest.wikiLink) {
+      window.open(quest.wikiLink, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  const handleWikiLinkMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent React Flow from intercepting
   };
 
   return (
@@ -104,13 +106,10 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
         className="!bg-gray-400 !w-1.5 !h-1.5"
       />
       <div
-        onClick={handleClick}
-        onDoubleClick={handleDoubleClick}
         onContextMenu={handleContextMenu}
         className={cn(
           "relative cursor-pointer rounded border p-1 transition-all duration-150",
           "hover:shadow-md active:scale-95",
-          isClicked && "scale-105",
           selected && "ring-2 ring-offset-2 ring-blue-500",
           quest.computedStatus === "locked" &&
             !isDimmed &&
@@ -143,7 +142,7 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
         )}
         style={{
           width: QUEST_NODE_WIDTH,
-          height: QUEST_NODE_HEIGHT,
+          height: nodeHeight, // Use dynamic height instead of constant
           backgroundColor: isDimmed ? "#F3F4F6" : statusColor.bg,
           borderColor: isDimmed
             ? "#E5E7EB"
@@ -161,6 +160,28 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
           >
             K
           </div>
+        )}
+
+        {/* Wiki link */}
+        {quest.wikiLink && !isDimmed && (
+          <Tooltip delayDuration={300}>
+            <TooltipTrigger asChild>
+              <a
+                role="button"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={handleWikiLinkClick}
+                onMouseDown={handleWikiLinkMouseDown}
+                className="absolute -bottom-1 -right-1 p-2 opacity-60 hover:opacity-100 text-gray-600 hover:text-blue-600 transition-colors duration-150 z-10 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 pointer-events-auto"
+                aria-label={`Open ${quest.title} wiki page`}
+              >
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </TooltipTrigger>
+            <TooltipContent side="top" sideOffset={4}>
+              <p className="text-xs">View on Tarkov Wiki</p>
+            </TooltipContent>
+          </Tooltip>
         )}
 
         {/* Cross-trader dependency badges */}
@@ -208,7 +229,7 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
 
         {/* Quest title */}
         <div
-          className="font-medium text-[10px] leading-tight line-clamp-1 text-gray-900"
+          className="font-medium text-[10px] leading-tight line-clamp-3 text-gray-900"
           title={quest.title}
         >
           {quest.title}

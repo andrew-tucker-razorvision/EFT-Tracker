@@ -35,6 +35,12 @@ const MAP_NAMES: Record<number, string> = {
   9: "Ground Zero",
 };
 
+// Quest title corrections (fix upstream data inconsistencies)
+const TITLE_CORRECTIONS: Record<string, string> = {
+  "No offence": "No Offense",
+  // Future corrections can be added here
+};
+
 interface TarkovTrader {
   locale: { en: string };
   wiki: string;
@@ -159,10 +165,14 @@ async function main() {
       }
     }
 
+    // Apply any title corrections
+    const originalTitle = quest.locales?.en || quest.title || `Quest ${quest.id}`;
+    const correctedTitle = TITLE_CORRECTIONS[originalTitle] || originalTitle;
+
     await prisma.quest.create({
       data: {
         id: questId,
-        title: quest.locales?.en || quest.title || `Quest ${quest.id}`,
+        title: correctedTitle,
         wikiLink: quest.wiki || null,
         levelRequired: quest.require?.level || 1,
         kappaRequired: kappaQuestIds.has(quest.id),

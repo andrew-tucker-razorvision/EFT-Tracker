@@ -177,21 +177,6 @@ describe("QuestNode", () => {
   });
 
   describe("click handling", () => {
-    it("should call onStatusChange when clicked", () => {
-      const quest = createQuestWithProgress(mockQuests[0], "available");
-      const onStatusChange = vi.fn();
-      const props = createNodeProps(quest, { onStatusChange });
-
-      const { container } = renderWithReactFlow(<QuestNode {...props} />);
-
-      const nodeDiv = container.querySelector(".cursor-pointer");
-      if (nodeDiv) {
-        fireEvent.click(nodeDiv);
-      }
-
-      expect(onStatusChange).toHaveBeenCalledWith(quest.id, "available");
-    });
-
     it("should call onClick on right-click (context menu)", () => {
       const quest = createQuestWithProgress(mockQuests[0], "available");
       const onClick = vi.fn();
@@ -206,22 +191,6 @@ describe("QuestNode", () => {
 
       expect(onClick).toHaveBeenCalledWith(quest.id);
     });
-
-    it("should pass current status to onStatusChange", () => {
-      const quest = createQuestWithProgress(mockQuests[0], "in_progress");
-      const onStatusChange = vi.fn();
-      const props = createNodeProps(quest, { onStatusChange });
-
-      const { container } = renderWithReactFlow(<QuestNode {...props} />);
-
-      const nodeDiv = container.querySelector(".cursor-pointer");
-      if (nodeDiv) {
-        fireEvent.click(nodeDiv);
-      }
-
-      // Should pass the current status, not the next one
-      expect(onStatusChange).toHaveBeenCalledWith(quest.id, "in_progress");
-    });
   });
 
   describe("selection", () => {
@@ -235,6 +204,119 @@ describe("QuestNode", () => {
       // Selected nodes have ring-blue-500
       const nodeDiv = container.querySelector(".ring-blue-500");
       expect(nodeDiv).toBeInTheDocument();
+    });
+  });
+
+  describe("wiki links", () => {
+    describe("rendering", () => {
+      it("should show wiki link icon when wikiLink is present", () => {
+        const quest = createQuestWithProgress(mockQuests[0], "available");
+        expect(quest.wikiLink).toBeTruthy(); // Debut has wiki link
+        const props = createNodeProps(quest);
+
+        const { container } = renderWithReactFlow(<QuestNode {...props} />);
+
+        const wikiIcon = container.querySelector('a[aria-label*="wiki"]');
+        expect(wikiIcon).toBeInTheDocument();
+        // Note: href attribute removed to prevent page refresh, now uses window.open() programmatically
+        expect(wikiIcon).toHaveAttribute("role", "button");
+      });
+
+      it("should not show wiki link icon when wikiLink is null", () => {
+        const quest = createQuestWithProgress(mockQuests[0], "available");
+        quest.wikiLink = null;
+        const props = createNodeProps(quest);
+
+        const { container } = renderWithReactFlow(<QuestNode {...props} />);
+
+        expect(
+          container.querySelector('a[aria-label*="wiki"]')
+        ).not.toBeInTheDocument();
+      });
+
+      it("should hide wiki link icon when node is dimmed in focus mode", () => {
+        const quest = createQuestWithProgress(mockQuests[0], "available");
+        const props = createNodeProps(quest, {
+          hasFocusMode: true,
+          isInFocusChain: false,
+          isFocused: false,
+        });
+
+        const { container } = renderWithReactFlow(<QuestNode {...props} />);
+
+        // isDimmed = true, icon should not render
+        expect(
+          container.querySelector('a[aria-label*="wiki"]')
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    describe("interaction", () => {
+      it("should open wiki link in new tab when icon is clicked", () => {
+        const quest = createQuestWithProgress(mockQuests[0], "available");
+        const windowOpenSpy = vi
+          .spyOn(window, "open")
+          .mockImplementation(() => null);
+        const props = createNodeProps(quest);
+
+        const { container } = renderWithReactFlow(<QuestNode {...props} />);
+
+        const wikiIcon = container.querySelector('a[aria-label*="wiki"]');
+        if (wikiIcon) {
+          fireEvent.click(wikiIcon);
+        }
+
+        expect(windowOpenSpy).toHaveBeenCalledWith(
+          quest.wikiLink,
+          "_blank",
+          "noopener,noreferrer"
+        );
+
+        windowOpenSpy.mockRestore();
+      });
+
+      it("should not trigger status change when wiki icon is clicked", () => {
+        const quest = createQuestWithProgress(mockQuests[0], "available");
+        const onStatusChange = vi.fn();
+        vi.spyOn(window, "open").mockImplementation(() => null);
+        const props = createNodeProps(quest, { onStatusChange });
+
+        const { container } = renderWithReactFlow(<QuestNode {...props} />);
+
+        const wikiIcon = container.querySelector('a[aria-label*="wiki"]');
+        if (wikiIcon) {
+          fireEvent.click(wikiIcon);
+        }
+
+        // Status change should NOT be called
+        expect(onStatusChange).not.toHaveBeenCalled();
+      });
+    });
+
+    describe("accessibility", () => {
+      it("should have descriptive aria-label", () => {
+        const quest = createQuestWithProgress(mockQuests[0], "available");
+        const props = createNodeProps(quest);
+
+        const { container } = renderWithReactFlow(<QuestNode {...props} />);
+
+        const wikiIcon = container.querySelector("a[aria-label]");
+        expect(wikiIcon).toHaveAttribute(
+          "aria-label",
+          `Open ${quest.title} wiki page`
+        );
+      });
+
+      it("should have security attributes on link", () => {
+        const quest = createQuestWithProgress(mockQuests[0], "available");
+        const props = createNodeProps(quest);
+
+        const { container } = renderWithReactFlow(<QuestNode {...props} />);
+
+        const wikiIcon = container.querySelector('a[aria-label*="wiki"]');
+        expect(wikiIcon).toHaveAttribute("target", "_blank");
+        expect(wikiIcon).toHaveAttribute("rel", "noopener noreferrer");
+      });
     });
   });
 });

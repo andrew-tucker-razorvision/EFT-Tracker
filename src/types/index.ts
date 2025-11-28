@@ -80,6 +80,7 @@ export type ViewMode = "trader-lanes" | "level-timeline";
 // React Flow node data for quest nodes
 export interface QuestNodeData extends Record<string, unknown> {
   quest: QuestWithProgress;
+  nodeHeight?: number; // Dynamic node height based on title length
   isSelected: boolean;
   isRoot: boolean; // No prerequisites - starting quest
   isLeaf: boolean; // No dependents - terminal quest

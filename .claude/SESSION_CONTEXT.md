@@ -175,6 +175,18 @@ The Memory MCP server persists knowledge across Claude Code sessions using a gra
 - **Environment Variables**: 1Password secret references
 - **Database**: SSL-required PostgreSQL connection
 
+## Development Server
+
+**Always use port 3000** - The dev scripts are configured to auto-kill existing servers to prevent port conflicts.
+
+| Command              | Description                                    |
+| -------------------- | ---------------------------------------------- |
+| `npm run dev`        | Kills existing servers, starts on port 3000    |
+| `npm run dev:clean`  | Same as above + clears `.next` cache           |
+| `npm run dev:kill`   | Just kills existing servers (standalone)       |
+
+**Important:** Never start multiple dev servers. If you need a fresh server, just run `npm run dev` - it handles cleanup automatically.
+
 ## Notes
 
 - Linux environment (WSL2 in devcontainer)

@@ -171,6 +171,32 @@ function QuestTreeInner({
     }
   }, [focusedQuestId]);
 
+  // Handle node click for status change
+  const handleNodeClick = useCallback(
+    (_event: React.MouseEvent, node: { data?: unknown }) => {
+      // Only handle quest nodes, not trader nodes
+      const data = node.data as QuestNodeData | undefined;
+      if (data?.quest) {
+        const quest = data.quest;
+        // Call status change handler
+        onStatusChange(quest.id, quest.computedStatus);
+      }
+    },
+    [onStatusChange]
+  );
+
+  // Handle node double-click for focus mode
+  const handleNodeDoubleClick = useCallback(
+    (_event: React.MouseEvent, node: { data?: unknown }) => {
+      // Only handle quest nodes, not trader nodes
+      const data = node.data as QuestNodeData | undefined;
+      if (data?.quest) {
+        handleFocus(data.quest.id);
+      }
+    },
+    [handleFocus]
+  );
+
   // MiniMap node color based on trader
   const getNodeColor = useCallback(
     (node: { data: Record<string, unknown> }) => {
@@ -219,6 +245,8 @@ function QuestTreeInner({
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onPaneClick={handlePaneClick}
+        onNodeClick={handleNodeClick}
+        onNodeDoubleClick={handleNodeDoubleClick}
         nodeTypes={nodeTypes}
         nodesDraggable={false}
         nodesConnectable={false}
@@ -233,7 +261,7 @@ function QuestTreeInner({
         proOptions={{ hideAttribution: true }}
         panOnScroll={!isMobile}
         zoomOnScroll={!isMobile}
-        panOnDrag={true}
+        panOnDrag={[1, 2]}
         zoomOnPinch={true}
         zoomOnDoubleClick={false}
       >
