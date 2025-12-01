@@ -161,38 +161,20 @@ export function QuestsClient() {
 
   return (
     <div className="flex-1 flex flex-col">
-      {/* Progress Summary Bar */}
-      <div className="px-3 md:px-4 py-2 bg-muted/50 border-b">
-        <div className="flex items-center gap-2 md:gap-4 text-xs md:text-sm flex-wrap">
-          <span className="font-medium hidden sm:inline">Progress:</span>
-          <div className="flex items-center gap-1.5 md:gap-3 flex-wrap">
-            <span className="text-green-600 flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-green-500" />
-              <span>{stats.completed}</span>
-            </span>
-            <span className="text-blue-600 flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-blue-500" />
-              <span>{stats.available}</span>
-            </span>
-            <span className="text-gray-500 flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-gray-400" />
-              <span>{stats.locked}</span>
-            </span>
-          </div>
-          <div className="ml-auto flex items-center gap-2">
-            <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
-            <span className="text-muted-foreground text-xs">
-              {stats.total} total
-            </span>
-          </div>
-        </div>
-      </div>
       <QuestFilters
         traders={traders}
         filters={filters}
         onFilterChange={setFilters}
         onApplyFilters={applyFilters}
         hasPendingChanges={hasPendingChanges}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        stats={{
+          completed: stats.completed,
+          available: stats.available,
+          locked: stats.locked,
+        }}
+        totalQuests={stats.total}
       />
       <div className="flex-1 min-h-0">
         {questsWithProgress.length > 0 ? (

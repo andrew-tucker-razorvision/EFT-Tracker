@@ -98,17 +98,24 @@ export function LevelTimelineView({
             <div key={bracket.label} className="flex-shrink-0 w-48">
               {/* Column header */}
               <div
-                className={`sticky top-0 z-10 p-2 rounded-t-lg border-b-2 ${
-                  isCurrentBracket
-                    ? "bg-emerald-50 border-emerald-400"
-                    : "bg-gray-100 border-gray-300"
-                }`}
+                className="sticky top-0 z-10 p-2 rounded-t-lg border-b-2"
+                style={{
+                  backgroundColor: isCurrentBracket
+                    ? "rgba(0, 167, 0, 0.15)"
+                    : "#383945",
+                  borderColor: isCurrentBracket ? "#00a700" : "#636363",
+                }}
               >
-                <div className="font-semibold text-sm">{bracket.label}</div>
-                <div className="text-xs text-gray-500">
+                <div
+                  className="font-semibold text-sm"
+                  style={{ color: "#c7c5b3" }}
+                >
+                  {bracket.label}
+                </div>
+                <div className="text-xs" style={{ color: "#636363" }}>
                   {stats.completed}/{stats.total} completed
                   {stats.available > 0 && (
-                    <span className="text-blue-600 ml-1">
+                    <span style={{ color: "#0292c0" }} className="ml-1">
                       ({stats.available} available)
                     </span>
                   )}
@@ -116,9 +123,15 @@ export function LevelTimelineView({
               </div>
 
               {/* Quest cards */}
-              <div className="space-y-2 p-2 bg-gray-50/50 min-h-[200px] rounded-b-lg">
+              <div
+                className="space-y-2 p-2 min-h-[200px] rounded-b-lg"
+                style={{ backgroundColor: "rgba(56, 57, 69, 0.5)" }}
+              >
                 {questList.length === 0 ? (
-                  <div className="text-xs text-gray-400 text-center py-4">
+                  <div
+                    className="text-xs text-center py-4"
+                    style={{ color: "#636363" }}
+                  >
                     No quests
                   </div>
                 ) : (

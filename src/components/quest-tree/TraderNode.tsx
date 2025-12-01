@@ -48,7 +48,8 @@ function TraderNodeComponent({ data }: NodeProps<TraderNodeType>) {
       <Handle
         type="source"
         position={Position.Right}
-        className="!bg-gray-400 !w-1.5 !h-1.5"
+        className="!w-1.5 !h-1.5"
+        style={{ backgroundColor: "#636363" }}
       />
     </>
   );

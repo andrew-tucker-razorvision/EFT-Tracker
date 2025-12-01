@@ -67,7 +67,10 @@ export function QuestTreeSkeleton() {
 
 function QuestNodeSkeleton() {
   return (
-    <div className="w-[200px] h-[72px] rounded-lg border-2 border-gray-200 bg-gray-50 p-3">
+    <div
+      className="w-[200px] h-[72px] rounded-lg border-2 p-3"
+      style={{ borderColor: "#636363", backgroundColor: "#383945" }}
+    >
       <Skeleton className="h-4 w-full mb-2" />
       <Skeleton className="h-3 w-3/4 mb-3" />
       <div className="flex justify-between">

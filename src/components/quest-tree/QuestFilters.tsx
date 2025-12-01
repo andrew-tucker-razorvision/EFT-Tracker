@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ViewToggle } from "@/components/quest-views";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -26,6 +27,7 @@ import type {
   QuestFilters as Filters,
   QuestStatus,
   LevelRange,
+  ViewMode,
 } from "@/types";
 
 const LEVEL_RANGES: LevelRange[] = [
@@ -63,6 +65,14 @@ interface QuestFiltersProps {
   onFilterChange: (filters: Partial<Filters>) => void;
   onApplyFilters: () => void;
   hasPendingChanges: boolean;
+  viewMode: ViewMode;
+  onViewModeChange: (mode: ViewMode) => void;
+  stats: {
+    completed: number;
+    available: number;
+    locked: number;
+  };
+  totalQuests: number;
 }
 
 interface FilterControlsProps {
@@ -275,6 +285,10 @@ export function QuestFilters({
   onFilterChange,
   onApplyFilters,
   hasPendingChanges,
+  viewMode,
+  onViewModeChange,
+  stats,
+  totalQuests,
 }: QuestFiltersProps) {
   const [searchValue, setSearchValue] = useState(filters.search);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -318,66 +332,215 @@ export function QuestFilters({
   ].filter(Boolean).length;
 
   return (
-    <div className="flex flex-wrap items-end gap-2 md:gap-4 p-3 md:p-4 bg-background border-b">
-      {/* Search - always visible */}
-      <div className="flex-1 min-w-[150px]">
-        <Label
-          htmlFor="search"
-          className="text-xs text-muted-foreground hidden md:block"
-        >
-          Search
-        </Label>
-        <Input
-          id="search"
-          type="text"
-          placeholder="Search quests..."
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-          className="h-9"
-        />
-      </div>
-
-      {/* Desktop Filters */}
-      <FilterControls
-        traders={traders}
-        filters={filters}
-        onFilterChange={onFilterChange}
-        onApplyFilters={onApplyFilters}
-        hasPendingChanges={hasPendingChanges}
-        activeFilterCount={activeFilterCount}
-        handleReset={handleReset}
-      />
-
-      {/* Mobile Filter Button */}
-      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetTrigger asChild>
-          <Button variant="outline" size="sm" className="md:hidden relative">
-            Filters
-            {activeFilterCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
-                {activeFilterCount}
-              </span>
-            )}
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="bottom" className="h-auto max-h-[80vh]">
-          <SheetHeader>
-            <SheetTitle>Filter Quests</SheetTitle>
-          </SheetHeader>
-          <div className="py-4">
-            <FilterControls
-              isMobile
-              traders={traders}
-              filters={filters}
-              onFilterChange={onFilterChange}
-              onApplyFilters={onApplyFilters}
-              hasPendingChanges={hasPendingChanges}
-              activeFilterCount={activeFilterCount}
-              handleReset={handleReset}
+    <div className="p-3 md:p-4 bg-background border-b">
+      {/* MOBILE LAYOUT (vertical stacking) */}
+      <div className="md:hidden flex flex-col gap-2 w-full">
+        {/* Row 1: Search + Filter Button */}
+        <div className="flex gap-2">
+          <div className="flex-1 min-w-0">
+            <Input
+              id="search-mobile"
+              type="text"
+              placeholder="Search quests..."
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              className="h-9"
             />
           </div>
-        </SheetContent>
-      </Sheet>
+          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="sm" className="relative h-9 px-3">
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-auto max-h-[80vh]">
+              <SheetHeader>
+                <SheetTitle>Filter Quests</SheetTitle>
+              </SheetHeader>
+              <div className="py-4">
+                <FilterControls
+                  isMobile
+                  traders={traders}
+                  filters={filters}
+                  onFilterChange={onFilterChange}
+                  onApplyFilters={onApplyFilters}
+                  hasPendingChanges={hasPendingChanges}
+                  activeFilterCount={activeFilterCount}
+                  handleReset={handleReset}
+                />
+                {/* Stats + ViewToggle in mobile sheet */}
+                <div className="mt-4 pt-4 border-t">
+                  <div className="flex items-center gap-3 text-xs mb-3">
+                    <span className="font-medium">Progress:</span>
+                    <span
+                      className="flex items-center gap-1"
+                      style={{ color: "#00a700" }}
+                    >
+                      <span
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: "#00a700" }}
+                      />
+                      {stats.completed}
+                    </span>
+                    <span
+                      className="flex items-center gap-1"
+                      style={{ color: "#0292c0" }}
+                    >
+                      <span
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: "#0292c0" }}
+                      />
+                      {stats.available}
+                    </span>
+                    <span
+                      className="flex items-center gap-1"
+                      style={{ color: "#636363" }}
+                    >
+                      <span
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: "#636363" }}
+                      />
+                      {stats.locked}
+                    </span>
+                    <span className="text-muted-foreground">
+                      / {totalQuests}
+                    </span>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground mb-2 block">
+                      View Mode
+                    </Label>
+                    <ViewToggle
+                      viewMode={viewMode}
+                      onViewModeChange={onViewModeChange}
+                    />
+                  </div>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+
+        {/* Row 2: Stats + ViewToggle + Total (visible outside sheet) */}
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center gap-1.5">
+            <span
+              className="flex items-center gap-0.5"
+              style={{ color: "#00a700" }}
+            >
+              <span
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: "#00a700" }}
+              />
+              {stats.completed}
+            </span>
+            <span
+              className="flex items-center gap-0.5"
+              style={{ color: "#0292c0" }}
+            >
+              <span
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: "#0292c0" }}
+              />
+              {stats.available}
+            </span>
+            <span
+              className="flex items-center gap-0.5"
+              style={{ color: "#636363" }}
+            >
+              <span
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: "#636363" }}
+              />
+              {stats.locked}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <ViewToggle
+              viewMode={viewMode}
+              onViewModeChange={onViewModeChange}
+            />
+            <span className="text-muted-foreground">{totalQuests} total</span>
+          </div>
+        </div>
+      </div>
+
+      {/* DESKTOP LAYOUT (single row, flex-wrap) */}
+      <div className="hidden md:flex flex-wrap items-center gap-3 w-full">
+        {/* Search Input */}
+        <div className="flex-1 min-w-[180px] max-w-[280px]">
+          <Label
+            htmlFor="search"
+            className="text-xs text-muted-foreground mb-1 block"
+          >
+            Search
+          </Label>
+          <Input
+            id="search"
+            type="text"
+            placeholder="Search quests..."
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            className="h-9"
+          />
+        </div>
+
+        {/* Stats */}
+        <div className="flex items-center gap-2 text-xs border-l pl-3">
+          <span
+            className="flex items-center gap-1"
+            style={{ color: "#00a700" }}
+          >
+            <span
+              className="w-2 h-2 rounded-full"
+              style={{ backgroundColor: "#00a700" }}
+            />
+            {stats.completed}
+          </span>
+          <span
+            className="flex items-center gap-1"
+            style={{ color: "#0292c0" }}
+          >
+            <span
+              className="w-2 h-2 rounded-full"
+              style={{ backgroundColor: "#0292c0" }}
+            />
+            {stats.available}
+          </span>
+          <span
+            className="flex items-center gap-1"
+            style={{ color: "#636363" }}
+          >
+            <span
+              className="w-2 h-2 rounded-full"
+              style={{ backgroundColor: "#636363" }}
+            />
+            {stats.locked}
+          </span>
+          <span className="text-muted-foreground">/ {totalQuests}</span>
+        </div>
+
+        {/* Existing FilterControls (desktop) - rendered inline */}
+        <FilterControls
+          traders={traders}
+          filters={filters}
+          onFilterChange={onFilterChange}
+          onApplyFilters={onApplyFilters}
+          hasPendingChanges={hasPendingChanges}
+          activeFilterCount={activeFilterCount}
+          handleReset={handleReset}
+        />
+
+        {/* ViewToggle */}
+        <div className="border-l pl-3">
+          <ViewToggle viewMode={viewMode} onViewModeChange={onViewModeChange} />
+        </div>
+      </div>
     </div>
   );
 }

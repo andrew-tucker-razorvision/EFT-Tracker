@@ -24,10 +24,10 @@ A web application to track your Escape from Tarkov quest progress across all tra
 ### Prerequisites
 
 - Node.js 18+
-- PostgreSQL database (local or hosted)
+- PostgreSQL database (local or hosted via [Neon](https://neon.tech), [Supabase](https://supabase.com), etc.)
 - npm or pnpm
 
-### Installation
+### Local Development (Recommended)
 
 ```bash
 # Clone the repository
@@ -38,11 +38,15 @@ cd EFT-Tracker
 npm install
 
 # Set up environment variables
-cp .env.example .env.local
-# Edit .env.local with your database URL and auth secrets
+cp .env.template .env
+# Edit .env with your database URL and auth secrets:
+#   DATABASE_URL - PostgreSQL connection string
+#   AUTH_SECRET - Generate with: openssl rand -base64 32
+#   NEXTAUTH_URL - http://localhost:3000 for local dev
 
-# Run database migrations
+# Run database migrations and seed data
 npx prisma migrate dev
+npx prisma db seed
 
 # Start development server
 npm run dev
@@ -50,39 +54,17 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-### Development with VS Code Dev Containers (Recommended)
+### Alternative: VS Code Dev Containers
 
-The easiest way to get started is using the VS Code Dev Container, which provides a pre-configured development environment with all tools installed.
+> **Note:** Dev containers provide a consistent environment but can have authentication and performance issues. Local development is recommended for most users.
 
-#### Prerequisites
+If you prefer a containerized environment:
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop)
-- [VS Code](https://code.visualstudio.com/)
-- [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
-- [1Password CLI](https://developer.1password.com/docs/cli) (for secret management)
+1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop) and [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+2. Generate `.env` file: `cp .env.template .env` (fill in values)
+3. Open in VS Code and click "Reopen in Container"
 
-#### Quick Start
-
-1. Clone the repository
-2. Generate `.env` file on your host:
-   ```bash
-   op inject -i .env.template -o .env
-   ```
-3. Open in VS Code
-4. Click "Reopen in Container" when prompted (or use Command Palette: "Dev Containers: Reopen in Container")
-5. Wait for container setup to complete (~2-3 minutes first time)
-6. Start coding! All dependencies and tools are pre-installed.
-
-#### What's Included
-
-- Node.js LTS, TypeScript, ESLint, Prettier
-- 1Password CLI for secure secret management
-- Claude Code AI assistant
-- GitHub CLI
-- Persistent bash history and command history
-- Isolated `node_modules` (prevents WSL2 binary conflicts)
-
-See [docs/DEV_CONTAINER_SETUP.md](docs/DEV_CONTAINER_SETUP.md) for comprehensive setup guide, troubleshooting, and replication instructions for other devices.
+See [docs/DEV_CONTAINER_SETUP.md](docs/DEV_CONTAINER_SETUP.md) for full dev container setup guide.
 
 ## Docker Deployment
 

@@ -3,33 +3,61 @@ export interface TraderColor {
   bg: string;
 }
 
+// EFT Brand Colors
+export const EFT_COLORS = {
+  goldOne: "#c7c5b3",
+  goldTwo: "#9a8866",
+  gunmetal: "#383945",
+  gunmetalDark: "#2d2d2f",
+  blackLight: "#1b1919",
+  border: "rgba(199, 197, 179, 0.2)",
+} as const;
+
+// All traders use unified gold theme (differentiate by icons instead)
 export const TRADER_COLORS: Record<string, TraderColor> = {
-  prapor: { primary: "#F97316", bg: "#FED7AA" },
-  therapist: { primary: "#22C55E", bg: "#BBF7D0" },
-  skier: { primary: "#3B82F6", bg: "#BFDBFE" },
-  peacekeeper: { primary: "#6366F1", bg: "#C7D2FE" },
-  mechanic: { primary: "#EAB308", bg: "#FEF08A" },
-  ragman: { primary: "#EC4899", bg: "#FBCFE8" },
-  jaeger: { primary: "#84CC16", bg: "#D9F99D" },
-  fence: { primary: "#6B7280", bg: "#E5E7EB" },
-  lightkeeper: { primary: "#FBBF24", bg: "#FDE68A" },
+  prapor: { primary: EFT_COLORS.goldTwo, bg: EFT_COLORS.gunmetal },
+  therapist: { primary: EFT_COLORS.goldTwo, bg: EFT_COLORS.gunmetal },
+  skier: { primary: EFT_COLORS.goldTwo, bg: EFT_COLORS.gunmetal },
+  peacekeeper: { primary: EFT_COLORS.goldTwo, bg: EFT_COLORS.gunmetal },
+  mechanic: { primary: EFT_COLORS.goldTwo, bg: EFT_COLORS.gunmetal },
+  ragman: { primary: EFT_COLORS.goldTwo, bg: EFT_COLORS.gunmetal },
+  jaeger: { primary: EFT_COLORS.goldTwo, bg: EFT_COLORS.gunmetal },
+  fence: { primary: EFT_COLORS.goldTwo, bg: EFT_COLORS.gunmetal },
+  lightkeeper: { primary: EFT_COLORS.goldTwo, bg: EFT_COLORS.gunmetal },
+  ref: { primary: EFT_COLORS.goldTwo, bg: EFT_COLORS.gunmetal },
 };
 
 export function getTraderColor(traderId: string): TraderColor {
   return (
     TRADER_COLORS[traderId.toLowerCase()] || {
-      primary: "#6B7280",
-      bg: "#E5E7EB",
+      primary: EFT_COLORS.goldTwo,
+      bg: EFT_COLORS.gunmetal,
     }
   );
 }
 
-// Status colors for quest progress
+// Status colors updated for dark EFT theme
 export const STATUS_COLORS = {
-  locked: { primary: "#9CA3AF", bg: "#F3F4F6", border: "#D1D5DB" },
-  available: { primary: "#3B82F6", bg: "#DBEAFE", border: "#93C5FD" },
-  in_progress: { primary: "#F59E0B", bg: "#FEF3C7", border: "#FCD34D" },
-  completed: { primary: "#10B981", bg: "#D1FAE5", border: "#6EE7B7" },
+  locked: {
+    primary: "#636363" /* gray-light */,
+    bg: "#424242" /* gray */,
+    border: "#636363",
+  },
+  available: {
+    primary: "#0292c0" /* blue-light */,
+    bg: "rgba(2, 146, 192, 0.2)",
+    border: "#0292c0",
+  },
+  in_progress: {
+    primary: "#ca8a00" /* orange */,
+    bg: "rgba(202, 138, 0, 0.2)",
+    border: "#ca8a00",
+  },
+  completed: {
+    primary: "#00a700" /* green */,
+    bg: "rgba(0, 167, 0, 0.2)",
+    border: "#00a700",
+  },
 } as const;
 
 export type StatusColorKey = keyof typeof STATUS_COLORS;
