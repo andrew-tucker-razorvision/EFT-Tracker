@@ -4,7 +4,7 @@ import { memo, useMemo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getTraderColor, STATUS_COLORS } from "@/lib/trader-colors";
+import { getTraderColor, STATUS_COLORS, EFT_COLORS } from "@/lib/trader-colors";
 import type { QuestNode as QuestNodeType } from "@/types";
 import {
   Tooltip,
@@ -104,12 +104,12 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
         type="target"
         position={Position.Left}
         className="!w-1.5 !h-1.5"
-        style={{ backgroundColor: "#636363" }}
+        style={{ backgroundColor: STATUS_COLORS.locked.primary }}
       />
       <div
         onContextMenu={handleContextMenu}
         className={cn(
-          "relative cursor-pointer rounded border p-1 transition-all duration-150",
+          "relative cursor-pointer rounded border-2 p-1 transition-all duration-150",
           "hover:shadow-md active:scale-95",
           selected && "ring-2 ring-offset-2 ring-blue-500",
           quest.computedStatus === "locked" &&
@@ -174,7 +174,7 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
                 onClick={handleWikiLinkClick}
                 onMouseDown={handleWikiLinkMouseDown}
                 className="absolute -bottom-1 -right-1 p-2 opacity-60 hover:opacity-100 transition-colors duration-150 z-10 rounded focus:outline-none focus:ring-2 focus:ring-offset-1 pointer-events-auto"
-                style={{ color: "#636363" }}
+                style={{ color: STATUS_COLORS.locked.primary }}
                 aria-label={`Open ${quest.title} wiki page`}
               >
                 <ExternalLink className="w-3 h-3" />
@@ -205,7 +205,7 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
             {crossTraderBadges.length > 2 && (
               <div
                 className="px-0.5 rounded text-[7px] font-medium text-white"
-                style={{ backgroundColor: "#636363" }}
+                style={{ backgroundColor: STATUS_COLORS.locked.primary }}
               >
                 +{crossTraderBadges.length - 2}
               </div>
@@ -217,8 +217,8 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
         {quest.computedStatus === "completed" && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <svg
-              className="w-5 h-5 opacity-30"
-              style={{ color: "#00a700" }}
+              className="w-5 h-5 opacity-40"
+              style={{ color: STATUS_COLORS.completed.primary }}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -235,8 +235,8 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
 
         {/* Quest title */}
         <div
-          className="font-medium text-[10px] leading-tight line-clamp-3"
-          style={{ color: "#c7c5b3" }}
+          className="font-semibold text-[10px] leading-tight line-clamp-3"
+          style={{ color: EFT_COLORS.goldOne }}
           title={quest.title}
         >
           {quest.title}
@@ -247,21 +247,22 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
           className="text-[9px] mt-0.5"
           style={{
             color: isLevelAppropriate
-              ? "#00a700"
+              ? STATUS_COLORS.completed.primary
               : isUpcoming
-                ? "#ca8a00"
-                : "#636363",
-            fontWeight: isLevelAppropriate ? 500 : 400,
+                ? STATUS_COLORS.in_progress.primary
+                : STATUS_COLORS.locked.primary,
+            fontWeight: isLevelAppropriate ? 600 : 400,
           }}
         >
           Lv.{quest.levelRequired}
         </div>
+
       </div>
       <Handle
         type="source"
         position={Position.Right}
         className="!w-1.5 !h-1.5"
-        style={{ backgroundColor: "#636363" }}
+        style={{ backgroundColor: STATUS_COLORS.locked.primary }}
       />
     </>
   );

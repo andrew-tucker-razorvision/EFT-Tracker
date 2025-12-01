@@ -16,6 +16,15 @@ Then restart the dev server:
 npm run dev
 ```
 
+### Development Server Port
+
+**IMPORTANT:** Always use port 3000 for the dev server. Never use alternative ports (3001, 3002, etc.) as this can cause confusion and authentication issues with NextAuth callbacks.
+
+If port 3000 is in use:
+1. Find the process: `netstat -ano | findstr :3000`
+2. Kill it: `cmd /c "taskkill /F /PID <PID>"`
+3. Then start the server on port 3000
+
 ### Database Schema Changes
 
 After modifying `prisma/schema.prisma`, sync to remote database:

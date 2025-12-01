@@ -70,6 +70,7 @@ interface TarkovQuest {
   wiki: string;
   objectives: TarkovObjective[];
   reputation?: Array<{ trader: number; rep: number }>;
+  nokappa?: boolean; // If true, quest is NOT required for Kappa
 }
 
 async function main() {
@@ -125,19 +126,6 @@ async function main() {
     });
   }
 
-  // Get list of Kappa-required quest IDs (quests required for Collector)
-  // These are quests that give Kappa container when all completed
-  const kappaQuestIds = new Set<number>();
-
-  // Find the Collector quest and get its requirements
-  const collectorQuest = questsData.find((q) =>
-    q.locales?.en?.toLowerCase().includes("collector")
-  );
-  if (collectorQuest) {
-    // All quests required by Collector are Kappa quests
-    collectorQuest.require.quests.forEach((id) => kappaQuestIds.add(id));
-  }
-
   // Create quests (first pass - without dependencies)
   console.log("Creating quests...");
   const questIdMap = new Map<number, string>();
@@ -176,7 +164,7 @@ async function main() {
         title: correctedTitle,
         wikiLink: quest.wiki || null,
         levelRequired: quest.require?.level || 1,
-        kappaRequired: kappaQuestIds.has(quest.id),
+        kappaRequired: !quest.nokappa, // nokappa=true means NOT required for Kappa
         traderId: traderId,
         objectives: {
           create: (quest.objectives || []).map((obj) => {
@@ -226,12 +214,13 @@ async function main() {
   // Summary
   const traderCount = await prisma.trader.count();
   const questCount = await prisma.quest.count();
+  const kappaCount = await prisma.quest.count({ where: { kappaRequired: true } });
   const objectiveCount = await prisma.objective.count();
   const dependencyCount = await prisma.questDependency.count();
 
   console.log("\nSeed completed!");
   console.log(`- ${traderCount} traders`);
-  console.log(`- ${questCount} quests`);
+  console.log(`- ${questCount} quests (${kappaCount} required for Kappa)`);
   console.log(`- ${objectiveCount} objectives`);
   console.log(`- ${dependencyCount} dependencies`);
 }

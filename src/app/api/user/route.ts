@@ -18,6 +18,7 @@ export async function GET() {
         email: true,
         name: true,
         playerLevel: true,
+        questsPerTree: true,
       },
     });
 
@@ -43,6 +44,13 @@ const updateUserSchema = z.object({
     .max(79, "Level cannot exceed 79")
     .nullable()
     .optional(),
+  questsPerTree: z
+    .number()
+    .int()
+    .min(5, "Must show at least 5 quests")
+    .max(100, "Maximum 100 quests per tree")
+    .nullable()
+    .optional(),
   name: z.string().min(1).max(100).optional(),
 });
 
@@ -63,6 +71,9 @@ export async function PATCH(request: Request) {
         ...(data.playerLevel !== undefined && {
           playerLevel: data.playerLevel,
         }),
+        ...(data.questsPerTree !== undefined && {
+          questsPerTree: data.questsPerTree,
+        }),
         ...(data.name !== undefined && { name: data.name }),
       },
       select: {
@@ -70,6 +81,7 @@ export async function PATCH(request: Request) {
         email: true,
         name: true,
         playerLevel: true,
+        questsPerTree: true,
       },
     });
 

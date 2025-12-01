@@ -184,6 +184,7 @@ export function QuestsClient() {
               traders={traders}
               selectedQuestId={selectedQuestId}
               playerLevel={filters.playerLevel}
+              maxColumns={filters.questsPerTree}
               onQuestSelect={handleQuestSelect}
               onStatusChange={handleStatusChange}
             />
