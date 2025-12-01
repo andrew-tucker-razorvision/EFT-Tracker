@@ -56,14 +56,14 @@ describe("trader-colors", () => {
 
     it("should return default EFT gold colors for unknown trader", () => {
       const colors = getTraderColor("unknown_trader");
-      // Returns EFT gold fallback
-      expect(colors.primary).toBe("#9a8866");
+      // Returns EFT gold fallback (brightened for better contrast)
+      expect(colors.primary).toBe("#b39d70");
       expect(colors.bg).toBe("#383945");
     });
 
     it("should return default EFT gold colors for empty string", () => {
       const colors = getTraderColor("");
-      expect(colors.primary).toBe("#9a8866");
+      expect(colors.primary).toBe("#b39d70");
     });
   });
 });
