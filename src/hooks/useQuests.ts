@@ -10,6 +10,7 @@ import type {
 
 interface UseQuestsReturn {
   quests: QuestWithProgress[];
+  allQuests: QuestWithProgress[]; // Unfiltered quests for accurate depth calculation
   traders: Trader[];
   loading: boolean;
   error: string | null;
@@ -33,6 +34,7 @@ const defaultFilters: QuestFilters = {
 
 export function useQuests(): UseQuestsReturn {
   const [quests, setQuests] = useState<QuestWithProgress[]>([]);
+  const [allQuests, setAllQuests] = useState<QuestWithProgress[]>([]); // Unfiltered for depth calc
   const [traders, setTraders] = useState<Trader[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,6 +51,18 @@ export function useQuests(): UseQuestsReturn {
       setTraders(data.traders);
     } catch (err) {
       console.error("Error fetching traders:", err);
+    }
+  }, []);
+
+  // Fetch all quests (unfiltered) for accurate depth calculation
+  const fetchAllQuests = useCallback(async () => {
+    try {
+      const res = await fetch("/api/quests");
+      if (!res.ok) throw new Error("Failed to fetch all quests");
+      const data = await res.json();
+      setAllQuests(data.quests);
+    } catch (err) {
+      console.error("Error fetching all quests:", err);
     }
   }, []);
 
@@ -115,7 +129,8 @@ export function useQuests(): UseQuestsReturn {
   // Initial fetch
   useEffect(() => {
     fetchTraders();
-  }, [fetchTraders]);
+    fetchAllQuests(); // Fetch all quests for depth calculation
+  }, [fetchTraders, fetchAllQuests]);
 
   useEffect(() => {
     fetchQuests();
@@ -123,6 +138,7 @@ export function useQuests(): UseQuestsReturn {
 
   return {
     quests,
+    allQuests,
     traders,
     loading,
     error,

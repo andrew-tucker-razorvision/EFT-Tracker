@@ -22,6 +22,7 @@ export function QuestsClient() {
   const { status: sessionStatus } = useSession();
   const {
     quests,
+    allQuests,
     traders,
     loading,
     error,
@@ -43,6 +44,15 @@ export function QuestsClient() {
 
   // Merge progress into quests
   const questsWithProgress: QuestWithProgress[] = quests.map((quest) => {
+    const userStatus = progress.get(quest.id);
+    return {
+      ...quest,
+      computedStatus: userStatus || quest.computedStatus,
+    };
+  });
+
+  // Merge progress into all quests (for accurate depth calculation)
+  const allQuestsWithProgress: QuestWithProgress[] = allQuests.map((quest) => {
     const userStatus = progress.get(quest.id);
     return {
       ...quest,
@@ -181,6 +191,7 @@ export function QuestsClient() {
           viewMode === "trader-lanes" ? (
             <QuestTree
               quests={questsWithProgress}
+              allQuests={allQuestsWithProgress}
               traders={traders}
               selectedQuestId={selectedQuestId}
               playerLevel={filters.playerLevel}

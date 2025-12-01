@@ -622,6 +622,7 @@ export function layoutTraderLane(
   }
 
   // Create spacer chain: spacer-0 -> spacer-1 -> spacer-2 -> ...
+  // The spacer chain is anchored to root quests so Dagre aligns them properly
   if (maxSpacerDepth > 0) {
     for (let i = 0; i <= maxSpacerDepth; i++) {
       const spacerId = `__spacer_${group.traderId}_${i}`;
@@ -633,6 +634,21 @@ export function layoutTraderLane(
       if (i > 0) {
         const prevSpacerId = spacersByDepth.get(i - 1)!;
         g.setEdge(prevSpacerId, spacerId);
+      }
+    }
+
+    // Anchor spacer_0 to root quests so the spacer chain aligns with the quest tree
+    const spacer0 = spacersByDepth.get(0);
+    if (spacer0) {
+      for (const rootQuest of group.rootQuests) {
+        // Only connect if this root quest doesn't have cross-trader deps
+        // (otherwise it will be connected to a deeper spacer)
+        const hasCrossTraderDep = questsWithCrossTraderDeps.some(
+          (q) => q.id === rootQuest.id
+        );
+        if (!hasCrossTraderDep) {
+          g.setEdge(spacer0, rootQuest.id);
+        }
       }
     }
   }
@@ -930,16 +946,22 @@ export interface TraderLaneGraph {
 
 /**
  * Main function to build the trader lane graph
+ * @param quests - Filtered quests to display
+ * @param allQuests - All quests (unfiltered) for accurate global depth calculation
+ * @param traders - Trader data
+ * @param options - Build options
  */
 export function buildTraderLaneGraph(
   quests: QuestWithProgress[],
+  allQuests: QuestWithProgress[],
   traders: Trader[],
   options: BuildQuestGraphOptions
 ): TraderLaneGraph {
   const { maxColumns } = options;
 
-  // Step 1: Calculate global depths for all quests
-  const globalDepths = calculateGlobalDepths(quests);
+  // Step 1: Calculate global depths using ALL quests (not just filtered)
+  // This ensures cross-trader dependencies are correctly positioned even when filtered
+  const globalDepths = calculateGlobalDepths(allQuests);
 
   // Step 2: Split quests by trader
   const groups = splitQuestsByTrader(quests);

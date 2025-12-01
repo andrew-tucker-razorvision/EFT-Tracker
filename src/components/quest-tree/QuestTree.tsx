@@ -48,6 +48,7 @@ function useIsMobile() {
 
 interface QuestTreeProps {
   quests: QuestWithProgress[];
+  allQuests: QuestWithProgress[]; // All quests (unfiltered) for accurate depth calculation
   traders: Trader[];
   selectedQuestId?: string | null;
   playerLevel?: number | null;
@@ -58,6 +59,7 @@ interface QuestTreeProps {
 
 function QuestTreeInner({
   quests,
+  allQuests,
   traders,
   selectedQuestId,
   playerLevel,
@@ -72,10 +74,11 @@ function QuestTreeInner({
   const [focusedQuestId, setFocusedQuestId] = useState<string | null>(null);
 
   // Calculate focus chain when focused quest changes
+  // Use allQuests to include cross-trader dependencies in the chain
   const focusChain = useMemo(() => {
     if (!focusedQuestId) return undefined;
-    return getQuestChain(focusedQuestId, quests);
-  }, [focusedQuestId, quests]);
+    return getQuestChain(focusedQuestId, allQuests);
+  }, [focusedQuestId, allQuests]);
 
   // Handle focus on a quest
   const handleFocus = useCallback((questId: string) => {
@@ -96,7 +99,7 @@ function QuestTreeInner({
 
   // Build graph with layout
   const { initialNodes, initialEdges } = useMemo(() => {
-    const graph = buildTraderLaneGraph(quests, traders, {
+    const graph = buildTraderLaneGraph(quests, allQuests, traders, {
       onStatusChange,
       onClick: onQuestSelect,
       onFocus: handleFocus,
@@ -112,6 +115,7 @@ function QuestTreeInner({
     };
   }, [
     quests,
+    allQuests,
     traders,
     selectedQuestId,
     playerLevel,
