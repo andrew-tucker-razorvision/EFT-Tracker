@@ -26,7 +26,7 @@ describe("GuestBanner", () => {
       render(<GuestBanner />);
 
       expect(
-        screen.getByText("Sign up to save your progress!")
+        screen.getByText(/You're browsing as a guest/)
       ).toBeInTheDocument();
     });
 
@@ -43,7 +43,7 @@ describe("GuestBanner", () => {
       render(<GuestBanner />);
 
       expect(
-        screen.queryByText("Sign up to save your progress!")
+        screen.queryByText(/You're browsing as a guest/)
       ).not.toBeInTheDocument();
     });
 
@@ -57,7 +57,7 @@ describe("GuestBanner", () => {
       render(<GuestBanner />);
 
       expect(
-        screen.queryByText("Sign up to save your progress!")
+        screen.queryByText(/You're browsing as a guest/)
       ).not.toBeInTheDocument();
     });
   });
@@ -71,21 +71,12 @@ describe("GuestBanner", () => {
       });
     });
 
-    it("should render guest message on larger screens", () => {
+    it("should render guest message", () => {
       render(<GuestBanner />);
 
-      // This text is hidden on small screens but present in DOM
       expect(
-        screen.getByText(/You're browsing as a guest\./)
+        screen.getByText(/You're browsing as a guest\. Your progress won't be saved\./)
       ).toBeInTheDocument();
-    });
-
-    it("should render Sign Up button", () => {
-      render(<GuestBanner />);
-
-      const signUpButton = screen.getByRole("link", { name: "Sign Up" });
-      expect(signUpButton).toBeInTheDocument();
-      expect(signUpButton).toHaveAttribute("href", "/register");
     });
 
     it("should render dismiss button", () => {
@@ -111,7 +102,7 @@ describe("GuestBanner", () => {
 
       // Banner should be visible initially
       expect(
-        screen.getByText("Sign up to save your progress!")
+        screen.getByText(/You're browsing as a guest/)
       ).toBeInTheDocument();
 
       // Click dismiss button
@@ -120,7 +111,7 @@ describe("GuestBanner", () => {
 
       // Banner should be hidden
       expect(
-        screen.queryByText("Sign up to save your progress!")
+        screen.queryByText(/You're browsing as a guest/)
       ).not.toBeInTheDocument();
     });
   });
