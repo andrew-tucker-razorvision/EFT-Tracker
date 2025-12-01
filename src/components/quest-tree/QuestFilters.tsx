@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { useSession } from "next-auth/react";
 import { ViewToggle } from "@/components/quest-views";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,6 +58,13 @@ const STATUSES: { value: QuestStatus | "all"; label: string }[] = [
   { value: "available", label: "Available" },
   { value: "in_progress", label: "In Progress" },
   { value: "completed", label: "Completed" },
+];
+
+const COLUMNS_OPTIONS: { value: number | null; label: string }[] = [
+  { value: 3, label: "3 columns" },
+  { value: 5, label: "5 columns" },
+  { value: 10, label: "10 columns" },
+  { value: null, label: "All columns" },
 ];
 
 interface QuestFiltersProps {
@@ -251,6 +259,32 @@ const FilterControls = ({
       </Select>
     </div>
 
+    {/* Columns Limit Filter */}
+    <div className={isMobile ? "w-full" : "w-[130px]"}>
+      <Label className="text-xs text-muted-foreground">Columns</Label>
+      <Select
+        value={filters.questsPerTree?.toString() ?? "all"}
+        onValueChange={(value) => {
+          const numValue = value === "all" ? null : parseInt(value);
+          onFilterChange({ questsPerTree: numValue });
+        }}
+      >
+        <SelectTrigger className="h-9">
+          <SelectValue placeholder="5 columns" />
+        </SelectTrigger>
+        <SelectContent>
+          {COLUMNS_OPTIONS.map((option) => (
+            <SelectItem
+              key={option.value?.toString() ?? "all"}
+              value={option.value?.toString() ?? "all"}
+            >
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+
     {/* Apply Filters Button */}
     <Button
       variant="default"
@@ -290,8 +324,108 @@ export function QuestFilters({
   stats,
   totalQuests,
 }: QuestFiltersProps) {
+  const { data: session, status: sessionStatus } = useSession();
   const [searchValue, setSearchValue] = useState(filters.search);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const initialLevelLoaded = useRef(false);
+  const lastSavedLevel = useRef<number | null>(null);
+  const initialQuestsPerTreeLoaded = useRef(false);
+  const lastSavedQuestsPerTree = useRef<number | null>(5);
+
+  // Load user's saved preferences on mount (only for logged-in users)
+  useEffect(() => {
+    if (sessionStatus === "authenticated" && !initialLevelLoaded.current) {
+      initialLevelLoaded.current = true;
+      initialQuestsPerTreeLoaded.current = true;
+      fetch("/api/user")
+        .then((res) => res.json())
+        .then((data) => {
+          const updates: Partial<Filters> = {};
+          if (data.user?.playerLevel != null) {
+            lastSavedLevel.current = data.user.playerLevel;
+            updates.playerLevel = data.user.playerLevel;
+          }
+          if (data.user?.questsPerTree != null) {
+            lastSavedQuestsPerTree.current = data.user.questsPerTree;
+            updates.questsPerTree = data.user.questsPerTree;
+          }
+          if (Object.keys(updates).length > 0) {
+            onFilterChange(updates);
+          }
+        })
+        .catch((err) =>
+          console.error("Failed to fetch user preferences:", err)
+        );
+    }
+  }, [sessionStatus, onFilterChange]);
+
+  // Auto-save player level when it changes (debounced, only for logged-in users)
+  const savePlayerLevel = useCallback(
+    async (level: number | null) => {
+      if (!session?.user) return;
+      if (level === lastSavedLevel.current) return; // No change
+
+      try {
+        const res = await fetch("/api/user", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ playerLevel: level }),
+        });
+        if (res.ok) {
+          lastSavedLevel.current = level;
+        }
+      } catch (err) {
+        console.error("Failed to save player level:", err);
+      }
+    },
+    [session?.user]
+  );
+
+  // Debounce level saving (1 second delay)
+  useEffect(() => {
+    if (sessionStatus !== "authenticated") return;
+    if (!initialLevelLoaded.current) return; // Don't save during initial load
+
+    const timer = setTimeout(() => {
+      savePlayerLevel(filters.playerLevel);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [filters.playerLevel, sessionStatus, savePlayerLevel]);
+
+  // Auto-save questsPerTree when it changes (debounced, only for logged-in users)
+  const saveQuestsPerTree = useCallback(
+    async (count: number | null) => {
+      if (!session?.user) return;
+      if (count === lastSavedQuestsPerTree.current) return; // No change
+
+      try {
+        const res = await fetch("/api/user", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ questsPerTree: count }),
+        });
+        if (res.ok) {
+          lastSavedQuestsPerTree.current = count;
+        }
+      } catch (err) {
+        console.error("Failed to save quests per tree:", err);
+      }
+    },
+    [session?.user]
+  );
+
+  // Debounce questsPerTree saving (1 second delay)
+  useEffect(() => {
+    if (sessionStatus !== "authenticated") return;
+    if (!initialQuestsPerTreeLoaded.current) return; // Don't save during initial load
+
+    const timer = setTimeout(() => {
+      saveQuestsPerTree(filters.questsPerTree);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [filters.questsPerTree, sessionStatus, saveQuestsPerTree]);
 
   // Debounce search input (increased to 500ms) and auto-apply
   useEffect(() => {
@@ -316,6 +450,7 @@ export function QuestFilters({
       map: null,
       playerLevel: null,
       levelRange: null,
+      questsPerTree: 5, // Reset to default
     });
     // Immediately apply reset
     onApplyFilters();
@@ -329,6 +464,7 @@ export function QuestFilters({
     filters.map,
     filters.playerLevel,
     filters.levelRange,
+    filters.questsPerTree !== 5 ? filters.questsPerTree : null, // Count if not default
   ].filter(Boolean).length;
 
   return (

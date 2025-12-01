@@ -72,6 +72,7 @@ export interface QuestFilters {
   map: string | null;
   playerLevel: number | null;
   levelRange: LevelRange | null;
+  questsPerTree: number | null; // null = show all
 }
 
 // View mode for quest display

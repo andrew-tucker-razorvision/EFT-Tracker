@@ -43,6 +43,7 @@ describe("useQuests", () => {
         map: null,
         playerLevel: null,
         levelRange: null,
+        questsPerTree: 3,
       });
     });
   });

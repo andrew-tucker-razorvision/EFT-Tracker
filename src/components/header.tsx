@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { Menu, X, User } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -24,6 +25,19 @@ import {
 export function Header() {
   const { data: session, status } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleSignOut = useCallback(async () => {
+    try {
+      await signOut({ callbackUrl: "/" });
+    } catch (error) {
+      console.error("Sign out error:", error);
+      toast.error("Sign out failed", {
+        description: "Please try again or refresh the page.",
+      });
+      // Fallback: redirect to home page anyway
+      window.location.href = "/";
+    }
+  }, []);
 
   return (
     <header className="border-b bg-background">
@@ -47,16 +61,16 @@ export function Header() {
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-2">
                   <User className="h-4 w-4" />
-                  <span className="hidden lg:inline max-w-[150px] truncate">
+                  <span className="hidden lg:inline">
                     {session.user?.email}
                   </span>
                   <span className="lg:hidden">Account</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent align="end" className="min-w-[200px]">
                 <DropdownMenuLabel className="font-normal">
                   <p className="text-sm font-medium">Signed in as</p>
-                  <p className="text-xs text-muted-foreground truncate">
+                  <p className="text-xs text-muted-foreground break-all">
                     {session.user?.email}
                   </p>
                 </DropdownMenuLabel>
@@ -66,7 +80,7 @@ export function Header() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  onClick={() => signOut({ callbackUrl: "/" })}
+                  onClick={handleSignOut}
                   className="text-destructive focus:text-destructive"
                 >
                   Sign Out
@@ -113,7 +127,7 @@ export function Header() {
                   <>
                     <div className="px-2 py-3 bg-muted rounded-lg">
                       <p className="text-sm font-medium">Signed in as</p>
-                      <p className="text-xs text-muted-foreground truncate">
+                      <p className="text-xs text-muted-foreground break-all">
                         {session.user?.email}
                       </p>
                     </div>
@@ -129,7 +143,7 @@ export function Header() {
                       className="w-full justify-start text-destructive hover:text-destructive"
                       onClick={() => {
                         setMobileMenuOpen(false);
-                        signOut({ callbackUrl: "/" });
+                        handleSignOut();
                       }}
                     >
                       Sign Out

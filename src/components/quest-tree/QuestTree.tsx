@@ -5,6 +5,8 @@ import {
   ReactFlow,
   Controls,
   MiniMap,
+  Background,
+  BackgroundVariant,
   useNodesState,
   useEdgesState,
   useReactFlow,
@@ -49,6 +51,7 @@ interface QuestTreeProps {
   traders: Trader[];
   selectedQuestId?: string | null;
   playerLevel?: number | null;
+  maxColumns?: number | null; // Limit number of columns (depth) shown per trader
   onQuestSelect: (questId: string) => void;
   onStatusChange: (questId: string, status: QuestStatus) => void;
 }
@@ -58,6 +61,7 @@ function QuestTreeInner({
   traders,
   selectedQuestId,
   playerLevel,
+  maxColumns,
   onQuestSelect,
   onStatusChange,
 }: QuestTreeProps) {
@@ -100,6 +104,7 @@ function QuestTreeInner({
       focusedQuestId,
       focusChain,
       playerLevel,
+      maxColumns,
     });
     return {
       initialNodes: graph.nodes,
@@ -110,6 +115,7 @@ function QuestTreeInner({
     traders,
     selectedQuestId,
     playerLevel,
+    maxColumns,
     focusedQuestId,
     focusChain,
     onStatusChange,
@@ -269,6 +275,14 @@ function QuestTreeInner({
           showInteractive={false}
           className="!shadow-md"
           position={isMobile ? "bottom-left" : "bottom-left"}
+        />
+        {/* Solid dark background for contrast */}
+        <Background
+          variant={BackgroundVariant.Dots}
+          gap={100}
+          size={0}
+          color="transparent"
+          style={{ backgroundColor: "#1e1e20" }}
         />
         {/* Hide MiniMap on mobile for more screen space */}
         {!isMobile && (

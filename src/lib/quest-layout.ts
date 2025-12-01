@@ -27,10 +27,10 @@ const LAYOUT_CONFIG = {
 export const LANE_CONFIG = {
   TRADER_NODE_WIDTH: 60,
   TRADER_NODE_HEIGHT: 40,
-  BASE_LANE_HEIGHT: 45, // Minimum lane height
-  LANE_SPACING: 10, // Comfortable gap between lanes
-  TRADER_TO_QUEST_GAP: 15, // Comfortable gap after trader header
-  QUEST_VERTICAL_GAP: 2, // Minimal gap between quests
+  BASE_LANE_HEIGHT: 80, // Minimum lane height (increased for better spacing)
+  LANE_SPACING: 25, // Comfortable gap between lanes (increased)
+  TRADER_TO_QUEST_GAP: 20, // Comfortable gap after trader header
+  QUEST_VERTICAL_GAP: 15, // Gap between quests (increased from 2)
 };
 
 // Fixed trader order (optimized for common cross-dependencies)
@@ -75,6 +75,7 @@ interface BuildQuestGraphOptions {
   focusedQuestId?: string | null;
   focusChain?: Set<string>;
   playerLevel?: number | null;
+  maxColumns?: number | null; // Limit number of columns (depth) shown per trader - null = show all
 }
 
 export interface QuestGraph {
@@ -265,6 +266,82 @@ export function filterQuestsByTrader(
   traderId: string
 ): QuestWithProgress[] {
   return quests.filter((q) => q.traderId === traderId);
+}
+
+/**
+ * Calculate depth (column) for each quest within a trader's tree.
+ * Depth 0 = root quests (no same-trader prerequisites)
+ * Depth N = max depth of same-trader prerequisites + 1
+ */
+export function calculateTraderLocalDepths(
+  quests: QuestWithProgress[],
+  traderId: string
+): Map<string, number> {
+  const depths = new Map<string, number>();
+  const traderQuests = quests.filter(
+    (q) => q.traderId.toLowerCase() === traderId.toLowerCase()
+  );
+  const questMap = new Map(traderQuests.map((q) => [q.id, q]));
+
+  function getDepth(questId: string, visited: Set<string>): number {
+    if (visited.has(questId)) return 0;
+    visited.add(questId);
+
+    if (depths.has(questId)) return depths.get(questId)!;
+
+    const quest = questMap.get(questId);
+    if (!quest) return 0;
+
+    // Find same-trader prerequisites
+    const sameTraderPrereqs = (quest.dependsOn || []).filter((dep) => {
+      const prereq = questMap.get(dep.requiredQuest.id);
+      return prereq !== undefined;
+    });
+
+    if (sameTraderPrereqs.length === 0) {
+      depths.set(questId, 0);
+      return 0;
+    }
+
+    let maxPrereqDepth = 0;
+    for (const dep of sameTraderPrereqs) {
+      const prereqDepth = getDepth(dep.requiredQuest.id, new Set(visited));
+      maxPrereqDepth = Math.max(maxPrereqDepth, prereqDepth);
+    }
+
+    const depth = maxPrereqDepth + 1;
+    depths.set(questId, depth);
+    return depth;
+  }
+
+  for (const quest of traderQuests) {
+    getDepth(quest.id, new Set());
+  }
+
+  return depths;
+}
+
+/**
+ * Filter quests to only include those within the first N columns (depths).
+ * maxColumns: number of columns to show (1 = only root quests, 2 = roots + their direct dependents, etc.)
+ */
+export function filterQuestsByColumns(
+  quests: QuestWithProgress[],
+  traderId: string,
+  maxColumns: number | null
+): QuestWithProgress[] {
+  if (maxColumns === null) return quests;
+
+  const depths = calculateTraderLocalDepths(quests, traderId);
+  const traderQuests = quests.filter(
+    (q) => q.traderId.toLowerCase() === traderId.toLowerCase()
+  );
+
+  // Include quests with depth < maxColumns (0-indexed, so depth 0-4 for maxColumns=5)
+  return traderQuests.filter((q) => {
+    const depth = depths.get(q.id) ?? 0;
+    return depth < maxColumns;
+  });
 }
 
 // Get all unique maps from quest objectives
@@ -500,7 +577,7 @@ export function layoutTraderLane(
   const g = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
   g.setGraph({
     rankdir: "LR",
-    nodesep: 2, // Minimal vertical spacing
+    nodesep: LANE_CONFIG.QUEST_VERTICAL_GAP, // Vertical spacing between nodes
     ranksep: LAYOUT_CONFIG.ranksep,
     marginx: 0,
     marginy: 0,
@@ -859,11 +936,50 @@ export function buildTraderLaneGraph(
   traders: Trader[],
   options: BuildQuestGraphOptions
 ): TraderLaneGraph {
+  const { maxColumns } = options;
+
   // Step 1: Calculate global depths for all quests
   const globalDepths = calculateGlobalDepths(quests);
 
   // Step 2: Split quests by trader
   const groups = splitQuestsByTrader(quests);
+
+  // Step 2.5: Apply column-based filtering if maxColumns is set
+  if (maxColumns !== null && maxColumns !== undefined) {
+    for (const [traderId, group] of groups) {
+      const filteredQuests = filterQuestsByColumns(
+        quests,
+        traderId,
+        maxColumns
+      );
+
+      // Update group with filtered quests
+      group.quests = filteredQuests;
+
+      // Recalculate root quests and dependencies for filtered set
+      const filteredIds = new Set(filteredQuests.map((q) => q.id));
+
+      // Filter intra-trader deps to only include edges where both quests are visible
+      group.intraTraderDeps = group.intraTraderDeps.filter(
+        (dep) => filteredIds.has(dep.sourceId) && filteredIds.has(dep.targetId)
+      );
+
+      // Recalculate root quests (no intra-trader deps pointing to them)
+      const hasIncomingDep = new Set(
+        group.intraTraderDeps.map((d) => d.targetId)
+      );
+      group.rootQuests = filteredQuests.filter(
+        (q) => !hasIncomingDep.has(q.id)
+      );
+
+      // Filter cross-trader deps to only include visible quests
+      group.crossTraderDeps = group.crossTraderDeps.filter(
+        (dep) =>
+          filteredIds.has(dep.sourceQuestId) ||
+          filteredIds.has(dep.targetQuestId)
+      );
+    }
+  }
 
   // Step 3: Compute trader order
   const traderOrder = computeTraderOrder(groups);
@@ -877,7 +993,7 @@ export function buildTraderLaneGraph(
     }
   }
 
-  // Step 4: Stack lanes vertically
+  // Step 5: Stack lanes vertically
   const stackedLayout = stackTraderLanes(laneLayouts, traderOrder, groups);
 
   // Note: Cross-trader edges removed - they create confusing long paths.

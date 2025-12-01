@@ -28,6 +28,7 @@ const defaultFilters: QuestFilters = {
   map: null,
   playerLevel: null,
   levelRange: null,
+  questsPerTree: 3, // Default to showing 3 columns (depth levels) per trader
 };
 
 export function useQuests(): UseQuestsReturn {

@@ -12,6 +12,7 @@ model User {
   password      String
   name          String?
   playerLevel   Int?
+  questsPerTree Int?            @default(5)  // null = show all
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   questProgress QuestProgress[]
