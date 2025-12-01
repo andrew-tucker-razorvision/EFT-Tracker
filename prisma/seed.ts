@@ -214,7 +214,9 @@ async function main() {
   // Summary
   const traderCount = await prisma.trader.count();
   const questCount = await prisma.quest.count();
-  const kappaCount = await prisma.quest.count({ where: { kappaRequired: true } });
+  const kappaCount = await prisma.quest.count({
+    where: { kappaRequired: true },
+  });
   const objectiveCount = await prisma.objective.count();
   const dependencyCount = await prisma.questDependency.count();
 

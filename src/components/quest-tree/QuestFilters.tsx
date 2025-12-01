@@ -353,28 +353,33 @@ export function QuestFilters({
             onFilterChange(updates);
           }
         })
-        .catch((err) => console.error("Failed to fetch user preferences:", err));
+        .catch((err) =>
+          console.error("Failed to fetch user preferences:", err)
+        );
     }
   }, [sessionStatus, onFilterChange]);
 
   // Auto-save player level when it changes (debounced, only for logged-in users)
-  const savePlayerLevel = useCallback(async (level: number | null) => {
-    if (!session?.user) return;
-    if (level === lastSavedLevel.current) return; // No change
+  const savePlayerLevel = useCallback(
+    async (level: number | null) => {
+      if (!session?.user) return;
+      if (level === lastSavedLevel.current) return; // No change
 
-    try {
-      const res = await fetch("/api/user", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ playerLevel: level }),
-      });
-      if (res.ok) {
-        lastSavedLevel.current = level;
+      try {
+        const res = await fetch("/api/user", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ playerLevel: level }),
+        });
+        if (res.ok) {
+          lastSavedLevel.current = level;
+        }
+      } catch (err) {
+        console.error("Failed to save player level:", err);
       }
-    } catch (err) {
-      console.error("Failed to save player level:", err);
-    }
-  }, [session?.user]);
+    },
+    [session?.user]
+  );
 
   // Debounce level saving (1 second delay)
   useEffect(() => {
@@ -389,23 +394,26 @@ export function QuestFilters({
   }, [filters.playerLevel, sessionStatus, savePlayerLevel]);
 
   // Auto-save questsPerTree when it changes (debounced, only for logged-in users)
-  const saveQuestsPerTree = useCallback(async (count: number | null) => {
-    if (!session?.user) return;
-    if (count === lastSavedQuestsPerTree.current) return; // No change
+  const saveQuestsPerTree = useCallback(
+    async (count: number | null) => {
+      if (!session?.user) return;
+      if (count === lastSavedQuestsPerTree.current) return; // No change
 
-    try {
-      const res = await fetch("/api/user", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ questsPerTree: count }),
-      });
-      if (res.ok) {
-        lastSavedQuestsPerTree.current = count;
+      try {
+        const res = await fetch("/api/user", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ questsPerTree: count }),
+        });
+        if (res.ok) {
+          lastSavedQuestsPerTree.current = count;
+        }
+      } catch (err) {
+        console.error("Failed to save quests per tree:", err);
       }
-    } catch (err) {
-      console.error("Failed to save quests per tree:", err);
-    }
-  }, [session?.user]);
+    },
+    [session?.user]
+  );
 
   // Debounce questsPerTree saving (1 second delay)
   useEffect(() => {

@@ -21,6 +21,7 @@ npm run dev
 **IMPORTANT:** Always use port 3000 for the dev server. Never use alternative ports (3001, 3002, etc.) as this can cause confusion and authentication issues with NextAuth callbacks.
 
 If port 3000 is in use:
+
 1. Find the process: `netstat -ano | findstr :3000`
 2. Kill it: `cmd /c "taskkill /F /PID <PID>"`
 3. Then start the server on port 3000
@@ -39,6 +40,21 @@ npx prisma db push
 - Prisma ORM with PostgreSQL (Neon)
 - NextAuth for authentication
 - Tailwind CSS for styling
+
+### Branch Naming Convention
+
+**IMPORTANT:** Use full prefixes, not abbreviated ones. CI enforces these exact prefixes:
+
+- `feature/` (new features) - NOT `feat/`
+- `fix/` (bug fixes)
+- `bugfix/` (bug fixes - alternative)
+- `hotfix/` (critical production fixes)
+- `docs/` (documentation only)
+- `refactor/` (code refactoring)
+- `test/` (test additions)
+- `chore/` (maintenance tasks)
+
+Example: `feature/add-user-dashboard`
 
 ### Pull Request Workflow
 

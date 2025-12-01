@@ -256,7 +256,6 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
         >
           Lv.{quest.levelRequired}
         </div>
-
       </div>
       <Handle
         type="source"
