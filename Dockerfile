@@ -6,6 +6,7 @@ FROM node:20-alpine AS deps
 WORKDIR /app
 
 # Install dependencies for native modules
+# hadolint ignore=DL3018
 RUN apk add --no-cache libc6-compat
 
 # Copy package files
@@ -38,6 +39,7 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 
 # Install dumb-init for proper signal handling
+# hadolint ignore=DL3018
 RUN apk add --no-cache dumb-init
 
 # Create non-root user
