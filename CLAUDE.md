@@ -137,3 +137,33 @@ curl -s "https://api.github.com/repos/andrew-tucker-razorvision/EFT-Tracker/comm
    - Link to the PR
    - If failed, which checks failed
 5. If checks pass and PR is ready, ask if user wants to merge
+
+## Code Quality Guidelines
+
+### TODO/FIXME Policy
+
+- Before committing, scan for TODO/FIXME comments
+- For each TODO: Create a GitHub issue and reference it (e.g., `TODO #123: description`)
+- FIXMEs must be resolved before merging - they indicate broken code
+- Use `it.skip()` for tests that need fixing, with a linked issue
+
+### PR Best Practices
+
+- Keep PRs under 500 lines when possible
+- Split large features into logical chunks:
+  - Backend/API changes first
+  - Frontend components second
+  - Tests can be separate or included
+- One PR = one logical change
+- Always fill out the PR template sections
+
+### Pre-Commit Checklist
+
+Before creating a commit or PR:
+
+1. Run `npm test` - all tests pass
+2. Run `npm run lint` - no lint errors
+3. Scan for new TODO/FIXME comments - create issues if needed
+4. Check PR size - consider splitting if >500 lines
+5. Write meaningful commit message with context
+6. Include test coverage for new functionality
