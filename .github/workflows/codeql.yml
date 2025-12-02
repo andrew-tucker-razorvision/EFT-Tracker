@@ -1,13 +1,16 @@
 name: CodeQL Security Scan
 
+# DISABLED on push/PR during active development to reduce CI costs
+# Re-enable before production deployment
 on:
-  push:
-    branches: [main, master, develop]
-  pull_request:
-    branches: [main, master, develop]
+  # push:
+  #   branches: [main, master, develop]
+  # pull_request:
+  #   branches: [main, master, develop]
   schedule:
-    # Run at 6:00 AM UTC every Monday
+    # Run at 6:00 AM UTC every Monday (keeps weekly security scans)
     - cron: "0 6 * * 1"
+  workflow_dispatch: # Allow manual runs when needed
 
 jobs:
   analyze:

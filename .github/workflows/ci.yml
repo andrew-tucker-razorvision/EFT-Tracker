@@ -158,11 +158,14 @@ jobs:
           retention-days: 7
 
   # Job 5: E2E Tests (Playwright)
+  # DISABLED: Re-enable before production deployment
+  # To run locally: npx playwright test
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: build
+    if: false # Disabled during active development to reduce CI costs
 
     steps:
       - name: Checkout code
@@ -222,7 +225,7 @@ jobs:
   ci-success:
     name: CI Success
     runs-on: ubuntu-latest
-    needs: [lint, test, security, build, e2e]
+    needs: [lint, test, security, build] # e2e removed - disabled during development
     if: always()
 
     steps:
