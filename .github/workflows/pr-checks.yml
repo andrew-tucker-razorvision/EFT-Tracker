@@ -56,9 +56,9 @@ jobs:
       - name: Check changed lines
         id: check-size
         run: |
-          # Get number of changed lines
-          ADDITIONS=$(git diff --shortstat origin/${{ github.base_ref }}...HEAD | grep -oP '\d+(?= insertion)')
-          DELETIONS=$(git diff --shortstat origin/${{ github.base_ref }}...HEAD | grep -oP '\d+(?= deletion)')
+          # Get number of changed lines (handle both singular and plural forms)
+          ADDITIONS=$(git diff --shortstat origin/${{ github.base_ref }}...HEAD | grep -oP '\d+(?= insertions?\b)' || echo "0")
+          DELETIONS=$(git diff --shortstat origin/${{ github.base_ref }}...HEAD | grep -oP '\d+(?= deletions?\b)' || echo "0")
 
           ADDITIONS=${ADDITIONS:-0}
           DELETIONS=${DELETIONS:-0}
