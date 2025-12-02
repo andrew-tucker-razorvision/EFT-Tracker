@@ -8,6 +8,7 @@ import type {
   Trader,
   TraderNode,
   TraderQuestGroup,
+  RequirementStatusType,
 } from "@/types";
 import {
   QUEST_NODE_WIDTH,
@@ -210,6 +211,14 @@ export function buildQuestGraph(
           focusChain?.has(quest.id) && focusChain?.has(dep.requiredQuest.id);
         const shouldDimEdge = hasFocusMode && !isEdgeInFocusChain;
 
+        // Get requirement status (default to ["complete"] for backwards compatibility)
+        const requirementStatus = (dep.requirementStatus || [
+          "complete",
+        ]) as RequirementStatusType[];
+        const isActiveOnly =
+          requirementStatus.includes("active") &&
+          !requirementStatus.includes("complete");
+
         edges.push({
           id: `${dep.requiredQuest.id}-${quest.id}`,
           source: dep.requiredQuest.id,
@@ -227,6 +236,7 @@ export function buildQuestGraph(
                     ? "#6B7280"
                     : "#9CA3AF",
             strokeWidth: isEdgeInFocusChain ? 3 : quest.kappaRequired ? 3 : 2,
+            strokeDasharray: isActiveOnly ? "5,5" : undefined, // Dashed line for "active only" requirements
             opacity: shouldDimEdge
               ? 0.2
               : quest.computedStatus === "locked"
@@ -236,6 +246,7 @@ export function buildQuestGraph(
           data: {
             sourceStatus: requiredQuest.computedStatus,
             targetStatus: quest.computedStatus,
+            requirementStatus,
           },
         });
       }
@@ -727,6 +738,17 @@ export function layoutTraderLane(
         focusChain?.has(targetQuest.id) && focusChain?.has(dep.sourceId);
       const shouldDimEdge = hasFocusMode && !isEdgeInFocusChain;
 
+      // Find the dependency to get requirementStatus
+      const dependency = targetQuest.dependsOn?.find(
+        (d) => d.requiredQuest.id === dep.sourceId
+      );
+      const requirementStatus = (dependency?.requirementStatus || [
+        "complete",
+      ]) as RequirementStatusType[];
+      const isActiveOnly =
+        requirementStatus.includes("active") &&
+        !requirementStatus.includes("complete");
+
       edges.push({
         id: `${dep.sourceId}-${dep.targetId}`,
         source: dep.sourceId,
@@ -748,6 +770,7 @@ export function layoutTraderLane(
             : targetQuest.kappaRequired
               ? 3
               : 2,
+          strokeDasharray: isActiveOnly ? "5,5" : undefined, // Dashed line for "active only" requirements
           opacity: shouldDimEdge
             ? 0.2
             : targetQuest.computedStatus === "locked"
@@ -757,6 +780,7 @@ export function layoutTraderLane(
         data: {
           sourceStatus: sourceQuest.computedStatus,
           targetStatus: targetQuest.computedStatus,
+          requirementStatus,
         },
       });
     }

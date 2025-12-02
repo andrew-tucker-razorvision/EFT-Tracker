@@ -43,7 +43,9 @@ export const mockQuests: Quest[] = [
         "quest_checking"
       ),
     ],
-    dependsOn: [{ requiredQuest: {} as Quest }], // Will be filled in later
+    dependsOn: [
+      { requiredQuest: {} as Quest, requirementStatus: ["complete"] },
+    ], // Will be filled in later
     dependedOnBy: [],
   },
   {
@@ -112,8 +114,12 @@ export const mockQuests: Quest[] = [
 ];
 
 // Fix dependencies after creation
-mockQuests[1].dependsOn = [{ requiredQuest: mockQuests[0] }];
-mockQuests[0].dependedOnBy = [{ dependentQuest: mockQuests[1] }];
+mockQuests[1].dependsOn = [
+  { requiredQuest: mockQuests[0], requirementStatus: ["complete"] },
+];
+mockQuests[0].dependedOnBy = [
+  { dependentQuest: mockQuests[1], requirementStatus: ["complete"] },
+];
 
 // Create quests with different statuses for testing
 export function createQuestWithProgress(

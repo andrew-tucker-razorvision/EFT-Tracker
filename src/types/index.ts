@@ -18,13 +18,21 @@ export interface Objective {
   questId: string;
 }
 
+// Requirement status types from tarkov.dev API
+export type RequirementStatusType =
+  | "complete" // Must complete the quest
+  | "active" // Must have quest active (in progress)
+  | "failed"; // Must have failed the quest
+
 // Quest dependency shape from API
 export interface QuestDependency {
   requiredQuest: Quest;
+  requirementStatus: RequirementStatusType[]; // e.g., ["complete"], ["active", "complete"]
 }
 
 export interface QuestDependent {
   dependentQuest: Quest;
+  requirementStatus: RequirementStatusType[];
 }
 
 // Quest from database
@@ -102,6 +110,7 @@ export type QuestNode = Node<QuestNodeData, "quest">;
 export interface QuestEdgeData extends Record<string, unknown> {
   sourceStatus: QuestStatus;
   targetStatus: QuestStatus;
+  requirementStatus: RequirementStatusType[]; // What status is required for the dependency
 }
 
 // React Flow quest edge type

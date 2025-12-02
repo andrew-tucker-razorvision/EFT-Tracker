@@ -43,11 +43,13 @@ model Quest {
 }
 
 model QuestDependency {
-  id             String @id @default(cuid())
-  dependentId    String
-  requiredId     String
-  dependentQuest Quest  @relation("DependentQuest", fields: [dependentId], references: [id], onDelete: Cascade)
-  requiredQuest  Quest  @relation("RequiredQuest", fields: [requiredId], references: [id], onDelete: Cascade)
+  id                String   @id @default(cuid())
+  dependentId       String
+  requiredId        String
+  // Status types from tarkov.dev: ["complete"], ["active", "complete"], ["active"], ["complete", "failed"], ["failed"]
+  requirementStatus String[] @default(["complete"])
+  dependentQuest    Quest    @relation("DependentQuest", fields: [dependentId], references: [id], onDelete: Cascade)
+  requiredQuest     Quest    @relation("RequiredQuest", fields: [requiredId], references: [id], onDelete: Cascade)
 
   @@unique([dependentId, requiredId])
 }

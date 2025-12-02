@@ -19,79 +19,145 @@ const TRADER_COLORS: Record<string, string> = {
   jaeger: "#8b4513", // Saddle brown
   fence: "#696969", // Dim gray
   lightkeeper: "#ffd700", // Gold
+  "btr-driver": "#556b2f", // Dark olive green
+  ref: "#2f4f4f", // Dark slate gray
+  "radio-station": "#483d8b", // Dark slate blue
+  taran: "#8b0000", // Dark red
+  "mr-kerman": "#4682b4", // Steel blue
+  voevoda: "#800080", // Purple
 };
 
-// Map ID to name mapping
-const MAP_NAMES: Record<number, string> = {
-  0: "Factory",
-  1: "Customs",
-  2: "Woods",
-  3: "Shoreline",
-  4: "Interchange",
-  5: "Reserve",
-  6: "Labs",
-  7: "Lighthouse",
-  8: "Streets of Tarkov",
-  9: "Ground Zero",
-};
-
-// Quest title corrections (fix upstream data inconsistencies)
-const TITLE_CORRECTIONS: Record<string, string> = {
-  "No offence": "No Offense",
-  // Future corrections can be added here
-};
-
-interface TarkovTrader {
-  locale: { en: string };
-  wiki: string;
+// tarkov.dev GraphQL API types
+interface TarkovDevTrader {
+  id: string;
+  name: string;
+  normalizedName: string;
+  imageLink: string | null;
 }
 
-interface TarkovObjective {
+interface TarkovDevMap {
+  id: string;
+  name: string;
+  normalizedName: string;
+}
+
+interface TarkovDevTaskRequirement {
+  task: {
+    id: string;
+    name: string;
+    normalizedName: string;
+  };
+  status: string[];
+}
+
+interface TarkovDevObjective {
+  id: string;
   type: string;
-  id?: number;
-  location?: number;
-  hint?: string;
-  target?: string;
-  number?: number;
+  description: string;
+  optional: boolean;
+  maps: TarkovDevMap[];
 }
 
-interface TarkovQuest {
-  id: number;
-  require: {
-    level: number;
-    quests: number[];
+interface TarkovDevTask {
+  id: string;
+  tarkovDataId: number | null;
+  name: string;
+  normalizedName: string;
+  trader: TarkovDevTrader;
+  map: TarkovDevMap | null;
+  experience: number;
+  wikiLink: string | null;
+  minPlayerLevel: number | null;
+  kappaRequired: boolean | null;
+  lightkeeperRequired: boolean | null;
+  factionName: string | null;
+  taskRequirements: TarkovDevTaskRequirement[];
+  objectives: TarkovDevObjective[];
+}
+
+interface TarkovDevResponse {
+  data: {
+    tasks: TarkovDevTask[];
+    traders: TarkovDevTrader[];
   };
-  giver: number;
-  turnin: number;
-  title: string;
-  locales: {
-    en: string;
-  };
-  wiki: string;
-  objectives: TarkovObjective[];
-  reputation?: Array<{ trader: number; rep: number }>;
-  nokappa?: boolean; // If true, quest is NOT required for Kappa
+}
+
+const TARKOV_DEV_QUERY = `
+{
+  tasks(limit: 600) {
+    id
+    tarkovDataId
+    name
+    normalizedName
+    trader {
+      id
+      name
+      normalizedName
+      imageLink
+    }
+    map {
+      id
+      name
+      normalizedName
+    }
+    experience
+    wikiLink
+    minPlayerLevel
+    kappaRequired
+    lightkeeperRequired
+    factionName
+    taskRequirements {
+      task {
+        id
+        name
+        normalizedName
+      }
+      status
+    }
+    objectives {
+      id
+      type
+      description
+      optional
+      maps {
+        id
+        name
+        normalizedName
+      }
+    }
+  }
+  traders {
+    id
+    name
+    normalizedName
+    imageLink
+  }
+}
+`;
+
+async function fetchTarkovDevData(): Promise<TarkovDevResponse> {
+  const response = await fetch("https://api.tarkov.dev/graphql", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ query: TARKOV_DEV_QUERY }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch from tarkov.dev: ${response.statusText}`);
+  }
+
+  return response.json();
 }
 
 async function main() {
-  console.log("Fetching data from TarkovTracker...");
+  console.log("Fetching data from tarkov.dev GraphQL API...");
 
-  // Fetch traders (object keyed by trader id)
-  const tradersRes = await fetch(
-    "https://raw.githubusercontent.com/TarkovTracker/tarkovdata/master/traders.json"
-  );
-  const tradersObj: Record<string, TarkovTrader> = await tradersRes.json();
+  const { data } = await fetchTarkovDevData();
+  const { tasks, traders } = data;
 
-  // Fetch quests (array)
-  const questsRes = await fetch(
-    "https://raw.githubusercontent.com/TarkovTracker/tarkovdata/master/quests.json"
-  );
-  const questsData: TarkovQuest[] = await questsRes.json();
-
-  const traderKeys = Object.keys(tradersObj);
-  console.log(
-    `Found ${traderKeys.length} traders and ${questsData.length} quests`
-  );
+  console.log(`Found ${traders.length} traders and ${tasks.length} tasks`);
 
   // Clear existing data
   console.log("Clearing existing data...");
@@ -103,24 +169,17 @@ async function main() {
 
   // Create traders
   console.log("Creating traders...");
-  // Map from trader key (prapor, therapist, etc.) to index for quest giver lookup
-  const traderKeyToIndex: Record<string, number> = {};
-  const traderIndexToKey: Record<number, string> = {};
+  const traderIdMap = new Map<string, string>();
 
-  // Build trader mapping - the giver field in quests uses numeric indices
-  traderKeys.forEach((key, idx) => {
-    traderKeyToIndex[key] = idx;
-    traderIndexToKey[idx] = key;
-  });
-
-  for (const traderKey of traderKeys) {
-    const trader = tradersObj[traderKey];
-    const traderId = traderKey.toLowerCase().replace(/\s+/g, "");
+  for (const trader of traders) {
+    // Use normalizedName as our internal ID for consistency
+    const traderId = trader.normalizedName;
+    traderIdMap.set(trader.id, traderId);
 
     await prisma.trader.create({
       data: {
         id: traderId,
-        name: trader.locale?.en || traderKey,
+        name: trader.name,
         color: TRADER_COLORS[traderId] || "#666666",
       },
     });
@@ -128,88 +187,97 @@ async function main() {
 
   // Create quests (first pass - without dependencies)
   console.log("Creating quests...");
-  const questIdMap = new Map<number, string>();
+  const questIdMap = new Map<string, string>();
+  let skippedTasks = 0;
 
-  for (const quest of questsData) {
-    const questId = `quest_${quest.id}`;
-    questIdMap.set(quest.id, questId);
+  for (const task of tasks) {
+    // Use the tarkov.dev ID directly
+    const questId = task.id;
+    questIdMap.set(task.id, questId);
 
-    const traderKey = traderIndexToKey[quest.giver];
-    const traderId = traderKey?.toLowerCase().replace(/\s+/g, "");
+    const traderId = traderIdMap.get(task.trader.id);
     if (!traderId) {
-      console.warn(`Unknown trader index ${quest.giver} for quest ${quest.id}`);
+      console.warn(
+        `Unknown trader ${task.trader.name} (${task.trader.id}) for task ${task.name}`
+      );
+      skippedTasks++;
       continue;
     }
 
-    // Extract maps from objectives
+    // Extract unique maps from objectives
     const objectiveMaps = new Set<string>();
-    for (const obj of quest.objectives || []) {
-      if (
-        obj.location !== undefined &&
-        obj.location >= 0 &&
-        MAP_NAMES[obj.location]
-      ) {
-        objectiveMaps.add(MAP_NAMES[obj.location]);
+    for (const obj of task.objectives || []) {
+      for (const map of obj.maps || []) {
+        objectiveMaps.add(map.name);
       }
     }
-
-    // Apply any title corrections
-    const originalTitle =
-      quest.locales?.en || quest.title || `Quest ${quest.id}`;
-    const correctedTitle = TITLE_CORRECTIONS[originalTitle] || originalTitle;
 
     await prisma.quest.create({
       data: {
         id: questId,
-        title: correctedTitle,
-        wikiLink: quest.wiki || null,
-        levelRequired: quest.require?.level || 1,
-        kappaRequired: !quest.nokappa, // nokappa=true means NOT required for Kappa
+        title: task.name,
+        wikiLink: task.wikiLink || null,
+        levelRequired: task.minPlayerLevel || 1,
+        kappaRequired: task.kappaRequired ?? false,
         traderId: traderId,
         objectives: {
-          create: (quest.objectives || []).map((obj) => {
-            // Convert description to string (some objectives have numeric values)
-            const desc =
-              obj.hint || obj.target || obj.type || "Complete objective";
-            return {
-              description: String(desc),
-              map:
-                obj.location !== undefined && obj.location >= 0
-                  ? MAP_NAMES[obj.location] || null
-                  : null,
-            };
-          }),
+          create: (task.objectives || []).map((obj) => ({
+            description: obj.description,
+            map: obj.maps?.[0]?.name || null,
+          })),
         },
       },
     });
   }
 
+  if (skippedTasks > 0) {
+    console.warn(`Skipped ${skippedTasks} tasks due to unknown traders`);
+  }
+
   // Create quest dependencies (second pass)
   console.log("Creating quest dependencies...");
-  let depCount = 0;
+  let skippedDeps = 0;
 
-  for (const quest of questsData) {
-    const questId = questIdMap.get(quest.id);
+  // Track status type distribution for logging
+  const statusCounts: Record<string, number> = {};
+
+  for (const task of tasks) {
+    const questId = questIdMap.get(task.id);
     if (!questId) continue;
 
-    for (const reqId of quest.require?.quests || []) {
-      const requiredQuestId = questIdMap.get(reqId);
+    for (const req of task.taskRequirements || []) {
+      const requiredQuestId = questIdMap.get(req.task.id);
       if (!requiredQuestId) {
-        console.warn(`Unknown required quest ${reqId} for quest ${quest.id}`);
+        console.warn(
+          `Unknown required task ${req.task.name} (${req.task.id}) for task ${task.name}`
+        );
+        skippedDeps++;
         continue;
       }
+
+      // Track status distribution
+      const statusKey = JSON.stringify(req.status.sort());
+      statusCounts[statusKey] = (statusCounts[statusKey] || 0) + 1;
 
       await prisma.questDependency.create({
         data: {
           dependentId: questId,
           requiredId: requiredQuestId,
+          requirementStatus: req.status,
         },
       });
-      depCount++;
     }
   }
 
-  console.log(`Created ${depCount} quest dependencies`);
+  if (skippedDeps > 0) {
+    console.warn(`Skipped ${skippedDeps} dependencies due to unknown tasks`);
+  }
+
+  // Log status type distribution
+  console.log("\nDependency status types:");
+  for (const [status, count] of Object.entries(statusCounts)) {
+    console.log(`  ${status}: ${count}`);
+  }
 
   // Summary
   const traderCount = await prisma.trader.count();

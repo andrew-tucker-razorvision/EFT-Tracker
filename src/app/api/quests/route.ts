@@ -39,6 +39,35 @@ type QuestDependency = Prisma.QuestDependencyGetPayload<{
   };
 }>;
 
+/**
+ * Check if a dependency requirement is satisfied based on the required status types
+ * and the actual progress status.
+ */
+function isDependencyMet(
+  requirementStatus: string[],
+  actualStatus: string | null
+): boolean {
+  if (!actualStatus) return false;
+
+  const normalizedActual = actualStatus.toUpperCase();
+
+  for (const reqStatus of requirementStatus) {
+    const normalizedReq = reqStatus.toLowerCase();
+
+    if (normalizedReq === "complete" && normalizedActual === "COMPLETED") {
+      return true;
+    }
+    if (
+      normalizedReq === "active" &&
+      (normalizedActual === "IN_PROGRESS" || normalizedActual === "COMPLETED")
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -120,18 +149,19 @@ export async function GET(request: Request) {
       if (progress) {
         computedStatus = progress.status.toLowerCase();
       } else {
-        // Check if all dependencies are completed
-        const hasIncompleteDeps = quest.dependsOn.some(
-          (dep: QuestDependency) => {
-            const depQuest = quests.find(
-              (q: QuestWithRelations) => q.id === dep.requiredQuest.id
-            );
-            const depProgress = depQuest?.progress?.[0];
-            return !depProgress || depProgress.status !== "COMPLETED";
-          }
-        );
+        // Check if all dependencies are met based on their requirement types
+        const hasUnmetDeps = quest.dependsOn.some((dep: QuestDependency) => {
+          const depQuest = quests.find(
+            (q: QuestWithRelations) => q.id === dep.requiredQuest.id
+          );
+          const depProgress = depQuest?.progress?.[0];
+          const actualStatus = depProgress?.status || null;
+          const requirementStatus = dep.requirementStatus || ["complete"];
 
-        if (quest.dependsOn.length > 0 && hasIncompleteDeps) {
+          return !isDependencyMet(requirementStatus, actualStatus);
+        });
+
+        if (quest.dependsOn.length > 0 && hasUnmetDeps) {
           computedStatus = "locked";
         }
       }

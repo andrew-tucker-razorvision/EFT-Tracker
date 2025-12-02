@@ -238,7 +238,9 @@ describe("quest-layout", () => {
       const childQuest: QuestWithProgress = {
         ...createQuestWithProgress(mockQuests[1], "locked"),
         progress: null, // No explicit progress
-        dependsOn: [{ requiredQuest: parentQuest }],
+        dependsOn: [
+          { requiredQuest: parentQuest, requirementStatus: ["complete"] },
+        ],
       };
 
       const questMap = new Map([
@@ -261,7 +263,9 @@ describe("quest-layout", () => {
       const childQuest: QuestWithProgress = {
         ...createQuestWithProgress(mockQuests[1], "locked"),
         progress: null, // No explicit progress
-        dependsOn: [{ requiredQuest: parentQuest }],
+        dependsOn: [
+          { requiredQuest: parentQuest, requirementStatus: ["complete"] },
+        ],
       };
 
       const questMap = new Map([

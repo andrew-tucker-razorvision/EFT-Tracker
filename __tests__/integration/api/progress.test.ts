@@ -25,6 +25,7 @@ vi.mock("@/lib/prisma", () => ({
     questDependency: {
       findMany: vi.fn(),
     },
+    $transaction: vi.fn((fn) => fn()),
   },
 }));
 
@@ -387,6 +388,8 @@ describe("/api/progress/[questId]", () => {
         questId: "quest-1",
         status: "IN_PROGRESS",
       } as never);
+      // Mock finding dependent quests for auto-unlock (now triggered for IN_PROGRESS too)
+      vi.mocked(prisma.questDependency.findMany).mockResolvedValue([]);
 
       const request = new Request(
         "http://localhost:3000/api/progress/quest-1",
@@ -495,14 +498,20 @@ describe("/api/progress/[questId]", () => {
         {
           requiredId: "quest-1",
           dependentId: "quest-2",
+          requirementStatus: ["complete"],
           dependentQuest: {
             id: "quest-2",
-            dependsOn: [{ requiredId: "quest-1" }],
+            dependsOn: [
+              { requiredId: "quest-1", requirementStatus: ["complete"] },
+            ],
           },
         },
       ] as never);
 
-      vi.mocked(prisma.questProgress.count).mockResolvedValue(1); // All deps completed
+      // Mock finding all progress for dependency check
+      vi.mocked(prisma.questProgress.findMany).mockResolvedValue([
+        { questId: "quest-1", status: "COMPLETED" },
+      ] as never);
 
       const request = new Request(
         "http://localhost:3000/api/progress/quest-1",
@@ -539,6 +548,8 @@ describe("/api/progress/[questId]", () => {
         questId: "quest-1",
         status: "IN_PROGRESS",
       } as never);
+      // Mock for auto-unlock check (now triggered for IN_PROGRESS)
+      vi.mocked(prisma.questDependency.findMany).mockResolvedValue([]);
 
       const request = new Request(
         "http://localhost:3000/api/progress/quest-1",
