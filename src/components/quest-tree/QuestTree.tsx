@@ -131,7 +131,7 @@ function QuestTreeInner({
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   // Update nodes when quests or selection changes
-  useMemo(() => {
+  useEffect(() => {
     setNodes(initialNodes);
     setEdges(initialEdges);
   }, [initialNodes, initialEdges, setNodes, setEdges]);
