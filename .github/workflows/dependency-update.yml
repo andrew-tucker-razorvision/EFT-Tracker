@@ -6,6 +6,10 @@ on:
     - cron: "0 9 * * 1"
   workflow_dispatch: # Allow manual trigger
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   update:
     name: Update Dependencies
@@ -67,10 +71,10 @@ jobs:
             - [ ] Test locally if needed
 
             ### Security
-            Run `npm audit` to check for vulnerabilities:
-            ```bash
+            Run \`npm audit\` to check for vulnerabilities:
+            \`\`\`bash
             npm audit
-            ```
+            \`\`\`
 
             ---
             🤖 Generated automatically by GitHub Actions
