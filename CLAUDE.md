@@ -118,6 +118,12 @@ curl -s "https://api.github.com/repos/andrew-tucker-razorvision/EFT-Tracker/comm
   - Tests can be separate or included
 - One PR = one logical change
 - Always fill out the PR template sections
+- **Issue linking:** Put each issue on its own line for auto-close to work:
+  ```
+  Closes #101
+  Closes #102
+  ```
+  NOT: `Closes #101, #102` (comma-separated won't auto-close)
 
 ### Pre-Commit Checklist
 

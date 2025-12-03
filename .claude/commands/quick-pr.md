@@ -20,6 +20,12 @@ Create a PR quickly with sensible defaults.
    - Push the branch: `git push -u origin <branch>`
    - Generate PR title from branch name (e.g., `feature/add-login` -> `feat: Add login`)
    - Create PR with `gh pr create`
+   - **Important:** When linking issues, put each on its own line:
+     ```
+     Closes #101
+     Closes #102
+     ```
+     NOT: `Closes #101, #102` (comma-separated won't auto-close)
 
 4. **Monitor CI:**
    - Get PR number and head SHA
