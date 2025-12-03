@@ -76,6 +76,25 @@ Dev Server: [running / stopped]
 Summary: [X items need attention / All clear!]
 ```
 
+## Automatic Actions
+
+### Kill dev server (if running)
+
+On Windows:
+
+```bash
+# Get PID from netstat output and kill it
+powershell -Command "Stop-Process -Id <PID> -Force"
+```
+
+On Unix/Mac:
+
+```bash
+lsof -ti:3000 | xargs kill -9
+```
+
+**Always kill the dev server automatically** - there's no reason to leave it running overnight.
+
 ## Actions to Offer
 
 Based on findings, offer relevant actions:
@@ -84,4 +103,3 @@ Based on findings, offer relevant actions:
 2. **If unpushed commits:** "Would you like to push now?"
 3. **If PR ready to merge:** "Would you like to merge PR #X?"
 4. **If on feature branch with no changes:** "Would you like to switch back to master?"
-5. **If dev server running:** "Would you like to stop the dev server?"
