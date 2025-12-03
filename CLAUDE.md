@@ -54,6 +54,8 @@ Use for E2E testing, visual verification, and debugging:
 
 **Note:** This project's E2E tests use the Playwright test runner (`npx playwright test`), which is separate from the MCP tools. The MCP tools are for ad-hoc browser automation during development.
 
+**Screenshot Cleanup:** When taking screenshots during development debugging (stored in `.playwright-mcp/`), remember to delete them when closing the related issue or PR. These are temporary files and should not accumulate in the working directory.
+
 ### Running E2E Tests
 
 ```bash
