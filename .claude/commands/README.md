@@ -61,6 +61,36 @@ Generate tests for existing code
 - Tests accessibility
 - Provides coverage metrics
 
+### Workflow Automation
+
+#### `/quick-pr`
+
+Create a PR quickly with sensible defaults
+
+- Verifies not on master/main
+- Runs lint and tests
+- Pushes branch and creates PR
+- Auto-generates title from branch name
+- Monitors CI status
+
+#### `/fix-lint`
+
+Quickly fix lint and formatting issues
+
+- Runs ESLint with --fix
+- Runs Prettier
+- Shows what changed
+- Offers to commit fixes
+
+#### `/newday`
+
+Daily startup check for pending work
+
+- Lists open PRs
+- Shows uncommitted changes
+- Shows unpushed commits
+- Syncs to latest master
+
 ### Code Improvement
 
 #### `/refactor`
@@ -230,6 +260,12 @@ Add your command to this README.
 
 - `/refactor` - Code improvement
 - `/optimize` - Performance tuning
+
+### 🔄 Workflow
+
+- `/quick-pr` - Fast PR creation
+- `/fix-lint` - Auto-fix lint issues
+- `/newday` - Daily startup check
 
 ## Examples
 
