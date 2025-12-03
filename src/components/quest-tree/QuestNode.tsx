@@ -99,12 +99,15 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
 
   return (
     <>
-      <Handle
-        type="target"
-        position={Position.Left}
-        className="!w-1.5 !h-1.5"
-        style={{ backgroundColor: STATUS_COLORS.locked.primary }}
-      />
+      {/* Only show left handle if quest has dependencies (not a root node) */}
+      {!isRoot && (
+        <Handle
+          type="target"
+          position={Position.Left}
+          className="!w-1.5 !h-1.5"
+          style={{ backgroundColor: STATUS_COLORS.locked.primary }}
+        />
+      )}
       <div
         onContextMenu={handleContextMenu}
         className={cn(
@@ -261,12 +264,15 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
           Lv.{quest.levelRequired}
         </div>
       </div>
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="!w-1.5 !h-1.5"
-        style={{ backgroundColor: STATUS_COLORS.locked.primary }}
-      />
+      {/* Only show right handle if quest has dependents (not a leaf node) */}
+      {!isLeaf && (
+        <Handle
+          type="source"
+          position={Position.Right}
+          className="!w-1.5 !h-1.5"
+          style={{ backgroundColor: STATUS_COLORS.locked.primary }}
+        />
+      )}
     </>
   );
 }
