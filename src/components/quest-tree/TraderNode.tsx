@@ -1,7 +1,7 @@
 "use client";
 
 import { memo } from "react";
-import { Handle, Position, type NodeProps } from "@xyflow/react";
+import type { NodeProps } from "@xyflow/react";
 import { cn } from "@/lib/utils";
 import type { TraderNode as TraderNodeType } from "@/types";
 import { LANE_CONFIG } from "@/lib/quest-layout";
@@ -45,12 +45,7 @@ function TraderNodeComponent({ data }: NodeProps<TraderNodeType>) {
           </span>
         </div>
       </div>
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="!w-1.5 !h-1.5"
-        style={{ backgroundColor: "#636363" }}
-      />
+      {/* No Handle needed - trader nodes don't connect via edges to quest nodes */}
     </>
   );
 }
