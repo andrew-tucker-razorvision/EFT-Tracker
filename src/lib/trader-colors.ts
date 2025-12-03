@@ -3,14 +3,14 @@ export interface TraderColor {
   bg: string;
 }
 
-// EFT Brand Colors
+// EFT Brand Colors - Tarkov Wiki inspired for maximum readability
 export const EFT_COLORS = {
-  goldOne: "#d9d7c5", // Brightened for better contrast (was #c7c5b3)
-  goldTwo: "#b39d70", // Slightly brightened (was #9a8866)
-  gunmetal: "#383945",
-  gunmetalDark: "#2d2d2f",
-  blackLight: "#1b1919",
-  border: "rgba(199, 197, 179, 0.3)", // Slightly more visible borders
+  goldOne: "#e8e6d4", // Bright cream/gold for maximum text readability
+  goldTwo: "#c4aa6a", // Brighter gold for accents
+  gunmetal: "#272727", // Darker, more neutral background
+  gunmetalDark: "#1a1a1a", // Near-black
+  blackLight: "#0f0f0f", // True dark
+  border: "rgba(196, 170, 106, 0.4)", // Gold-tinted borders for visibility
 } as const;
 
 // All traders use unified gold theme (differentiate by icons instead)
@@ -36,27 +36,27 @@ export function getTraderColor(traderId: string): TraderColor {
   );
 }
 
-// Status colors updated for dark EFT theme - high contrast solid backgrounds
+// Status colors - dark backgrounds with bright accent borders for readability
 export const STATUS_COLORS = {
   locked: {
-    primary: "#888888" /* lighter gray for better visibility */,
-    bg: "#1a1a1a" /* near-black for maximum contrast */,
-    border: "#444444",
+    primary: "#6b6b6b", // Medium gray
+    bg: "#1a1a1a", // Near-black
+    border: "#3a3a3a", // Subtle border
   },
   available: {
-    primary: "#00c8ff" /* brighter cyan-blue */,
-    bg: "#0a1a22" /* very dark blue-tinted black */,
-    border: "#00c8ff",
+    primary: "#4db8ff", // Bright sky blue
+    bg: "#1a1a1a", // Same dark background for consistency
+    border: "#4db8ff", // Bright blue border
   },
   in_progress: {
-    primary: "#ffaa00" /* brighter amber-orange */,
-    bg: "#1a1408" /* very dark amber-tinted black */,
-    border: "#ffaa00",
+    primary: "#ffcc00", // Bright yellow/gold
+    bg: "#1a1a1a", // Same dark background
+    border: "#ffcc00", // Bright yellow border
   },
   completed: {
-    primary: "#00cc00" /* brighter green */,
-    bg: "#0a1a0a" /* very dark green-tinted black */,
-    border: "#00cc00",
+    primary: "#4ade80", // Bright green
+    bg: "#1a1a1a", // Same dark background
+    border: "#2d5a3d", // Muted green border
   },
 } as const;
 

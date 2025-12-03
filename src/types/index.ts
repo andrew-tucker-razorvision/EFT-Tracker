@@ -74,12 +74,11 @@ export interface LevelRange {
 // Filter options for quest list/tree
 export interface QuestFilters {
   traderId: string | null;
-  status: QuestStatus | null;
+  statuses: QuestStatus[]; // Empty array = all statuses (multi-select)
   search: string;
   kappaOnly: boolean;
   map: string | null;
   playerLevel: number | null;
-  levelRange: LevelRange | null;
   questsPerTree: number | null; // null = show all
   bypassLevelRequirement: boolean; // Show all quests regardless of level
 }
