@@ -30,6 +30,7 @@ Start a fresh development session by checking project status and suggesting high
 ## Output Format
 
 Provide a concise summary:
+
 ```
 ## Project Status
 - Branch: master (up to date / X commits behind)
