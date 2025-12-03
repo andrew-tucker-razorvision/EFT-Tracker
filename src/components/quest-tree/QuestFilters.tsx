@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -585,6 +586,9 @@ export function QuestFilters({
             <SheetContent side="bottom" className="h-auto max-h-[80vh]">
               <SheetHeader>
                 <SheetTitle>Filter Quests</SheetTitle>
+                <SheetDescription className="sr-only">
+                  Filter quests by trader, status, map, and level
+                </SheetDescription>
               </SheetHeader>
               <div className="py-4">
                 <FilterControls
