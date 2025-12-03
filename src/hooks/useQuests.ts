@@ -19,6 +19,7 @@ interface UseQuestsReturn {
   applyFilters: () => void;
   hasPendingChanges: boolean;
   refetch: () => Promise<void>;
+  hiddenByLevelCount: number; // Number of quests hidden due to level filter
 }
 
 const defaultFilters: QuestFilters = {
@@ -43,6 +44,7 @@ export function useQuests(): UseQuestsReturn {
     useState<QuestFilters>(defaultFilters);
   const [appliedFilters, setAppliedFilters] =
     useState<QuestFilters>(defaultFilters);
+  const [hiddenByLevelCount, setHiddenByLevelCount] = useState(0);
 
   const fetchTraders = useCallback(async () => {
     try {
@@ -104,16 +106,20 @@ export function useQuests(): UseQuestsReturn {
       }
 
       // Hide quests more than 5 levels above player level (skip if bypassLevelRequirement is enabled)
+      let levelHiddenCount = 0;
       if (
         appliedFilters.playerLevel &&
         !appliedFilters.bypassLevelRequirement
       ) {
+        const beforeCount = filteredQuests.length;
         filteredQuests = filteredQuests.filter(
           (q: QuestWithProgress) =>
             q.levelRequired <= appliedFilters.playerLevel! + 5
         );
+        levelHiddenCount = beforeCount - filteredQuests.length;
       }
 
+      setHiddenByLevelCount(levelHiddenCount);
       setQuests(filteredQuests);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
@@ -127,8 +133,12 @@ export function useQuests(): UseQuestsReturn {
   }, []);
 
   const applyFilters = useCallback(() => {
-    setAppliedFilters(pendingFilters);
-  }, [pendingFilters]);
+    // Use functional update to read current pendingFilters, avoiding stale closure issues
+    setPendingFilters((current) => {
+      setAppliedFilters(current);
+      return current;
+    });
+  }, []);
 
   const hasPendingChanges = useMemo(() => {
     return JSON.stringify(pendingFilters) !== JSON.stringify(appliedFilters);
@@ -159,6 +169,7 @@ export function useQuests(): UseQuestsReturn {
     applyFilters,
     hasPendingChanges,
     refetch,
+    hiddenByLevelCount,
   };
 }
 

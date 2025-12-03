@@ -33,6 +33,7 @@ export function QuestsClient() {
     applyFilters,
     hasPendingChanges,
     refetch,
+    hiddenByLevelCount,
   } = useQuests();
   const {
     progress,
@@ -260,6 +261,7 @@ export function QuestsClient() {
           locked: stats.locked,
         }}
         totalQuests={stats.total}
+        hiddenByLevelCount={hiddenByLevelCount}
       />
       <div className="flex-1 min-h-0">
         {questsWithProgress.length > 0 ? (

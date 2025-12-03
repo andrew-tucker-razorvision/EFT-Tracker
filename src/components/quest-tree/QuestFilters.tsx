@@ -81,6 +81,7 @@ interface QuestFiltersProps {
     locked: number;
   };
   totalQuests: number;
+  hiddenByLevelCount: number;
 }
 
 interface FilterControlsProps {
@@ -345,6 +346,7 @@ export function QuestFilters({
   onViewModeChange,
   stats,
   totalQuests,
+  hiddenByLevelCount,
 }: QuestFiltersProps) {
   const { data: session, status: sessionStatus } = useSession();
   const [searchValue, setSearchValue] = useState(filters.search);
@@ -534,6 +536,27 @@ export function QuestFilters({
 
   return (
     <div className="p-3 md:p-4 bg-background border-b">
+      {/* Hidden quests banner */}
+      {hiddenByLevelCount > 0 && !filters.bypassLevelRequirement && (
+        <div className="mb-3 flex items-center justify-between gap-2 px-3 py-2 bg-muted/50 rounded-md text-sm">
+          <span className="text-muted-foreground">
+            {hiddenByLevelCount} quest{hiddenByLevelCount > 1 ? "s" : ""} hidden
+            (above level {(filters.playerLevel || 1) + 5})
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 text-xs"
+            onClick={() => {
+              onFilterChange({ bypassLevelRequirement: true });
+              // Delay apply to ensure state update is processed
+              setTimeout(() => onApplyFilters(), 0);
+            }}
+          >
+            Show All
+          </Button>
+        </div>
+      )}
       {/* MOBILE LAYOUT (vertical stacking) */}
       <div className="md:hidden flex flex-col gap-2 w-full">
         {/* Row 1: Search + Filter Button */}
