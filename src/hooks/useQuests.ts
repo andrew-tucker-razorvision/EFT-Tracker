@@ -30,7 +30,7 @@ const defaultFilters: QuestFilters = {
   kappaOnly: false,
   map: null,
   playerLevel: 1, // Default to level 1 for all users
-  questsPerTree: 3, // Default to showing 3 columns (depth levels) per trader
+  questsPerTree: 5, // Default to showing 5 columns (depth levels) per trader
   bypassLevelRequirement: false, // Show all quests regardless of level when true
 };
 

@@ -31,7 +31,7 @@ export const LANE_CONFIG = {
   BASE_LANE_HEIGHT: 80, // Minimum lane height (increased for better spacing)
   LANE_SPACING: 25, // Comfortable gap between lanes (increased)
   TRADER_TO_QUEST_GAP: 20, // Comfortable gap after trader header
-  QUEST_VERTICAL_GAP: 15, // Gap between quests (increased from 2)
+  QUEST_VERTICAL_GAP: 25, // Gap between quests
 };
 
 // Fixed trader order (optimized for common cross-dependencies)
@@ -50,19 +50,23 @@ const TRADER_ORDER = [
 /**
  * Calculate dynamic node height based on quest title length
  * Allows quest names to span multiple lines instead of truncating
+ *
+ * Current node specs: 155px width, p-2 padding (8px each side), 14px title font
  */
 export function calculateNodeHeight(title: string): number {
-  const baseHeight = 38;
+  // Base height for single-line title (matches QUEST_NODE_HEIGHT)
+  const baseHeight = QUEST_NODE_HEIGHT;
 
-  // Approximate characters per line at 10px font for 110px width node with 16px padding
-  const charsPerLine = 20;
+  // Approximate characters per line at 14px font for 155px width node with 16px total padding
+  // Content width ~139px, at ~9px per char average = ~15 chars per line
+  const charsPerLine = 15;
   const estimatedLines = Math.ceil(title.length / charsPerLine);
 
-  // Cap at 3 lines maximum
-  const lines = Math.min(estimatedLines, 3);
+  // Cap at 2 lines maximum (matches line-clamp-2 in QuestNode)
+  const lines = Math.min(estimatedLines, 2);
 
-  // 12px per additional line
-  return baseHeight + (lines - 1) * 12;
+  // 18px per additional line (14px font + line spacing)
+  return baseHeight + (lines - 1) * 18;
 }
 
 interface BuildQuestGraphOptions {

@@ -42,7 +42,7 @@ describe("useQuests", () => {
         kappaOnly: false,
         map: null,
         playerLevel: 1,
-        questsPerTree: 3,
+        questsPerTree: 5,
         bypassLevelRequirement: false,
       });
     });

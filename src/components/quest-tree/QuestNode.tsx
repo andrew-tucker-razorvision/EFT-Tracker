@@ -12,11 +12,11 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 
-// Responsive node sizes
-export const QUEST_NODE_WIDTH = 110;
-export const QUEST_NODE_HEIGHT = 38;
-export const QUEST_NODE_WIDTH_MOBILE = 100;
-export const QUEST_NODE_HEIGHT_MOBILE = 34;
+// Responsive node sizes - built around 14px title / 12px level fonts
+export const QUEST_NODE_WIDTH = 155;
+export const QUEST_NODE_HEIGHT = 58;
+export const QUEST_NODE_WIDTH_MOBILE = 130;
+export const QUEST_NODE_HEIGHT_MOBILE = 58;
 
 function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
   const {
@@ -111,7 +111,7 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
       <div
         onContextMenu={handleContextMenu}
         className={cn(
-          "relative cursor-pointer rounded border-2 p-1 transition-all duration-150",
+          "relative cursor-pointer rounded border-2 p-2 transition-all duration-150",
           "hover:shadow-md active:scale-95",
           selected && "ring-2 ring-offset-2 ring-blue-500",
           quest.computedStatus === "locked" && !isDimmed && "opacity-50",
@@ -143,7 +143,7 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
         )}
         style={{
           width: QUEST_NODE_WIDTH,
-          height: nodeHeight, // Use dynamic height instead of constant
+          minHeight: QUEST_NODE_HEIGHT, // Minimum height, but grow with content
           backgroundColor: isDimmed ? "#424242" : statusColor.bg,
           borderColor: isDimmed
             ? "#636363"
@@ -177,7 +177,7 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
                 style={{ color: STATUS_COLORS.locked.primary }}
                 aria-label={`Open ${quest.title} wiki page`}
               >
-                <ExternalLink className="w-3 h-3" />
+                <ExternalLink className="w-[18px] h-[18px]" />
               </a>
             </TooltipTrigger>
             <TooltipContent side="top" sideOffset={4}>
@@ -242,7 +242,7 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
 
         {/* Quest title */}
         <div
-          className="font-semibold text-[10px] leading-tight line-clamp-3"
+          className="font-semibold text-[14px] leading-tight line-clamp-2"
           style={{ color: EFT_COLORS.goldOne }}
           title={quest.title}
         >
@@ -251,7 +251,7 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
 
         {/* Level badge */}
         <div
-          className="text-[9px] mt-0.5"
+          className="text-[12px] mt-1"
           style={{
             color: isLevelAppropriate
               ? STATUS_COLORS.completed.primary

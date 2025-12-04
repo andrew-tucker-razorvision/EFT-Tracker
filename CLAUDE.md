@@ -56,6 +56,25 @@ Use for E2E testing, visual verification, and debugging:
 
 **Screenshot Cleanup:** When taking screenshots during development debugging (stored in `.playwright-mcp/`), remember to delete them when closing the related issue or PR. These are temporary files and should not accumulate in the working directory.
 
+### Visual Change Self-Evaluation
+
+**IMPORTANT:** After making any visual/UI changes, always self-evaluate before presenting to the user:
+
+1. Take a screenshot using `browser_take_screenshot`
+2. Critically assess the result - does it look good? Are there obvious issues?
+3. If issues are found, iterate and fix them before showing the user
+4. Only present the final result once you're satisfied it meets quality standards
+
+Examples of things to check:
+
+- Spacing and alignment - is it balanced and readable?
+- Font sizes - are they appropriate for the context?
+- Color contrast - is text readable against backgrounds?
+- Layout - does it work across different content lengths?
+- Overall polish - would this look professional to end users?
+
+Don't rely on the user to catch visual issues - proactively identify and fix them yourself.
+
 ### Running E2E Tests
 
 ```bash

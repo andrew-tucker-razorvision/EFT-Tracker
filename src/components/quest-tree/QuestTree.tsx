@@ -70,7 +70,7 @@ function QuestTreeInner({
   onStatusChange,
 }: QuestTreeProps) {
   const isMobile = useIsMobile();
-  const { fitView, setViewport } = useReactFlow();
+  const { fitView, setViewport, getViewport } = useReactFlow();
   const isInitializedRef = useRef(false);
 
   // Focus mode state
@@ -141,18 +141,22 @@ function QuestTreeInner({
     setEdges(initialEdges);
   }, [initialNodes, initialEdges, setNodes, setEdges]);
 
-  // Set initial viewport to left-align content when React Flow is ready
+  // Set initial viewport to center content with appropriate zoom when React Flow is ready
   const onInit = useCallback(() => {
     if (!isInitializedRef.current && nodes.length > 0) {
-      // Find the leftmost and topmost node positions
-      const minX = Math.min(...nodes.map((n) => n.position.x));
-      const minY = Math.min(...nodes.map((n) => n.position.y));
+      // First: fit all content to center it properly
+      fitView({ padding: 0.1, duration: 0 });
 
-      // Set viewport so content starts at left edge with small padding
-      setViewport({ x: -minX + 10, y: -minY + 10, zoom: 1 }, { duration: 0 });
+      // Then: zoom in by 50% after fitView completes
+      // Use setTimeout because fitView updates viewport asynchronously
+      setTimeout(() => {
+        const { x, y, zoom } = getViewport();
+        setViewport({ x, y, zoom: zoom * 1.5 }, { duration: 0 });
+      }, 50);
+
       isInitializedRef.current = true;
     }
-  }, [nodes, setViewport]);
+  }, [nodes, fitView, getViewport, setViewport]);
 
   // Calculate bounds to constrain panning - include ALL nodes (traders + quests)
   const translateExtent = useMemo(() => {

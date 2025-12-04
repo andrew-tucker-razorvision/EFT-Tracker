@@ -124,8 +124,8 @@ describe("QuestNode", () => {
     });
 
     it("should export node dimensions", () => {
-      expect(QUEST_NODE_WIDTH).toBe(110);
-      expect(QUEST_NODE_HEIGHT).toBe(38);
+      expect(QUEST_NODE_WIDTH).toBe(155);
+      expect(QUEST_NODE_HEIGHT).toBe(58);
     });
   });
 
