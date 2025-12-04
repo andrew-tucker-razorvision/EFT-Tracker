@@ -29,6 +29,7 @@ Start a fresh development session by checking project status and suggesting high
 ## Deferred Items
 
 The following items are intentionally deferred and should NOT be suggested:
+
 - **E2E tests (#104)** - Disabled to reduce CI costs during active development. Will re-enable before v1.0 release.
 
 ## Output Format

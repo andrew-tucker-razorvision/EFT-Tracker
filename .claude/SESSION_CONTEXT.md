@@ -85,17 +85,20 @@ To enable OneDrive sync, update `.mcp.json`:
 ```
 
 **Benefits:**
+
 - Automatic sync across all computers with OneDrive
 - No manual file copying required
 - Backup via OneDrive version history
 
 **Setup Steps:**
+
 1. Create the directory: `C:\Users\{username}\OneDrive\Documents\Claude\`
 2. Update `MEMORY_FILE_PATH` in `.mcp.json` with your username
 3. Restart Claude Code to pick up the new configuration
 4. Verify with `mcp__memory__read_graph()` - should show existing entities or empty graph
 
 **Troubleshooting:**
+
 - **File not syncing:** Check OneDrive sync status in system tray
 - **Permission errors:** Ensure the Claude directory exists and is writable
 - **Sync conflicts:** OneDrive handles conflicts automatically; check for `.conflict` files

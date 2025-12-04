@@ -134,13 +134,14 @@ This template includes sixteen MCP servers for enhanced development capabilities
 
 **Storage Options:**
 
-| Option | Location | Cross-Computer | Setup |
-|--------|----------|----------------|-------|
-| Workspace (default) | `.claude/memory.jsonl` | Manual copy | None required |
-| OneDrive Sync | `OneDrive/Documents/Claude/memory.jsonl` | Automatic | Configure path |
-| Other Cloud | Dropbox, Google Drive, etc. | Automatic | Configure path |
+| Option              | Location                                 | Cross-Computer | Setup          |
+| ------------------- | ---------------------------------------- | -------------- | -------------- |
+| Workspace (default) | `.claude/memory.jsonl`                   | Manual copy    | None required  |
+| OneDrive Sync       | `OneDrive/Documents/Claude/memory.jsonl` | Automatic      | Configure path |
+| Other Cloud         | Dropbox, Google Drive, etc.              | Automatic      | Configure path |
 
 **Default Configuration (Workspace Storage):**
+
 ```json
 "memory": {
   "transport": "stdio",
@@ -153,6 +154,7 @@ This template includes sixteen MCP servers for enhanced development capabilities
 ```
 
 **OneDrive Sync Configuration (Recommended):**
+
 ```json
 "memory": {
   "transport": "stdio",
@@ -165,24 +167,28 @@ This template includes sixteen MCP servers for enhanced development capabilities
 ```
 
 **Why Use OneDrive Sync?**
+
 - Memory persists across all computers automatically
 - OneDrive provides version history for recovery
 - No manual file copying between machines
 - Works with OneDrive personal or business accounts
 
 **Setup Instructions:**
+
 1. Create directory: `C:\Users\{username}\OneDrive\Documents\Claude\`
 2. Update `MEMORY_FILE_PATH` in `.mcp.json` (replace `{username}` with your Windows username)
 3. Restart Claude Code
 4. Test: Create an entity, restart, verify it persists
 
 **Troubleshooting:**
+
 - **Memory not persisting:** Check `MEMORY_FILE_PATH` is correctly configured
 - **OneDrive not syncing:** Verify OneDrive is running (check system tray icon)
 - **Permission denied:** Ensure the target directory exists before first use
 - **Sync conflicts:** OneDrive auto-resolves; check for `memory.jsonl.conflict` files
 
 **Alternative Cloud Providers:**
+
 - **Dropbox:** `C:\Users\{username}\Dropbox\Claude\memory.jsonl`
 - **Google Drive:** `G:\My Drive\Claude\memory.jsonl` (path varies)
 - **iCloud (macOS):** `~/Library/Mobile Documents/com~apple~CloudDocs/Claude/memory.jsonl`
