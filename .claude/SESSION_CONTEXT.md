@@ -57,12 +57,52 @@ The Memory MCP server persists knowledge across Claude Code sessions using a gra
 
 ### Storage Configuration
 
-**Storage Location:** `.claude/memory.jsonl` (in workspace)
+Memory can be stored locally in the workspace or synced via cloud storage for cross-computer access.
 
-- Configured via `MEMORY_FILE_PATH` environment variable in `.mcp.json`
-- Stored in workspace, gitignored to prevent accidental commits
-- Survives Claude Code restarts and devcontainer rebuilds
-- **Manual sync needed:** Copy/backup this file to sync across computers
+#### Option 1: Workspace Storage (Default)
+
+**Location:** `.claude/memory.jsonl`
+
+- Simple setup, no additional configuration
+- Gitignored to prevent accidental commits
+- Limited to single computer
+
+#### Option 2: OneDrive Sync (Recommended for Multi-Computer)
+
+**Location:** `C:\Users\{username}\OneDrive\Documents\Claude\memory.jsonl`
+
+To enable OneDrive sync, update `.mcp.json`:
+
+```json
+"memory": {
+  "transport": "stdio",
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-memory"],
+  "env": {
+    "MEMORY_FILE_PATH": "C:\\Users\\{username}\\OneDrive\\Documents\\Claude\\memory.jsonl"
+  }
+}
+```
+
+**Benefits:**
+
+- Automatic sync across all computers with OneDrive
+- No manual file copying required
+- Backup via OneDrive version history
+
+**Setup Steps:**
+
+1. Create the directory: `C:\Users\{username}\OneDrive\Documents\Claude\`
+2. Update `MEMORY_FILE_PATH` in `.mcp.json` with your username
+3. Restart Claude Code to pick up the new configuration
+4. Verify with `mcp__memory__read_graph()` - should show existing entities or empty graph
+
+**Troubleshooting:**
+
+- **File not syncing:** Check OneDrive sync status in system tray
+- **Permission errors:** Ensure the Claude directory exists and is writable
+- **Sync conflicts:** OneDrive handles conflicts automatically; check for `.conflict` files
+- **Verify persistence:** Create an entity, restart Claude Code, then read the graph
 
 ### Available Operations
 

@@ -23,9 +23,14 @@ Start a fresh development session by checking project status and suggesting high
    - Open issues labeled "bug" or "high priority"
    - Incomplete features that are partially implemented
    - Technical debt or code quality improvements
-   - Missing tests for critical paths
    - Performance optimizations
    - UX improvements based on the current UI state
+
+## Deferred Items
+
+The following items are intentionally deferred and should NOT be suggested:
+
+- **E2E tests (#104)** - Disabled to reduce CI costs during active development. Will re-enable before v1.0 release.
 
 ## Output Format
 

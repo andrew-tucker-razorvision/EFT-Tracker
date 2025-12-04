@@ -20,8 +20,8 @@ const LAYOUT_CONFIG = {
   rankdir: "LR" as const, // Left-to-right layout
   nodesep: 10, // Comfortable vertical spacing between nodes
   ranksep: 20, // Comfortable horizontal spacing between ranks
-  marginx: 20, // Padding from left edge
-  marginy: 20, // Padding from top edge
+  marginx: 5, // Minimal padding from left edge
+  marginy: 10, // Minimal padding from top edge
 };
 
 // Lane-based layout configuration

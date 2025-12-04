@@ -37,12 +37,11 @@ describe("useQuests", () => {
       const { result } = renderHook(() => useQuests());
       expect(result.current.filters).toEqual({
         traderId: null,
-        status: null,
+        statuses: [], // Empty array = all statuses
         search: "",
         kappaOnly: false,
         map: null,
         playerLevel: 1,
-        levelRange: null,
         questsPerTree: 3,
         bypassLevelRequirement: false,
       });
@@ -127,7 +126,7 @@ describe("useQuests", () => {
       const totalQuests = result.current.quests.length;
 
       act(() => {
-        result.current.setFilters({ status: "completed" });
+        result.current.setFilters({ statuses: ["completed"] });
         result.current.applyFilters(); // Must apply filters to trigger refetch
       });
 
