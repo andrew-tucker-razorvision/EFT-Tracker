@@ -44,50 +44,50 @@
 :root {
   --radius: 0.625rem;
 
-  /* EFT Dark Theme - Single theme using official EFT brand colors */
-  --background: #2d2d2f; /* gunmetal-dark */
-  --foreground: #c7c5b3; /* gold-one */
+  /* EFT Dark Theme - Tarkov Wiki inspired for maximum readability */
+  --background: #141414; /* True dark background */
+  --foreground: #e8e6d4; /* Bright cream/gold text */
 
-  --card: #383945; /* gunmetal */
-  --card-foreground: #c7c5b3; /* gold-one */
+  --card: #1a1a1a; /* Slightly lighter than background */
+  --card-foreground: #e8e6d4; /* Bright cream/gold */
 
-  --popover: #383945; /* gunmetal */
-  --popover-foreground: #c7c5b3; /* gold-one */
+  --popover: #1f1f1f; /* Dark popover */
+  --popover-foreground: #e8e6d4; /* Bright cream/gold */
 
-  --primary: #9a8866; /* gold-two */
-  --primary-foreground: #1b1919; /* black-light */
+  --primary: #c4aa6a; /* Brighter gold */
+  --primary-foreground: #0f0f0f; /* Near-black */
 
-  --secondary: #383945; /* gunmetal */
-  --secondary-foreground: #c7c5b3; /* gold-one */
+  --secondary: #252525; /* Subtle secondary */
+  --secondary-foreground: #e8e6d4; /* Bright cream/gold */
 
-  --muted: #424242; /* gray */
-  --muted-foreground: #636363; /* gray-light */
+  --muted: #2a2a2a; /* Muted background */
+  --muted-foreground: #9a9a9a; /* Medium gray for secondary text */
 
-  --accent: #9a8866; /* gold-two */
-  --accent-foreground: #1b1919; /* black-light */
+  --accent: #c4aa6a; /* Gold accent */
+  --accent-foreground: #0f0f0f; /* Near-black */
 
-  --destructive: #cd1e2f; /* red */
+  --destructive: #ef4444; /* Bright red */
 
-  --border: rgba(199, 197, 179, 0.2); /* gold-one at 20% */
-  --input: rgba(199, 197, 179, 0.15); /* gold-one at 15% */
-  --ring: #9a8866; /* gold-two */
+  --border: rgba(196, 170, 106, 0.25); /* Gold-tinted borders */
+  --input: rgba(196, 170, 106, 0.15); /* Subtle gold input bg */
+  --ring: #c4aa6a; /* Gold focus ring */
 
-  /* Chart colors using EFT palette */
-  --chart-1: #00a700; /* green - completed */
-  --chart-2: #0292c0; /* blue - available */
-  --chart-3: #ca8a00; /* orange - in progress */
-  --chart-4: #636363; /* gray - locked */
-  --chart-5: #9a8866; /* gold-two */
+  /* Chart colors - bright and readable */
+  --chart-1: #4ade80; /* Bright green - completed */
+  --chart-2: #4db8ff; /* Bright blue - available */
+  --chart-3: #ffcc00; /* Bright yellow - in progress */
+  --chart-4: #6b6b6b; /* Medium gray - locked */
+  --chart-5: #c4aa6a; /* Gold */
 
   /* Sidebar */
-  --sidebar: #1b1919; /* black-light */
-  --sidebar-foreground: #c7c5b3; /* gold-one */
-  --sidebar-primary: #9a8866; /* gold-two */
-  --sidebar-primary-foreground: #1b1919;
-  --sidebar-accent: #383945; /* gunmetal */
-  --sidebar-accent-foreground: #c7c5b3;
-  --sidebar-border: rgba(199, 197, 179, 0.1);
-  --sidebar-ring: #9a8866;
+  --sidebar: #0f0f0f; /* True dark */
+  --sidebar-foreground: #e8e6d4; /* Bright cream/gold */
+  --sidebar-primary: #c4aa6a; /* Gold */
+  --sidebar-primary-foreground: #0f0f0f;
+  --sidebar-accent: #1f1f1f; /* Subtle accent */
+  --sidebar-accent-foreground: #e8e6d4;
+  --sidebar-border: rgba(196, 170, 106, 0.15);
+  --sidebar-ring: #c4aa6a;
 }
 
 @layer base {

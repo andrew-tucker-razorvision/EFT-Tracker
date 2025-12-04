@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState, useEffect } from "react";
+import { useCallback, useMemo, useState, useEffect, useRef } from "react";
 import {
   ReactFlow,
   Controls,
@@ -70,7 +70,8 @@ function QuestTreeInner({
   onStatusChange,
 }: QuestTreeProps) {
   const isMobile = useIsMobile();
-  const { fitView } = useReactFlow();
+  const { fitView, setViewport } = useReactFlow();
+  const isInitializedRef = useRef(false);
 
   // Focus mode state
   const [focusedQuestId, setFocusedQuestId] = useState<string | null>(null);
@@ -139,6 +140,19 @@ function QuestTreeInner({
     setNodes(initialNodes);
     setEdges(initialEdges);
   }, [initialNodes, initialEdges, setNodes, setEdges]);
+
+  // Set initial viewport to left-align content when React Flow is ready
+  const onInit = useCallback(() => {
+    if (!isInitializedRef.current && nodes.length > 0) {
+      // Find the leftmost and topmost node positions
+      const minX = Math.min(...nodes.map((n) => n.position.x));
+      const minY = Math.min(...nodes.map((n) => n.position.y));
+
+      // Set viewport so content starts at left edge with small padding
+      setViewport({ x: -minX + 10, y: -minY + 10, zoom: 1 }, { duration: 0 });
+      isInitializedRef.current = true;
+    }
+  }, [nodes, setViewport]);
 
   // Calculate bounds to constrain panning - include ALL nodes (traders + quests)
   const translateExtent = useMemo(() => {
@@ -261,11 +275,12 @@ function QuestTreeInner({
         onPaneClick={handlePaneClick}
         onNodeClick={handleNodeClick}
         onNodeDoubleClick={handleNodeDoubleClick}
+        onInit={onInit}
         nodeTypes={nodeTypes}
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}
-        defaultViewport={{ x: 20, y: 20, zoom: 1 }}
+        defaultViewport={{ x: 0, y: 0, zoom: 1 }}
         translateExtent={translateExtent}
         minZoom={0.1}
         maxZoom={isMobile ? 2 : 4}
@@ -273,8 +288,8 @@ function QuestTreeInner({
           type: "default", // Bezier curves
         }}
         proOptions={{ hideAttribution: true }}
-        panOnScroll={!isMobile}
-        zoomOnScroll={!isMobile}
+        panOnScroll={true}
+        zoomOnScroll={false}
         panOnDrag={[1, 2]}
         zoomOnPinch={true}
         zoomOnDoubleClick={false}

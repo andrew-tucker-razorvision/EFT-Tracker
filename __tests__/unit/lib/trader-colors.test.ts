@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getTraderColor, TRADER_COLORS } from "@/lib/trader-colors";
+import { getTraderColor, TRADER_COLORS, EFT_COLORS } from "@/lib/trader-colors";
 
 describe("trader-colors", () => {
   describe("TRADER_COLORS", () => {
@@ -56,14 +56,14 @@ describe("trader-colors", () => {
 
     it("should return default EFT gold colors for unknown trader", () => {
       const colors = getTraderColor("unknown_trader");
-      // Returns EFT gold fallback (brightened for better contrast)
-      expect(colors.primary).toBe("#b39d70");
-      expect(colors.bg).toBe("#383945");
+      // Returns EFT gold fallback
+      expect(colors.primary).toBe(EFT_COLORS.goldTwo);
+      expect(colors.bg).toBe(EFT_COLORS.gunmetal);
     });
 
     it("should return default EFT gold colors for empty string", () => {
       const colors = getTraderColor("");
-      expect(colors.primary).toBe("#b39d70");
+      expect(colors.primary).toBe(EFT_COLORS.goldTwo);
     });
   });
 });
