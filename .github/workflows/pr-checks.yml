@@ -157,8 +157,8 @@ jobs:
     name: Check Branch Name
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    # Skip for Dependabot PRs - they use their own naming convention
-    if: github.actor != 'dependabot[bot]'
+    # Skip for Dependabot PRs - they use their own naming convention (dependabot/...)
+    if: ${{ !startsWith(github.head_ref, 'dependabot/') }}
 
     steps:
       - name: Validate branch name
