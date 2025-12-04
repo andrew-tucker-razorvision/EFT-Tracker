@@ -2,8 +2,8 @@ import { http, HttpResponse } from "msw";
 import { mockQuestsWithProgress } from "../../fixtures/quests";
 import { mockTraders } from "../../fixtures/traders";
 
-// Base URL for API routes
-const API_BASE = "/api";
+// Base URL for API routes - use wildcard to match any origin (localhost:3000, etc.)
+const API_BASE = "*/api";
 
 export const questHandlers = [
   // GET /api/quests

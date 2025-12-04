@@ -1,6 +1,16 @@
 import type { Quest, QuestWithProgress, QuestStatus, Objective } from "@/types";
 import { mockTraders } from "./traders";
 
+// Helper to create a flat quest reference (without circular dependencies)
+// This matches how the API returns nested quest data
+function createFlatQuestRef(quest: Quest): Quest {
+  return {
+    ...quest,
+    dependsOn: [], // Don't include nested dependencies to avoid circular refs
+    dependedOnBy: [],
+  };
+}
+
 // Helper to create objectives
 function createObjective(
   id: string,
@@ -113,12 +123,18 @@ export const mockQuests: Quest[] = [
   },
 ];
 
-// Fix dependencies after creation
+// Fix dependencies after creation (use flat refs to avoid circular JSON)
 mockQuests[1].dependsOn = [
-  { requiredQuest: mockQuests[0], requirementStatus: ["complete"] },
+  {
+    requiredQuest: createFlatQuestRef(mockQuests[0]),
+    requirementStatus: ["complete"],
+  },
 ];
 mockQuests[0].dependedOnBy = [
-  { dependentQuest: mockQuests[1], requirementStatus: ["complete"] },
+  {
+    dependentQuest: createFlatQuestRef(mockQuests[1]),
+    requirementStatus: ["complete"],
+  },
 ];
 
 // Create quests with different statuses for testing

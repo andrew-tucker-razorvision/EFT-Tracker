@@ -9,13 +9,13 @@ import { mockTraders } from "../../../test/fixtures/traders";
 // Helper to set up default handlers
 const setupDefaultHandlers = () => {
   server.use(
-    http.get("/api/quests", () => {
+    http.get("*/api/quests", () => {
       return HttpResponse.json({
         quests: mockQuestsWithProgress,
         traders: mockTraders,
       });
     }),
-    http.get("/api/traders", () => {
+    http.get("*/api/traders", () => {
       return HttpResponse.json({ traders: mockTraders });
     })
   );
@@ -50,8 +50,7 @@ describe("useQuests", () => {
   });
 
   describe("fetching quests", () => {
-    it.skip("should fetch quests and traders on mount", async () => {
-      // TODO: Fix MSW handler timing issue
+    it("should fetch quests and traders on mount", async () => {
       setupDefaultHandlers();
 
       const { result } = renderHook(() => useQuests());
@@ -62,9 +61,9 @@ describe("useQuests", () => {
 
       // Hook fetches both quests and traders - verify no error
       expect(result.current.error).toBeNull();
-      // Since we setup handlers, we should have data
-      expect(result.current.quests).toBeDefined();
-      expect(result.current.traders).toBeDefined();
+      // Verify data was actually loaded (not just defined as empty arrays)
+      expect(result.current.quests.length).toBeGreaterThan(0);
+      expect(result.current.traders.length).toBeGreaterThan(0);
     });
 
     it("should handle API errors gracefully", async () => {
@@ -129,6 +128,7 @@ describe("useQuests", () => {
 
       act(() => {
         result.current.setFilters({ status: "completed" });
+        result.current.applyFilters(); // Must apply filters to trigger refetch
       });
 
       await waitFor(() => {
