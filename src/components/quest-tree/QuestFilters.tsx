@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
+import { SlidersHorizontal, Filter } from "lucide-react";
 import { ViewToggle } from "@/components/quest-views";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,13 +24,15 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { StatusMultiSelect } from "./StatusMultiSelect";
+import { ActiveFilterChips } from "./ActiveFilterChips";
 import { getTraderColor } from "@/lib/trader-colors";
-import type {
-  Trader,
-  QuestFilters as Filters,
-  QuestStatus,
-  ViewMode,
-} from "@/types";
+import type { Trader, QuestFilters as Filters, ViewMode } from "@/types";
 
 const MAPS = [
   "Factory",
@@ -42,13 +45,6 @@ const MAPS = [
   "Lighthouse",
   "Streets of Tarkov",
   "Ground Zero",
-];
-
-const STATUSES: { value: QuestStatus; label: string }[] = [
-  { value: "available", label: "Available" },
-  { value: "in_progress", label: "In Progress" },
-  { value: "completed", label: "Completed" },
-  { value: "locked", label: "Locked" },
 ];
 
 const COLUMNS_OPTIONS: { value: number | null; label: string }[] = [
@@ -66,234 +62,127 @@ interface QuestFiltersProps {
   hasPendingChanges: boolean;
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
-  stats: {
-    completed: number;
-    available: number;
-    locked: number;
-  };
-  totalQuests: number;
   hiddenByLevelCount: number;
 }
 
-interface FilterControlsProps {
-  isMobile?: boolean;
-  traders: Trader[];
+// Advanced filters in popover
+interface AdvancedFiltersProps {
   filters: Filters;
   onFilterChange: (filters: Partial<Filters>) => void;
   onApplyFilters: () => void;
   hasPendingChanges: boolean;
-  activeFilterCount: number;
-  handleReset: () => void;
+  onReset: () => void;
+  isMobile?: boolean;
 }
 
-const FilterControls = ({
-  isMobile = false,
-  traders,
+function AdvancedFilters({
   filters,
   onFilterChange,
   onApplyFilters,
   hasPendingChanges,
-  activeFilterCount,
-  handleReset,
-}: FilterControlsProps) => (
-  <div
-    className={
-      isMobile
-        ? "flex flex-col gap-4"
-        : "hidden md:flex flex-wrap items-end gap-4"
-    }
-  >
-    {/* Trader Filter */}
-    <div className={isMobile ? "w-full" : "w-[160px]"}>
-      <Label className="text-xs text-muted-foreground">Trader</Label>
-      <Select
-        value={filters.traderId || "all"}
-        onValueChange={(value) =>
-          onFilterChange({ traderId: value === "all" ? null : value })
-        }
-      >
-        <SelectTrigger className="h-9">
-          <SelectValue placeholder="All Traders" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Traders</SelectItem>
-          {traders.map((trader) => (
-            <SelectItem key={trader.id} value={trader.id}>
-              <div className="flex items-center gap-2">
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{
-                    backgroundColor: getTraderColor(trader.id).primary,
-                  }}
-                />
-                {trader.name}
-              </div>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+  onReset,
+  isMobile = false,
+}: AdvancedFiltersProps) {
+  return (
+    <div className={`space-y-4 ${isMobile ? "" : "w-[280px]"}`}>
+      <div className="text-sm font-medium">Advanced Filters</div>
 
-    {/* Status Filter (Multi-select) */}
-    <div className={isMobile ? "w-full" : "w-[160px]"}>
-      <Label className="text-xs text-muted-foreground">Status</Label>
-      <div className="flex flex-wrap gap-1 mt-1">
-        {STATUSES.map((status) => {
-          const isSelected = filters.statuses.includes(status.value);
-          return (
-            <button
-              key={status.value}
-              type="button"
-              onClick={() => {
-                const newStatuses = isSelected
-                  ? filters.statuses.filter((s) => s !== status.value)
-                  : [...filters.statuses, status.value];
-                onFilterChange({ statuses: newStatuses });
-              }}
-              className={`px-2 py-1 text-xs rounded border transition-colors ${
-                isSelected
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background border-border hover:bg-muted"
-              }`}
-            >
-              {status.label}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-
-    {/* Map Filter */}
-    <div className={isMobile ? "w-full" : "w-[160px]"}>
-      <Label className="text-xs text-muted-foreground">Map</Label>
-      <Select
-        value={filters.map || "all"}
-        onValueChange={(value) =>
-          onFilterChange({ map: value === "all" ? null : value })
-        }
-      >
-        <SelectTrigger className="h-9">
-          <SelectValue placeholder="All Maps" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Maps</SelectItem>
-          {MAPS.map((map) => (
-            <SelectItem key={map} value={map}>
-              {map}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-
-    {/* Kappa Toggle */}
-    <div className="flex items-center gap-2 py-2">
-      <Switch
-        id={isMobile ? "kappa-mobile" : "kappa"}
-        checked={filters.kappaOnly}
-        onCheckedChange={(checked) => onFilterChange({ kappaOnly: checked })}
-      />
-      <Label
-        htmlFor={isMobile ? "kappa-mobile" : "kappa"}
-        className="text-sm cursor-pointer"
-      >
-        Kappa Only
-      </Label>
-    </div>
-
-    {/* Player Level Input with Bypass Checkbox */}
-    <div
-      className={
-        isMobile ? "w-full flex gap-2 items-end" : "flex gap-2 items-end"
-      }
-    >
-      <div className={isMobile ? "flex-1" : "w-[90px]"}>
-        <Label className="text-xs text-muted-foreground">My Level</Label>
-        <Input
-          type="number"
-          min={1}
-          max={79}
-          placeholder="1-79"
-          value={filters.playerLevel ?? ""}
-          onChange={(e) => {
-            const val = parseInt(e.target.value);
-            const level = isNaN(val) ? null : Math.min(79, Math.max(1, val));
-            onFilterChange({ playerLevel: level });
-          }}
-          className="h-9"
-          disabled={filters.bypassLevelRequirement}
-        />
-      </div>
-      <div className="flex items-center gap-1.5 pb-0.5">
-        <Switch
-          id={isMobile ? "bypass-level-mobile" : "bypass-level"}
-          checked={filters.bypassLevelRequirement}
-          onCheckedChange={(checked) =>
-            onFilterChange({ bypassLevelRequirement: checked })
-          }
-        />
-        <Label
-          htmlFor={isMobile ? "bypass-level-mobile" : "bypass-level"}
-          className="text-xs cursor-pointer whitespace-nowrap"
-        >
-          Bypass
+      {/* Kappa Only */}
+      <div className="flex items-center justify-between">
+        <Label htmlFor="kappa-advanced" className="text-sm cursor-pointer">
+          Kappa Required Only
         </Label>
+        <Switch
+          id="kappa-advanced"
+          checked={filters.kappaOnly}
+          onCheckedChange={(checked) => onFilterChange({ kappaOnly: checked })}
+        />
+      </div>
+
+      {/* Player Level */}
+      <div className="space-y-2">
+        <Label className="text-sm">Player Level</Label>
+        <div className="flex gap-2 items-center">
+          <Input
+            type="number"
+            min={1}
+            max={79}
+            placeholder="1-79"
+            value={filters.playerLevel ?? ""}
+            onChange={(e) => {
+              const val = parseInt(e.target.value);
+              const level = isNaN(val) ? null : Math.min(79, Math.max(1, val));
+              onFilterChange({ playerLevel: level });
+            }}
+            className="h-9 w-20"
+            disabled={filters.bypassLevelRequirement}
+          />
+          <div className="flex items-center gap-1.5">
+            <Switch
+              id="bypass-advanced"
+              checked={filters.bypassLevelRequirement}
+              onCheckedChange={(checked) =>
+                onFilterChange({ bypassLevelRequirement: checked })
+              }
+            />
+            <Label
+              htmlFor="bypass-advanced"
+              className="text-xs cursor-pointer whitespace-nowrap"
+            >
+              Bypass
+            </Label>
+          </div>
+        </div>
+      </div>
+
+      {/* Columns */}
+      <div className="space-y-2">
+        <Label className="text-sm">Display Columns</Label>
+        <Select
+          value={filters.questsPerTree?.toString() ?? "all"}
+          onValueChange={(value) => {
+            const numValue = value === "all" ? null : parseInt(value);
+            onFilterChange({ questsPerTree: numValue });
+          }}
+        >
+          <SelectTrigger className="h-9">
+            <SelectValue placeholder="5 columns" />
+          </SelectTrigger>
+          <SelectContent>
+            {COLUMNS_OPTIONS.map((option) => (
+              <SelectItem
+                key={option.value?.toString() ?? "all"}
+                value={option.value?.toString() ?? "all"}
+              >
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Actions */}
+      <div className="flex gap-2 pt-2 border-t">
+        <Button
+          size="sm"
+          onClick={onApplyFilters}
+          disabled={!hasPendingChanges}
+          className="flex-1"
+        >
+          Apply
+          {hasPendingChanges && (
+            <Badge className="ml-1 bg-white text-primary text-[10px] px-1">
+              !
+            </Badge>
+          )}
+        </Button>
+        <Button variant="ghost" size="sm" onClick={onReset}>
+          Reset All
+        </Button>
       </div>
     </div>
-
-    {/* Columns Limit Filter */}
-    <div className={isMobile ? "w-full" : "w-[130px]"}>
-      <Label className="text-xs text-muted-foreground">Columns</Label>
-      <Select
-        value={filters.questsPerTree?.toString() ?? "all"}
-        onValueChange={(value) => {
-          const numValue = value === "all" ? null : parseInt(value);
-          onFilterChange({ questsPerTree: numValue });
-        }}
-      >
-        <SelectTrigger className="h-9">
-          <SelectValue placeholder="5 columns" />
-        </SelectTrigger>
-        <SelectContent>
-          {COLUMNS_OPTIONS.map((option) => (
-            <SelectItem
-              key={option.value?.toString() ?? "all"}
-              value={option.value?.toString() ?? "all"}
-            >
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-
-    {/* Apply Filters Button */}
-    <Button
-      variant="default"
-      size="sm"
-      onClick={onApplyFilters}
-      disabled={!hasPendingChanges}
-      className={isMobile ? "w-full" : ""}
-    >
-      Apply Filters
-      {hasPendingChanges && (
-        <Badge className="ml-1 bg-white text-primary">!</Badge>
-      )}
-    </Button>
-
-    {/* Reset Button */}
-    {activeFilterCount > 0 && (
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={handleReset}
-        className={isMobile ? "w-full" : ""}
-      >
-        Reset Filters
-      </Button>
-    )}
-  </div>
-);
+  );
+}
 
 export function QuestFilters({
   traders,
@@ -303,20 +192,31 @@ export function QuestFilters({
   hasPendingChanges,
   viewMode,
   onViewModeChange,
-  stats,
-  totalQuests,
   hiddenByLevelCount,
 }: QuestFiltersProps) {
   const { data: session, status: sessionStatus } = useSession();
   const [searchValue, setSearchValue] = useState(filters.search);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
   const initialPrefsLoaded = useRef(false);
+  const prefsFullyLoaded = useRef(false); // True only after prefs fetch completes
   const lastSavedLevel = useRef<number | null>(null);
   const lastSavedQuestsPerTree = useRef<number | null>(5);
   const lastSavedBypassLevel = useRef<boolean>(false);
 
+  // Stable ref for onApplyFilters to avoid infinite loops
+  const onApplyFiltersRef = useRef(onApplyFilters);
+  useEffect(() => {
+    onApplyFiltersRef.current = onApplyFilters;
+  });
+
   // Load user's saved preferences on mount (only for logged-in users)
   useEffect(() => {
+    // For non-authenticated users, mark prefs as loaded immediately
+    if (sessionStatus === "unauthenticated" && !prefsFullyLoaded.current) {
+      prefsFullyLoaded.current = true;
+    }
+
     if (sessionStatus === "authenticated" && !initialPrefsLoaded.current) {
       initialPrefsLoaded.current = true;
       fetch("/api/user")
@@ -337,11 +237,16 @@ export function QuestFilters({
           }
           if (Object.keys(updates).length > 0) {
             onFilterChange(updates);
+            // Apply the loaded preferences immediately
+            setTimeout(() => onApplyFiltersRef.current(), 0);
           }
+          // Mark prefs as fully loaded after applying
+          prefsFullyLoaded.current = true;
         })
-        .catch((err) =>
-          console.error("Failed to fetch user preferences:", err)
-        );
+        .catch((err) => {
+          console.error("Failed to fetch user preferences:", err);
+          prefsFullyLoaded.current = true; // Still mark as loaded on error
+        });
     }
   }, [sessionStatus, onFilterChange]);
 
@@ -349,7 +254,7 @@ export function QuestFilters({
   const savePlayerLevel = useCallback(
     async (level: number | null) => {
       if (!session?.user) return;
-      if (level === lastSavedLevel.current) return; // No change
+      if (level === lastSavedLevel.current) return;
 
       try {
         const res = await fetch("/api/user", {
@@ -367,10 +272,9 @@ export function QuestFilters({
     [session?.user]
   );
 
-  // Debounce level saving (1 second delay)
   useEffect(() => {
     if (sessionStatus !== "authenticated") return;
-    if (!initialPrefsLoaded.current) return; // Don't save during initial load
+    if (!prefsFullyLoaded.current) return; // Wait until prefs are fully loaded
 
     const timer = setTimeout(() => {
       savePlayerLevel(filters.playerLevel);
@@ -379,11 +283,11 @@ export function QuestFilters({
     return () => clearTimeout(timer);
   }, [filters.playerLevel, sessionStatus, savePlayerLevel]);
 
-  // Auto-save questsPerTree when it changes (debounced, only for logged-in users)
+  // Auto-save questsPerTree when it changes
   const saveQuestsPerTree = useCallback(
     async (count: number | null) => {
       if (!session?.user) return;
-      if (count === lastSavedQuestsPerTree.current) return; // No change
+      if (count === lastSavedQuestsPerTree.current) return;
 
       try {
         const res = await fetch("/api/user", {
@@ -401,10 +305,9 @@ export function QuestFilters({
     [session?.user]
   );
 
-  // Debounce questsPerTree saving (1 second delay)
   useEffect(() => {
     if (sessionStatus !== "authenticated") return;
-    if (!initialPrefsLoaded.current) return; // Don't save during initial load
+    if (!prefsFullyLoaded.current) return; // Wait until prefs are fully loaded
 
     const timer = setTimeout(() => {
       saveQuestsPerTree(filters.questsPerTree);
@@ -413,11 +316,11 @@ export function QuestFilters({
     return () => clearTimeout(timer);
   }, [filters.questsPerTree, sessionStatus, saveQuestsPerTree]);
 
-  // Auto-save bypassLevelRequirement when it changes (debounced, only for logged-in users)
+  // Auto-save bypassLevelRequirement when it changes
   const saveBypassLevelRequirement = useCallback(
     async (bypass: boolean) => {
       if (!session?.user) return;
-      if (bypass === lastSavedBypassLevel.current) return; // No change
+      if (bypass === lastSavedBypassLevel.current) return;
 
       try {
         const res = await fetch("/api/user", {
@@ -435,10 +338,9 @@ export function QuestFilters({
     [session?.user]
   );
 
-  // Debounce bypassLevelRequirement saving (1 second delay)
   useEffect(() => {
     if (sessionStatus !== "authenticated") return;
-    if (!initialPrefsLoaded.current) return; // Don't save during initial load
+    if (!prefsFullyLoaded.current) return; // Wait until prefs are fully loaded
 
     const timer = setTimeout(() => {
       saveBypassLevelRequirement(filters.bypassLevelRequirement);
@@ -451,51 +353,91 @@ export function QuestFilters({
     saveBypassLevelRequirement,
   ]);
 
-  // Debounce search input (increased to 500ms) and auto-apply
+  // Debounce search input and auto-apply
   useEffect(() => {
     const timer = setTimeout(() => {
       if (searchValue !== filters.search) {
         onFilterChange({ search: searchValue });
-        // Auto-apply search changes after a brief delay for state to update
-        setTimeout(() => onApplyFilters(), 100);
+        // Use ref to avoid dependency on onApplyFilters
+        setTimeout(() => onApplyFiltersRef.current(), 100);
       }
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [searchValue, filters.search, onFilterChange, onApplyFilters]);
+  }, [searchValue, filters.search, onFilterChange]);
 
   const handleReset = () => {
     setSearchValue("");
     onFilterChange({
       traderId: null,
-      statuses: [], // Reset to empty = all statuses
+      statuses: [],
       search: "",
       kappaOnly: false,
       map: null,
-      playerLevel: 1, // Reset to default level 1
-      questsPerTree: 5, // Reset to default
-      bypassLevelRequirement: false, // Reset to default
+      playerLevel: 1,
+      questsPerTree: 5,
+      bypassLevelRequirement: false,
     });
-    // Immediately apply reset
     onApplyFilters();
   };
 
+  // Auto-apply is disabled - users must click Apply or use filter chips
+  // TODO: Re-enable auto-apply after fixing infinite loop issue
+
+  // Handle removal of individual filter from chips
+  const handleRemoveFilter = (key: keyof Filters, value?: string) => {
+    if (key === "statuses" && value) {
+      const newStatuses = filters.statuses.filter((s) => s !== value);
+      onFilterChange({ statuses: newStatuses });
+    } else if (key === "traderId") {
+      onFilterChange({ traderId: null });
+    } else if (key === "map") {
+      onFilterChange({ map: null });
+    } else if (key === "kappaOnly") {
+      onFilterChange({ kappaOnly: false });
+    } else if (key === "playerLevel") {
+      onFilterChange({ playerLevel: 1 });
+    } else if (key === "bypassLevelRequirement") {
+      onFilterChange({ bypassLevelRequirement: false });
+    } else if (key === "questsPerTree") {
+      onFilterChange({ questsPerTree: 5 });
+    }
+    // Primary filters will auto-apply via useEffect above
+    // For advanced filters, apply immediately
+    if (!["traderId", "statuses", "map"].includes(key)) {
+      onApplyFiltersRef.current();
+    }
+  };
+
+  // Simple filter change handler (auto-apply handled by useEffect)
+  const handlePrimaryFilterChange = (update: Partial<Filters>) => {
+    onFilterChange(update);
+  };
+
+  // Count advanced filters that are active
+  const advancedFilterCount = [
+    filters.kappaOnly,
+    filters.playerLevel !== 1 ? filters.playerLevel : null,
+    filters.bypassLevelRequirement,
+    filters.questsPerTree !== 5 ? filters.questsPerTree : null,
+  ].filter(Boolean).length;
+
+  // Count all active filters (for chips)
   const activeFilterCount = [
     filters.traderId,
-    filters.statuses.length > 0 ? filters.statuses : null, // Count if any status selected
-    filters.search,
+    filters.statuses.length > 0 ? filters.statuses : null,
     filters.kappaOnly,
     filters.map,
-    filters.playerLevel !== 1 ? filters.playerLevel : null, // Count if not default
-    filters.questsPerTree !== 5 ? filters.questsPerTree : null, // Count if not default
-    filters.bypassLevelRequirement ? true : null, // Count if enabled
+    filters.playerLevel !== 1 ? filters.playerLevel : null,
+    filters.questsPerTree !== 5 ? filters.questsPerTree : null,
+    filters.bypassLevelRequirement ? true : null,
   ].filter(Boolean).length;
 
   return (
-    <div className="px-3 py-2 bg-background border-b">
+    <div className="bg-background border-b">
       {/* Hidden quests banner */}
       {hiddenByLevelCount > 0 && !filters.bypassLevelRequirement && (
-        <div className="mb-3 flex items-center justify-between gap-2 px-3 py-2 bg-muted/50 rounded-md text-sm">
+        <div className="mx-4 mt-2 flex items-center justify-between gap-2 px-3 py-2 bg-muted/50 rounded-md text-sm">
           <span className="text-muted-foreground">
             {hiddenByLevelCount} quest{hiddenByLevelCount > 1 ? "s" : ""} hidden
             (above level {(filters.playerLevel || 1) + 5})
@@ -506,21 +448,20 @@ export function QuestFilters({
             className="h-7 text-xs"
             onClick={() => {
               onFilterChange({ bypassLevelRequirement: true });
-              // Delay apply to ensure state update is processed
-              setTimeout(() => onApplyFilters(), 0);
+              setTimeout(() => onApplyFiltersRef.current(), 0);
             }}
           >
             Show All
           </Button>
         </div>
       )}
-      {/* MOBILE LAYOUT (vertical stacking) */}
-      <div className="md:hidden flex flex-col gap-2 w-full">
+
+      {/* MOBILE LAYOUT */}
+      <div className="md:hidden">
         {/* Row 1: Search + Filter Button */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 px-4 py-2">
           <div className="flex-1 min-w-0">
             <Input
-              id="search-mobile"
               type="text"
               placeholder="Search quests..."
               value={searchValue}
@@ -531,6 +472,7 @@ export function QuestFilters({
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="sm" className="relative h-9 px-3">
+                <Filter className="h-4 w-4 mr-1" />
                 Filters
                 {activeFilterCount > 0 && (
                   <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
@@ -539,191 +481,277 @@ export function QuestFilters({
                 )}
               </Button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="h-auto max-h-[80vh]">
+            <SheetContent side="bottom" className="h-auto max-h-[85vh]">
               <SheetHeader>
                 <SheetTitle>Filter Quests</SheetTitle>
                 <SheetDescription className="sr-only">
-                  Filter quests by trader, status, map, and level
+                  Filter quests by trader, status, map, and more
                 </SheetDescription>
               </SheetHeader>
-              <div className="py-4">
-                <FilterControls
-                  isMobile
-                  traders={traders}
-                  filters={filters}
-                  onFilterChange={onFilterChange}
-                  onApplyFilters={onApplyFilters}
-                  hasPendingChanges={hasPendingChanges}
-                  activeFilterCount={activeFilterCount}
-                  handleReset={handleReset}
-                />
-                {/* Stats + ViewToggle in mobile sheet */}
-                <div className="mt-4 pt-4 border-t">
-                  <div className="flex items-center gap-3 text-xs mb-3">
-                    <span className="font-medium">Progress:</span>
-                    <span
-                      className="flex items-center gap-1"
-                      style={{ color: "#00a700" }}
-                    >
-                      <span
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: "#00a700" }}
-                      />
-                      {stats.completed}
-                    </span>
-                    <span
-                      className="flex items-center gap-1"
-                      style={{ color: "#0292c0" }}
-                    >
-                      <span
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: "#0292c0" }}
-                      />
-                      {stats.available}
-                    </span>
-                    <span
-                      className="flex items-center gap-1"
-                      style={{ color: "#636363" }}
-                    >
-                      <span
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: "#636363" }}
-                      />
-                      {stats.locked}
-                    </span>
-                    <span className="text-muted-foreground">
-                      / {totalQuests}
-                    </span>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground mb-2 block">
-                      View Mode
-                    </Label>
-                    <ViewToggle
-                      viewMode={viewMode}
-                      onViewModeChange={onViewModeChange}
+              <div className="py-4 space-y-4 overflow-y-auto">
+                {/* Trader */}
+                <div>
+                  <Label className="text-xs text-muted-foreground">
+                    Trader
+                  </Label>
+                  <Select
+                    value={filters.traderId || "all"}
+                    onValueChange={(value) =>
+                      handlePrimaryFilterChange({
+                        traderId: value === "all" ? null : value,
+                      })
+                    }
+                  >
+                    <SelectTrigger className="h-9 mt-1">
+                      <SelectValue placeholder="All Traders" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Traders</SelectItem>
+                      {traders.map((trader) => (
+                        <SelectItem key={trader.id} value={trader.id}>
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-3 h-3 rounded-full"
+                              style={{
+                                backgroundColor: getTraderColor(trader.id)
+                                  .primary,
+                              }}
+                            />
+                            {trader.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Status */}
+                <div>
+                  <Label className="text-xs text-muted-foreground">
+                    Status
+                  </Label>
+                  <div className="mt-1">
+                    <StatusMultiSelect
+                      selectedStatuses={filters.statuses}
+                      onChange={(statuses) =>
+                        handlePrimaryFilterChange({ statuses })
+                      }
                     />
                   </div>
+                </div>
+
+                {/* Map */}
+                <div>
+                  <Label className="text-xs text-muted-foreground">Map</Label>
+                  <Select
+                    value={filters.map || "all"}
+                    onValueChange={(value) =>
+                      handlePrimaryFilterChange({
+                        map: value === "all" ? null : value,
+                      })
+                    }
+                  >
+                    <SelectTrigger className="h-9 mt-1">
+                      <SelectValue placeholder="All Maps" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Maps</SelectItem>
+                      {MAPS.map((map) => (
+                        <SelectItem key={map} value={map}>
+                          {map}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Advanced Filters */}
+                <div className="pt-4 border-t">
+                  <AdvancedFilters
+                    filters={filters}
+                    onFilterChange={onFilterChange}
+                    onApplyFilters={onApplyFilters}
+                    hasPendingChanges={hasPendingChanges}
+                    onReset={handleReset}
+                    isMobile
+                  />
+                </div>
+
+                {/* View Mode */}
+                <div className="pt-4 border-t">
+                  <Label className="text-xs text-muted-foreground mb-2 block">
+                    View Mode
+                  </Label>
+                  <ViewToggle
+                    viewMode={viewMode}
+                    onViewModeChange={onViewModeChange}
+                  />
                 </div>
               </div>
             </SheetContent>
           </Sheet>
         </div>
 
-        {/* Row 2: Stats + ViewToggle + Total (visible outside sheet) */}
-        <div className="flex items-center justify-between text-xs">
-          <div className="flex items-center gap-1.5">
-            <span
-              className="flex items-center gap-0.5"
-              style={{ color: "#00a700" }}
-            >
-              <span
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: "#00a700" }}
-              />
-              {stats.completed}
-            </span>
-            <span
-              className="flex items-center gap-0.5"
-              style={{ color: "#0292c0" }}
-            >
-              <span
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: "#0292c0" }}
-              />
-              {stats.available}
-            </span>
-            <span
-              className="flex items-center gap-0.5"
-              style={{ color: "#636363" }}
-            >
-              <span
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: "#636363" }}
-              />
-              {stats.locked}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <ViewToggle
-              viewMode={viewMode}
-              onViewModeChange={onViewModeChange}
-            />
-            <span className="text-muted-foreground">{totalQuests} total</span>
-          </div>
-        </div>
-      </div>
-
-      {/* DESKTOP LAYOUT (single row, flex-wrap) */}
-      <div className="hidden md:flex flex-wrap items-center gap-3 w-full">
-        {/* Search Input */}
-        <div className="flex-1 min-w-[180px] max-w-[280px]">
-          <Label
-            htmlFor="search"
-            className="text-xs text-muted-foreground mb-1 block"
-          >
-            Search
-          </Label>
-          <Input
-            id="search"
-            type="text"
-            placeholder="Search quests..."
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            className="h-9"
-          />
-        </div>
-
-        {/* Stats */}
-        <div className="flex items-center gap-2 text-xs border-l pl-3">
-          <span
-            className="flex items-center gap-1"
-            style={{ color: "#00a700" }}
-          >
-            <span
-              className="w-2 h-2 rounded-full"
-              style={{ backgroundColor: "#00a700" }}
-            />
-            {stats.completed}
-          </span>
-          <span
-            className="flex items-center gap-1"
-            style={{ color: "#0292c0" }}
-          >
-            <span
-              className="w-2 h-2 rounded-full"
-              style={{ backgroundColor: "#0292c0" }}
-            />
-            {stats.available}
-          </span>
-          <span
-            className="flex items-center gap-1"
-            style={{ color: "#636363" }}
-          >
-            <span
-              className="w-2 h-2 rounded-full"
-              style={{ backgroundColor: "#636363" }}
-            />
-            {stats.locked}
-          </span>
-          <span className="text-muted-foreground">/ {totalQuests}</span>
-        </div>
-
-        {/* Existing FilterControls (desktop) - rendered inline */}
-        <FilterControls
-          traders={traders}
-          filters={filters}
-          onFilterChange={onFilterChange}
-          onApplyFilters={onApplyFilters}
-          hasPendingChanges={hasPendingChanges}
-          activeFilterCount={activeFilterCount}
-          handleReset={handleReset}
-        />
-
-        {/* ViewToggle */}
-        <div className="border-l pl-3">
+        {/* View toggle row (mobile) */}
+        <div className="px-4 pb-1 flex items-center justify-end">
           <ViewToggle viewMode={viewMode} onViewModeChange={onViewModeChange} />
         </div>
+
+        {/* Active filter chips (mobile) */}
+        {activeFilterCount > 0 && (
+          <div className="px-4 pb-2 overflow-x-auto">
+            <ActiveFilterChips
+              filters={filters}
+              traders={traders}
+              onRemoveFilter={handleRemoveFilter}
+              onClearAll={handleReset}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* DESKTOP LAYOUT */}
+      <div className="hidden md:block">
+        {/* Primary filters row */}
+        <div className="px-4 py-2 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 flex-1">
+            {/* Search */}
+            <div className="w-[200px]">
+              <Input
+                type="text"
+                placeholder="Search quests... (press /)"
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                className="h-9"
+              />
+            </div>
+
+            {/* Trader */}
+            <Select
+              value={filters.traderId || "all"}
+              onValueChange={(value) =>
+                handlePrimaryFilterChange({
+                  traderId: value === "all" ? null : value,
+                })
+              }
+            >
+              <SelectTrigger className="h-9 w-[150px]">
+                <SelectValue placeholder="All Traders" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Traders</SelectItem>
+                {traders.map((trader) => (
+                  <SelectItem key={trader.id} value={trader.id}>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{
+                          backgroundColor: getTraderColor(trader.id).primary,
+                        }}
+                      />
+                      {trader.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Status */}
+            <StatusMultiSelect
+              selectedStatuses={filters.statuses}
+              onChange={(statuses) => handlePrimaryFilterChange({ statuses })}
+            />
+
+            {/* Map */}
+            <Select
+              value={filters.map || "all"}
+              onValueChange={(value) =>
+                handlePrimaryFilterChange({
+                  map: value === "all" ? null : value,
+                })
+              }
+            >
+              <SelectTrigger className="h-9 w-[150px]">
+                <SelectValue placeholder="All Maps" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Maps</SelectItem>
+                {MAPS.map((map) => (
+                  <SelectItem key={map} value={map}>
+                    {map}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Apply button for primary filters */}
+            <Button
+              size="sm"
+              onClick={onApplyFilters}
+              disabled={!hasPendingChanges}
+              className="h-9"
+            >
+              Apply
+              {hasPendingChanges && (
+                <Badge className="ml-1 bg-white text-primary text-[10px] px-1">
+                  !
+                </Badge>
+              )}
+            </Button>
+
+            {/* More Filters (Advanced) */}
+            <Popover open={advancedOpen} onOpenChange={setAdvancedOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-9 gap-1.5 relative"
+                >
+                  <SlidersHorizontal className="h-4 w-4" />
+                  More
+                  {advancedFilterCount > 0 && (
+                    <Badge
+                      variant="secondary"
+                      className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]"
+                    >
+                      {advancedFilterCount}
+                    </Badge>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="p-4">
+                <AdvancedFilters
+                  filters={filters}
+                  onFilterChange={onFilterChange}
+                  onApplyFilters={() => {
+                    onApplyFilters();
+                    setAdvancedOpen(false);
+                  }}
+                  hasPendingChanges={hasPendingChanges}
+                  onReset={() => {
+                    handleReset();
+                    setAdvancedOpen(false);
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* View Toggle */}
+          <ViewToggle viewMode={viewMode} onViewModeChange={onViewModeChange} />
+        </div>
+
+        {/* Active filter chips (desktop) */}
+        {activeFilterCount > 0 && (
+          <div className="px-4 pb-2">
+            <ActiveFilterChips
+              filters={filters}
+              traders={traders}
+              onRemoveFilter={handleRemoveFilter}
+              onClearAll={handleReset}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

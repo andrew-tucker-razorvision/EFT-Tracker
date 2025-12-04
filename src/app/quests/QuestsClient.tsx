@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
+import { useStats } from "@/contexts/StatsContext";
 import {
   QuestTree,
   QuestFilters,
@@ -27,6 +28,7 @@ const STATUS_CYCLE: Record<QuestStatus, QuestStatus | null> = {
 
 export function QuestsClient() {
   const { status: sessionStatus } = useSession();
+  const { setStats } = useStats();
   const {
     quests,
     allQuests,
@@ -62,23 +64,31 @@ export function QuestsClient() {
   // Onboarding state
   const [showWelcome, setShowWelcome] = useState(false);
 
-  // Merge progress into quests
-  const questsWithProgress: QuestWithProgress[] = quests.map((quest) => {
-    const userStatus = progress.get(quest.id);
-    return {
-      ...quest,
-      computedStatus: userStatus || quest.computedStatus,
-    };
-  });
+  // Merge progress into quests (memoized to prevent infinite re-renders)
+  const questsWithProgress = useMemo(
+    () =>
+      quests.map((quest) => {
+        const userStatus = progress.get(quest.id);
+        return {
+          ...quest,
+          computedStatus: userStatus || quest.computedStatus,
+        };
+      }),
+    [quests, progress]
+  );
 
   // Merge progress into all quests (for accurate depth calculation)
-  const allQuestsWithProgress: QuestWithProgress[] = allQuests.map((quest) => {
-    const userStatus = progress.get(quest.id);
-    return {
-      ...quest,
-      computedStatus: userStatus || quest.computedStatus,
-    };
-  });
+  const allQuestsWithProgress = useMemo(
+    () =>
+      allQuests.map((quest) => {
+        const userStatus = progress.get(quest.id);
+        return {
+          ...quest,
+          computedStatus: userStatus || quest.computedStatus,
+        };
+      }),
+    [allQuests, progress]
+  );
 
   // Show notification when quests are unlocked
   useEffect(() => {
@@ -228,6 +238,32 @@ export function QuestsClient() {
     [questsWithProgress, sessionStatus, updateStatus, refetch]
   );
 
+  // Calculate progress stats (in_progress counted as available)
+  // Must be before early returns to follow React hooks rules
+  const stats = useMemo(
+    () => ({
+      total: questsWithProgress.length,
+      completed: questsWithProgress.filter(
+        (q) => q.computedStatus === "completed"
+      ).length,
+      available: questsWithProgress.filter(
+        (q) =>
+          q.computedStatus === "available" || q.computedStatus === "in_progress"
+      ).length,
+      locked: questsWithProgress.filter((q) => q.computedStatus === "locked")
+        .length,
+    }),
+    [questsWithProgress]
+  );
+
+  // Update stats in context for header display
+  useEffect(() => {
+    if (!loading && !error) {
+      setStats(stats);
+    }
+    return () => setStats(null); // Clear on unmount
+  }, [stats, setStats, loading, error]);
+
   if (loading) {
     return <QuestTreeSkeleton />;
   }
@@ -250,20 +286,6 @@ export function QuestsClient() {
       </div>
     );
   }
-
-  // Calculate progress stats (in_progress counted as available)
-  const stats = {
-    total: questsWithProgress.length,
-    completed: questsWithProgress.filter(
-      (q) => q.computedStatus === "completed"
-    ).length,
-    available: questsWithProgress.filter(
-      (q) =>
-        q.computedStatus === "available" || q.computedStatus === "in_progress"
-    ).length,
-    locked: questsWithProgress.filter((q) => q.computedStatus === "locked")
-      .length,
-  };
 
   return (
     <div className="flex-1 flex flex-col">
@@ -288,12 +310,6 @@ export function QuestsClient() {
         hasPendingChanges={hasPendingChanges}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
-        stats={{
-          completed: stats.completed,
-          available: stats.available,
-          locked: stats.locked,
-        }}
-        totalQuests={stats.total}
         hiddenByLevelCount={hiddenByLevelCount}
       />
       <div className="flex-1 min-h-0">

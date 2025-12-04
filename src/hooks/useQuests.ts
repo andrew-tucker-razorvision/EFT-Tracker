@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import type {
   QuestWithProgress,
   Trader,
@@ -44,6 +44,10 @@ export function useQuests(): UseQuestsReturn {
   const [appliedFilters, setAppliedFilters] =
     useState<QuestFilters>(defaultFilters);
   const [hiddenByLevelCount, setHiddenByLevelCount] = useState(0);
+
+  // Ref to store pending filters for stable applyFilters callback
+  const pendingFiltersRef = useRef(pendingFilters);
+  pendingFiltersRef.current = pendingFilters;
 
   const fetchTraders = useCallback(async () => {
     try {
@@ -123,11 +127,7 @@ export function useQuests(): UseQuestsReturn {
   }, []);
 
   const applyFilters = useCallback(() => {
-    // Use functional update to read current pendingFilters, avoiding stale closure issues
-    setPendingFilters((current) => {
-      setAppliedFilters(current);
-      return current;
-    });
+    setAppliedFilters(pendingFiltersRef.current);
   }, []);
 
   const hasPendingChanges = useMemo(() => {

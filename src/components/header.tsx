@@ -21,6 +21,42 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useStats } from "@/contexts/StatsContext";
+
+function QuestStats() {
+  const { stats } = useStats();
+
+  if (!stats) return null;
+
+  return (
+    <div className="hidden md:flex items-center gap-2 text-xs">
+      <span className="flex items-center gap-1" style={{ color: "#00a700" }}>
+        <span
+          className="w-2 h-2 rounded-full"
+          style={{ backgroundColor: "#00a700" }}
+        />
+        {stats.completed}
+      </span>
+      <span className="opacity-50">|</span>
+      <span className="flex items-center gap-1" style={{ color: "#0292c0" }}>
+        <span
+          className="w-2 h-2 rounded-full"
+          style={{ backgroundColor: "#0292c0" }}
+        />
+        {stats.available}
+      </span>
+      <span className="opacity-50">|</span>
+      <span className="flex items-center gap-1" style={{ color: "#636363" }}>
+        <span
+          className="w-2 h-2 rounded-full"
+          style={{ backgroundColor: "#636363" }}
+        />
+        {stats.locked}
+      </span>
+      <span className="text-muted-foreground">/ {stats.total}</span>
+    </div>
+  );
+}
 
 export function Header() {
   const { data: session, status } = useSession();
@@ -34,25 +70,36 @@ export function Header() {
       toast.error("Sign out failed", {
         description: "Please try again or refresh the page.",
       });
-      // Fallback: redirect to home page anyway
       window.location.href = "/";
     }
   }, []);
 
   return (
     <header className="border-b bg-background">
-      <div className="container mx-auto px-4 h-14 md:h-16 flex items-center justify-between">
-        {/* Logo - shorter on mobile */}
-        <Link href="/" className="font-bold text-lg md:text-xl">
-          <span className="hidden sm:inline">EFT Quest Tracker</span>
-          <span className="sm:hidden">EFT Tracker</span>
-        </Link>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-4">
-          <Link href="/quests" className="text-sm hover:text-primary">
-            Quests
+      <div className="w-full px-4 h-14 md:h-16 flex items-center">
+        {/* Left: Logo + Navigation */}
+        <div className="flex items-center gap-6">
+          <Link href="/" className="font-bold text-lg md:text-xl flex-shrink-0">
+            <span className="hidden sm:inline">EFT Quest Tracker</span>
+            <span className="sm:hidden">EFT</span>
           </Link>
+          <nav className="hidden md:flex items-center gap-6">
+            <Link
+              href="/quests"
+              className="text-sm font-medium hover:text-primary transition-colors"
+            >
+              Quests
+            </Link>
+            {/* Future nav items will go here */}
+          </nav>
+        </div>
+
+        {/* Spacer to push right content to edge */}
+        <div className="flex-1" />
+
+        {/* Right: Stats + User (Desktop) */}
+        <div className="hidden md:flex items-center gap-4 flex-shrink-0">
+          <QuestStats />
 
           {status === "loading" ? (
             <div className="w-20 h-9 bg-muted animate-pulse rounded" />
@@ -97,10 +144,10 @@ export function Header() {
               </Button>
             </div>
           )}
-        </nav>
+        </div>
 
-        {/* Mobile Navigation */}
-        <div className="flex md:hidden items-center gap-2">
+        {/* Mobile: Nav + Menu */}
+        <div className="flex md:hidden items-center gap-2 ml-auto">
           <Link href="/quests" className="text-sm hover:text-primary px-2">
             Quests
           </Link>
