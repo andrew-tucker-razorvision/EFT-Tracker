@@ -77,6 +77,10 @@ function QuestTreeInner({
   const nodesRef = useRef<Node[]>([]);
   // Ref for container to attach custom wheel handler
   const containerRef = useRef<HTMLDivElement>(null);
+  // Ref to store translate extent for use in wheel handler
+  const translateExtentRef = useRef<
+    [[number, number], [number, number]] | undefined
+  >(undefined);
 
   // Focus mode state
   const [focusedQuestId, setFocusedQuestId] = useState<string | null>(null);
@@ -171,7 +175,9 @@ function QuestTreeInner({
 
   // Calculate bounds to constrain panning - include ALL nodes (traders + quests)
   const translateExtent = useMemo(() => {
-    if (nodes.length === 0) return undefined;
+    if (nodes.length === 0) {
+      return undefined;
+    }
 
     const padding = 50; // Padding around all nodes
 
@@ -189,6 +195,11 @@ function QuestTreeInner({
     ] as [[number, number], [number, number]];
   }, [nodes]);
 
+  // Sync translateExtent to ref for use in wheel handler (must be in effect, not render)
+  useEffect(() => {
+    translateExtentRef.current = translateExtent;
+  }, [translateExtent]);
+
   // Center on focused quest when focus changes
   // Uses nodesRef to avoid re-centering when nodes update while already focused
   useEffect(() => {
@@ -205,7 +216,7 @@ function QuestTreeInner({
     }
   }, [focusedQuestId, fitView]);
 
-  // Custom wheel handler for vertical-only scrolling
+  // Custom wheel handler for vertical-only scrolling with bounds clamping
   // React Flow's panOnScrollMode doesn't reliably prevent horizontal movement on all devices
   useEffect(() => {
     const container = containerRef.current;
@@ -220,7 +231,23 @@ function QuestTreeInner({
       const { x, y, zoom } = getViewport();
       // Only use deltaY for vertical scrolling, ignore deltaX completely
       const panSpeed = 0.8;
-      const newY = y - e.deltaY * panSpeed;
+      let newY = y - e.deltaY * panSpeed;
+
+      // Clamp to translateExtent bounds if available
+      const extent = translateExtentRef.current;
+      if (extent) {
+        const [[, minY], [, maxY]] = extent;
+        const viewportHeight = container.clientHeight;
+
+        // Calculate valid viewport.y range:
+        // - maxViewportY: can't scroll higher than top of content
+        // - minViewportY: can't scroll lower than bottom of content
+        const maxViewportY = -minY * zoom;
+        const minViewportY = viewportHeight - maxY * zoom;
+
+        // Clamp newY within valid range
+        newY = Math.max(minViewportY, Math.min(maxViewportY, newY));
+      }
 
       setViewport({ x, y: newY, zoom }, { duration: 0 });
     };
