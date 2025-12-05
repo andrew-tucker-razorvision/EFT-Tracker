@@ -11,6 +11,7 @@ import {
   useEdgesState,
   useReactFlow,
   type NodeTypes,
+  type Node,
   ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -72,6 +73,10 @@ function QuestTreeInner({
   const isMobile = useIsMobile();
   const { fitView, setViewport, getViewport } = useReactFlow();
   const isInitializedRef = useRef(false);
+  // Ref to access current nodes without causing effect re-runs
+  const nodesRef = useRef<Node[]>([]);
+  // Ref for container to attach custom wheel handler
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Focus mode state
   const [focusedQuestId, setFocusedQuestId] = useState<string | null>(null);
@@ -141,9 +146,15 @@ function QuestTreeInner({
     setEdges(initialEdges);
   }, [initialNodes, initialEdges, setNodes, setEdges]);
 
+  // Keep nodesRef in sync with nodes for use in effects that shouldn't re-run on node changes
+  useEffect(() => {
+    nodesRef.current = nodes;
+  }, [nodes]);
+
   // Set initial viewport to center content with appropriate zoom when React Flow is ready
+  // Uses nodesRef to avoid callback recreation on every nodes change
   const onInit = useCallback(() => {
-    if (!isInitializedRef.current && nodes.length > 0) {
+    if (!isInitializedRef.current && nodesRef.current.length > 0) {
       // First: fit all content to center it properly
       fitView({ padding: 0.1, duration: 0 });
 
@@ -156,7 +167,7 @@ function QuestTreeInner({
 
       isInitializedRef.current = true;
     }
-  }, [nodes, fitView, getViewport, setViewport]);
+  }, [fitView, getViewport, setViewport]);
 
   // Calculate bounds to constrain panning - include ALL nodes (traders + quests)
   const translateExtent = useMemo(() => {
@@ -179,9 +190,10 @@ function QuestTreeInner({
   }, [nodes]);
 
   // Center on focused quest when focus changes
+  // Uses nodesRef to avoid re-centering when nodes update while already focused
   useEffect(() => {
     if (focusedQuestId) {
-      const focusedNode = nodes.find((n) => n.id === focusedQuestId);
+      const focusedNode = nodesRef.current.find((n) => n.id === focusedQuestId);
       if (focusedNode) {
         fitView({
           nodes: [focusedNode],
@@ -191,7 +203,31 @@ function QuestTreeInner({
         });
       }
     }
-  }, [focusedQuestId, nodes, fitView]);
+  }, [focusedQuestId, fitView]);
+
+  // Custom wheel handler for vertical-only scrolling
+  // React Flow's panOnScrollMode doesn't reliably prevent horizontal movement on all devices
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      // Only handle scroll events, not pinch-to-zoom (which has ctrlKey)
+      if (e.ctrlKey) return;
+
+      e.preventDefault();
+
+      const { x, y, zoom } = getViewport();
+      // Only use deltaY for vertical scrolling, ignore deltaX completely
+      const panSpeed = 0.8;
+      const newY = y - e.deltaY * panSpeed;
+
+      setViewport({ x, y: newY, zoom }, { duration: 0 });
+    };
+
+    container.addEventListener("wheel", handleWheel, { passive: false });
+    return () => container.removeEventListener("wheel", handleWheel);
+  }, [getViewport, setViewport]);
 
   // Handle background click to exit focus mode
   const handlePaneClick = useCallback(() => {
@@ -239,7 +275,7 @@ function QuestTreeInner({
   );
 
   return (
-    <div className="w-full h-full touch-pan-x touch-pan-y relative">
+    <div ref={containerRef} className="w-full h-full touch-pan-y relative">
       {/* Top action bar */}
       <div className="absolute top-2 left-2 z-10 flex items-center gap-2">
         {/* Focus mode indicator */}
@@ -292,7 +328,7 @@ function QuestTreeInner({
           type: "default", // Bezier curves
         }}
         proOptions={{ hideAttribution: true }}
-        panOnScroll={true}
+        panOnScroll={false}
         zoomOnScroll={false}
         panOnDrag={[1, 2]}
         zoomOnPinch={true}
