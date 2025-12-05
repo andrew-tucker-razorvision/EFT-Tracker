@@ -407,7 +407,7 @@ describe("/api/progress/[questId]", () => {
       expect(data.progress.status).toBe("IN_PROGRESS");
     });
 
-    it("should reject invalid status transition (LOCKED -> COMPLETED)", async () => {
+    it("should reject invalid status transition (LOCKED -> IN_PROGRESS)", async () => {
       vi.mocked(auth).mockResolvedValue(mockSession as any);
       vi.mocked(prisma.questProgress.findUnique).mockResolvedValue({
         id: "progress-1",
@@ -415,6 +415,38 @@ describe("/api/progress/[questId]", () => {
         questId: "quest-1",
         status: "LOCKED",
       } as never);
+
+      const request = new Request(
+        "http://localhost:3000/api/progress/quest-1",
+        {
+          method: "PATCH",
+          body: JSON.stringify({ status: "IN_PROGRESS" }),
+        }
+      );
+      const response = await PATCH(request, {
+        params: Promise.resolve({ questId: "quest-1" }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.error).toContain("Invalid status transition");
+    });
+
+    it("should allow LOCKED -> COMPLETED for skip-to-quest feature", async () => {
+      vi.mocked(auth).mockResolvedValue(mockSession as any);
+      vi.mocked(prisma.questProgress.findUnique).mockResolvedValue({
+        id: "progress-1",
+        userId: "user-123",
+        questId: "quest-1",
+        status: "LOCKED",
+      } as never);
+      vi.mocked(prisma.questProgress.update).mockResolvedValue({
+        id: "progress-1",
+        userId: "user-123",
+        questId: "quest-1",
+        status: "COMPLETED",
+      } as never);
+      vi.mocked(prisma.questDependency.findMany).mockResolvedValue([]);
 
       const request = new Request(
         "http://localhost:3000/api/progress/quest-1",
@@ -428,8 +460,8 @@ describe("/api/progress/[questId]", () => {
       });
       const data = await response.json();
 
-      expect(response.status).toBe(400);
-      expect(data.error).toContain("Invalid status transition");
+      expect(response.status).toBe(200);
+      expect(data.progress.status).toBe("COMPLETED");
     });
 
     it("should allow IN_PROGRESS -> COMPLETED transition", async () => {

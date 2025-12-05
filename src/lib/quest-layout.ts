@@ -133,7 +133,8 @@ export function getQuestChain(
 
 /**
  * Get all incomplete prerequisites for a quest (recursively).
- * Returns quests that need to be completed before this quest can be started.
+ * Returns quests that need to be completed before this quest can be started,
+ * in dependency order (deepest prerequisites first).
  * Does NOT include the target quest itself.
  */
 export function getIncompletePrerequisites(
@@ -153,24 +154,21 @@ export function getIncompletePrerequisites(
       if (seen.has(prereqId)) continue;
       seen.add(prereqId);
 
+      // First recurse to get deeper prerequisites (post-order traversal)
+      collectPrereqs(prereqId);
+
+      // Then add this prerequisite (after its own prerequisites)
       const prereqQuest = questMap.get(prereqId);
       if (prereqQuest && prereqQuest.computedStatus !== "completed") {
         prerequisites.push(prereqQuest);
       }
-      // Recursively get prerequisites of prerequisites
-      collectPrereqs(prereqId);
     }
   }
 
   collectPrereqs(questId);
 
-  // Sort by trader then by title for consistent display
-  return prerequisites.sort((a, b) => {
-    if (a.trader.name !== b.trader.name) {
-      return a.trader.name.localeCompare(b.trader.name);
-    }
-    return a.title.localeCompare(b.title);
-  });
+  // Return in dependency order (no sorting - order matters for skip feature)
+  return prerequisites;
 }
 
 export function buildQuestGraph(

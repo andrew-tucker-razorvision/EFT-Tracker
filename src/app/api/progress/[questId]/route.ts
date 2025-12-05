@@ -10,7 +10,7 @@ type QuestDependencyWithStatus = Prisma.QuestDependencyGetPayload<{
 
 // Valid status transitions
 const VALID_TRANSITIONS: Record<string, string[]> = {
-  LOCKED: [], // Can only be unlocked via auto-unlock logic
+  LOCKED: ["COMPLETED"], // Allow direct completion for skip-to-quest feature
   AVAILABLE: ["IN_PROGRESS", "COMPLETED"], // Allow direct completion
   IN_PROGRESS: ["COMPLETED", "AVAILABLE"], // Can abandon back to available
   COMPLETED: ["AVAILABLE"], // Can reset to available
