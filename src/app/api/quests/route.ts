@@ -29,16 +29,6 @@ type QuestWithRelations = Prisma.QuestGetPayload<{
   };
 }>;
 
-type QuestDependency = Prisma.QuestDependencyGetPayload<{
-  include: {
-    requiredQuest: {
-      include: {
-        trader: true;
-      };
-    };
-  };
-}>;
-
 /**
  * Check if a dependency requirement is satisfied based on the required status types
  * and the actual progress status.
@@ -65,6 +55,71 @@ function isDependencyMet(
     }
   }
 
+  return false;
+}
+
+/**
+ * Recursively check if a quest should be locked based on its dependency chain.
+ * This handles the case where a prerequisite quest has stored progress "COMPLETED"
+ * but should actually be locked because ITS prerequisites are not met.
+ *
+ * Uses memoization to avoid redundant computation.
+ */
+function isQuestEffectivelyLocked(
+  questId: string,
+  quests: QuestWithRelations[],
+  memo: Map<string, boolean>
+): boolean {
+  // Check memo first
+  if (memo.has(questId)) {
+    return memo.get(questId)!;
+  }
+
+  const quest = quests.find((q) => q.id === questId);
+  if (!quest) {
+    // Quest not in results (filtered out), assume not locked
+    memo.set(questId, false);
+    return false;
+  }
+
+  // If no dependencies, not locked
+  if (quest.dependsOn.length === 0) {
+    memo.set(questId, false);
+    return false;
+  }
+
+  // Check each dependency
+  for (const dep of quest.dependsOn) {
+    const depQuest = quests.find((q) => q.id === dep.requiredQuest.id);
+    if (!depQuest) {
+      // Dependency not in results - check if progress exists via the dependency data
+      // If we can't find the quest, we can't check its status, so assume dependency not met
+      memo.set(questId, true);
+      return true;
+    }
+
+    const depProgress = depQuest.progress?.[0];
+    const storedStatus = depProgress?.status || null;
+    const requirementStatus = dep.requirementStatus || ["complete"];
+
+    // First check: Is the stored status sufficient?
+    if (!isDependencyMet(requirementStatus, storedStatus)) {
+      // Stored status doesn't meet requirement
+      memo.set(questId, true);
+      return true;
+    }
+
+    // Second check: Even if stored status is COMPLETED/IN_PROGRESS,
+    // is the prerequisite quest effectively locked due to its own dependencies?
+    if (isQuestEffectivelyLocked(dep.requiredQuest.id, quests, memo)) {
+      // The prerequisite is effectively locked, so this dependency is not truly met
+      memo.set(questId, true);
+      return true;
+    }
+  }
+
+  // All dependencies are met
+  memo.set(questId, false);
   return false;
 }
 
@@ -139,26 +194,24 @@ export async function GET(request: Request) {
       orderBy: [{ levelRequired: "asc" }, { title: "asc" }],
     });
 
+    // Memoization map for recursive dependency checking
+    const lockMemo = new Map<string, boolean>();
+
     // Transform to include computed status
     const questsWithStatus = quests.map((quest: QuestWithRelations) => {
       const progress = quest.progress?.[0] || null;
 
-      // Compute status based on dependencies
+      // Compute status based on dependencies (recursive check)
       let computedStatus = "available";
 
-      // Check if all dependencies are met based on their requirement types
-      const hasUnmetDeps = quest.dependsOn.some((dep: QuestDependency) => {
-        const depQuest = quests.find(
-          (q: QuestWithRelations) => q.id === dep.requiredQuest.id
-        );
-        const depProgress = depQuest?.progress?.[0];
-        const actualStatus = depProgress?.status || null;
-        const requirementStatus = dep.requirementStatus || ["complete"];
-
-        return !isDependencyMet(requirementStatus, actualStatus);
-      });
-
-      const shouldBeLocked = quest.dependsOn.length > 0 && hasUnmetDeps;
+      // Use recursive function to check if quest should be locked
+      // This properly handles chains where a prerequisite has "COMPLETED" stored
+      // but should actually be locked due to its own unmet dependencies
+      const shouldBeLocked = isQuestEffectivelyLocked(
+        quest.id,
+        quests,
+        lockMemo
+      );
 
       if (progress) {
         const storedStatus = progress.status.toLowerCase();
