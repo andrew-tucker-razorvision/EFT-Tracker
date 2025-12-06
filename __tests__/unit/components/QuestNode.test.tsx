@@ -98,6 +98,7 @@ describe("QuestNode", () => {
       const { container } = renderWithReactFlow(<QuestNode {...props} />);
 
       // Trader info is shown via border color, not text
+      // Available quests have cursor-pointer
       expect(container.querySelector(".cursor-pointer")).toBeInTheDocument();
     });
 
@@ -136,9 +137,11 @@ describe("QuestNode", () => {
 
       const { container } = renderWithReactFlow(<QuestNode {...props} />);
 
-      // Locked quests have opacity-50 class (cursor-pointer to allow skip-to-quest feature)
-      const nodeDiv = container.querySelector(".opacity-50");
+      // Locked quests have opacity-70 class and cursor-not-allowed
+      const nodeDiv = container.querySelector(".opacity-70");
       expect(nodeDiv).toBeInTheDocument();
+      const cursorDiv = container.querySelector(".cursor-not-allowed");
+      expect(cursorDiv).toBeInTheDocument();
     });
 
     it("should apply available status styling", () => {

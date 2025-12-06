@@ -111,11 +111,17 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
       <div
         onContextMenu={handleContextMenu}
         className={cn(
-          "relative cursor-pointer rounded border-2 p-2 transition-all duration-150",
-          "hover:shadow-md active:scale-95",
+          "relative rounded border-2 p-2 transition-all duration-150",
+          // Cursor: not-allowed for locked, pointer for others
+          quest.computedStatus === "locked"
+            ? "cursor-not-allowed"
+            : "cursor-pointer",
+          // Hover/active effects only for non-locked quests
+          quest.computedStatus !== "locked" &&
+            "hover:shadow-md active:scale-95",
           selected && "ring-2 ring-offset-2 ring-blue-500",
-          quest.computedStatus === "locked" && !isDimmed && "opacity-50",
-          quest.computedStatus === "completed" && !isDimmed && "opacity-60",
+          quest.computedStatus === "locked" && !isDimmed && "opacity-70",
+          quest.computedStatus === "completed" && !isDimmed && "opacity-80",
           // in_progress treated same as available (no special styling)
           (quest.computedStatus === "available" ||
             quest.computedStatus === "in_progress") &&
@@ -128,7 +134,7 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
           // Focus mode styling
           isFocused && "ring-4 ring-blue-500 shadow-lg scale-105",
           isInFocusChain && !isFocused && "ring-2 ring-blue-300",
-          isDimmed && "opacity-20 grayscale pointer-events-auto",
+          isDimmed && "opacity-40 pointer-events-auto",
           // Level-based highlighting (only for available quests)
           isLevelAppropriate &&
             quest.computedStatus === "available" &&

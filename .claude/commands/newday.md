@@ -28,9 +28,11 @@ Start a fresh development session by checking project status and suggesting high
 
 ## Deferred Items
 
-The following items are intentionally deferred and should NOT be suggested:
+The following items are intentionally deferred and should be **excluded from the Open Issues list**:
 
-- **E2E tests (#104)** - Disabled to reduce CI costs during active development. Will re-enable before v1.0 release.
+- **#104** (E2E tests) - Disabled to reduce CI costs during active development. Will re-enable before v1.0 release.
+
+When listing open issues, filter out these issue numbers and adjust the count accordingly.
 
 ## Output Format
 

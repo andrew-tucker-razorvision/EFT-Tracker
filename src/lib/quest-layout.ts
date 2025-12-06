@@ -242,9 +242,9 @@ export function buildQuestGraph(
             strokeWidth: isEdgeInFocusChain ? 3 : quest.kappaRequired ? 3 : 2,
             strokeDasharray: isActiveOnly ? "5,5" : undefined, // Dashed line for "active only" requirements
             opacity: shouldDimEdge
-              ? 0.2
+              ? 0.4
               : quest.computedStatus === "locked"
-                ? 0.4
+                ? 0.5
                 : 1,
           },
           data: {
@@ -778,9 +778,9 @@ export function layoutTraderLane(
               : 2,
           strokeDasharray: isActiveOnly ? "5,5" : undefined, // Dashed line for "active only" requirements
           opacity: shouldDimEdge
-            ? 0.2
+            ? 0.4
             : targetQuest.computedStatus === "locked"
-              ? 0.4
+              ? 0.5
               : 1,
         },
         data: {
@@ -999,7 +999,7 @@ export function buildCrossTraderEdges(
           stroke: shouldDim ? "#E5E7EB" : "#9CA3AF",
           strokeWidth: 1.5,
           strokeDasharray: "6,4",
-          opacity: shouldDim ? 0.2 : 0.6,
+          opacity: shouldDim ? 0.4 : 0.7,
         },
         data: {
           isCrossTrader: true,

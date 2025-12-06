@@ -219,8 +219,11 @@ describe("Quest Status Styling", () => {
     const props = createNodeProps(lockedQuest);
     const { container } = renderWithReactFlow(<QuestNode {...props} />);
 
-    const nodeDiv = container.querySelector(".opacity-50");
+    // Locked quests have opacity-70 and cursor-not-allowed
+    const nodeDiv = container.querySelector(".opacity-70");
     expect(nodeDiv).toBeInTheDocument();
+    const cursorDiv = container.querySelector(".cursor-not-allowed");
+    expect(cursorDiv).toBeInTheDocument();
   });
 
   it("should apply available status styling with shadow", () => {
@@ -317,12 +320,9 @@ describe("Focus Mode", () => {
     });
     const { container } = renderWithReactFlow(<QuestNode {...props} />);
 
-    // Dimmed nodes have opacity-20 and grayscale
-    const dimmedNode = container.querySelector(".opacity-20");
+    // Dimmed nodes have opacity-40 (no grayscale for better visibility)
+    const dimmedNode = container.querySelector(".opacity-40");
     expect(dimmedNode).toBeInTheDocument();
-
-    const grayscaleNode = container.querySelector(".grayscale");
-    expect(grayscaleNode).toBeInTheDocument();
   });
 
   it("should hide wiki link icon when node is dimmed", () => {
