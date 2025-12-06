@@ -28,7 +28,7 @@ const CHECKMARK_STYLE = { color: STATUS_COLORS.completed.primary };
 function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
   const {
     quest,
-    nodeHeight = QUEST_NODE_HEIGHT, // Use dynamic height if provided, otherwise default
+    // nodeHeight - dynamic height is passed but we use fixed dimensions for now
     onClick,
     isRoot,
     isLeaf,
@@ -204,7 +204,7 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
                 rel="noopener noreferrer"
                 onClick={handleWikiLinkClick}
                 onMouseDown={handleWikiLinkMouseDown}
-                className="absolute -bottom-1 -right-1 p-2 opacity-60 hover:opacity-100 transition-colors duration-150 z-10 rounded focus:outline-none focus:ring-2 focus:ring-offset-1 pointer-events-auto"
+                className="absolute -bottom-1 -right-1 p-2 opacity-100 sm:opacity-60 sm:hover:opacity-100 transition-colors duration-150 z-10 rounded focus:outline-none focus:ring-2 focus:ring-offset-1 pointer-events-auto"
                 style={WIKI_LINK_STYLE}
                 aria-label={`Open ${quest.title} wiki page`}
               >

@@ -95,7 +95,7 @@ export function LevelTimelineView({
           const isCurrentBracket = bracket.label === currentBracketLabel;
 
           return (
-            <div key={bracket.label} className="flex-shrink-0 w-48">
+            <div key={bracket.label} className="flex-shrink-0 w-36 sm:w-48">
               {/* Column header */}
               <div
                 className="sticky top-0 z-10 p-2 rounded-t-lg border-b-2"

@@ -260,8 +260,8 @@ describe("Quest Status Styling", () => {
     const props = createNodeProps(completedQuest);
     const { container } = renderWithReactFlow(<QuestNode {...props} />);
 
-    // Completed quests have opacity-60
-    const nodeDiv = container.querySelector(".opacity-60");
+    // Completed quests have opacity-80
+    const nodeDiv = container.querySelector(".opacity-80");
     expect(nodeDiv).toBeInTheDocument();
   });
 });

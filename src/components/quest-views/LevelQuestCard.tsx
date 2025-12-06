@@ -60,11 +60,10 @@ export function LevelQuestCard({
   }, [quest.dependsOn, quest.traderId]);
 
   const handleClick = () => {
-    if (quest.computedStatus === "locked") return;
-
     setIsClicked(true);
     setTimeout(() => setIsClicked(false), 150);
 
+    // Pass to parent handler (handles locked state for skip-to-quest feature)
     onStatusChange(quest.id, quest.computedStatus);
   };
 
@@ -72,10 +71,10 @@ export function LevelQuestCard({
     <div
       onClick={handleClick}
       className={cn(
-        "relative p-2 rounded-lg border transition-all duration-150 cursor-pointer",
+        "relative p-2 rounded-lg border transition-all duration-150 cursor-pointer min-h-[44px]",
         "hover:shadow-md",
         isClicked && "scale-95",
-        quest.computedStatus === "locked" && "opacity-50 cursor-not-allowed",
+        quest.computedStatus === "locked" && "opacity-70",
         quest.computedStatus === "completed" && "opacity-70",
         quest.computedStatus === "available" && "shadow-sm hover:shadow-lg",
         // Level-based highlighting
