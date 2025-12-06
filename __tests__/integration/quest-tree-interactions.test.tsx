@@ -219,11 +219,9 @@ describe("Quest Status Styling", () => {
     const props = createNodeProps(lockedQuest);
     const { container } = renderWithReactFlow(<QuestNode {...props} />);
 
-    // Locked quests have opacity-70 and cursor-not-allowed
+    // Locked quests have opacity-70 (cursor-pointer to allow skip-to-quest feature)
     const nodeDiv = container.querySelector(".opacity-70");
     expect(nodeDiv).toBeInTheDocument();
-    const cursorDiv = container.querySelector(".cursor-not-allowed");
-    expect(cursorDiv).toBeInTheDocument();
   });
 
   it("should apply available status styling with shadow", () => {

@@ -111,14 +111,8 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
       <div
         onContextMenu={handleContextMenu}
         className={cn(
-          "relative rounded border-2 p-2 transition-all duration-150",
-          // Cursor: not-allowed for locked, pointer for others
-          quest.computedStatus === "locked"
-            ? "cursor-not-allowed"
-            : "cursor-pointer",
-          // Hover/active effects only for non-locked quests
-          quest.computedStatus !== "locked" &&
-            "hover:shadow-md active:scale-95",
+          "relative cursor-pointer rounded border-2 p-2 transition-all duration-150",
+          "hover:shadow-md active:scale-95",
           selected && "ring-2 ring-offset-2 ring-blue-500",
           quest.computedStatus === "locked" && !isDimmed && "opacity-70",
           quest.computedStatus === "completed" && !isDimmed && "opacity-80",
