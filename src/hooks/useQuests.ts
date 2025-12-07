@@ -8,6 +8,30 @@ import type {
   QuestStatus,
 } from "@/types";
 
+// Simple request deduplication - tracks in-flight requests
+const inflightRequests = new Map<string, Promise<Response>>();
+
+async function fetchWithDedup(url: string): Promise<Response> {
+  // Check if there's already an in-flight request for this URL
+  const existing = inflightRequests.get(url);
+  if (existing) {
+    return existing;
+  }
+
+  // Create new request
+  const request = fetch(url);
+  inflightRequests.set(url, request);
+
+  try {
+    const response = await request;
+    // Return a clone so the original can still be consumed
+    return response.clone();
+  } finally {
+    // Clean up after request completes (success or failure)
+    inflightRequests.delete(url);
+  }
+}
+
 interface UseQuestsReturn {
   quests: QuestWithProgress[];
   allQuests: QuestWithProgress[]; // Unfiltered quests for accurate depth calculation
@@ -53,7 +77,7 @@ export function useQuests(): UseQuestsReturn {
 
   const fetchTraders = useCallback(async () => {
     try {
-      const res = await fetch("/api/traders");
+      const res = await fetchWithDedup("/api/traders");
       if (!res.ok) throw new Error("Failed to fetch traders");
       const data = await res.json();
       setTraders(data.traders);
@@ -65,7 +89,7 @@ export function useQuests(): UseQuestsReturn {
   // Fetch all quests (unfiltered) for accurate depth calculation
   const fetchAllQuests = useCallback(async () => {
     try {
-      const res = await fetch("/api/quests");
+      const res = await fetchWithDedup("/api/quests");
       if (!res.ok) throw new Error("Failed to fetch all quests");
       const data = await res.json();
       setAllQuests(data.quests);
@@ -86,7 +110,8 @@ export function useQuests(): UseQuestsReturn {
       if (appliedFilters.kappaOnly) params.set("kappa", "true");
       if (appliedFilters.search) params.set("search", appliedFilters.search);
 
-      const res = await fetch(`/api/quests?${params.toString()}`);
+      const url = `/api/quests?${params.toString()}`;
+      const res = await fetchWithDedup(url);
       if (!res.ok) throw new Error("Failed to fetch quests");
 
       const data = await res.json();

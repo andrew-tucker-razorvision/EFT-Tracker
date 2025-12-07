@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Cloud, CloudOff, Check, Loader2 } from "lucide-react";
+import { Cloud, CloudOff, Check, Loader2, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SyncStatusIndicatorProps {
   lastSynced: Date | null;
   isOnline: boolean;
   isSaving: boolean;
+  pendingOfflineCount?: number;
 }
 
 function formatRelativeTime(date: Date): string {
@@ -34,6 +35,7 @@ export function SyncStatusIndicator({
   lastSynced,
   isOnline,
   isSaving,
+  pendingOfflineCount = 0,
 }: SyncStatusIndicatorProps) {
   const [relativeTime, setRelativeTime] = useState<string>("");
 
@@ -55,7 +57,23 @@ export function SyncStatusIndicator({
     return (
       <div className="flex items-center gap-1.5 text-xs text-amber-500">
         <CloudOff className="w-3.5 h-3.5" />
-        <span>Offline</span>
+        <span>
+          Offline
+          {pendingOfflineCount > 0 && ` (${pendingOfflineCount} pending)`}
+        </span>
+      </div>
+    );
+  }
+
+  // Show pending count even when online (syncing in progress)
+  if (pendingOfflineCount > 0 && !isSaving) {
+    return (
+      <div className="flex items-center gap-1.5 text-xs text-amber-500">
+        <Clock className="w-3.5 h-3.5" />
+        <span>
+          {pendingOfflineCount} change{pendingOfflineCount > 1 ? "s" : ""}{" "}
+          pending sync
+        </span>
       </div>
     );
   }

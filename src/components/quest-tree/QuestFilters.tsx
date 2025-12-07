@@ -381,8 +381,11 @@ export function QuestFilters({
     onApplyFilters();
   };
 
-  // Auto-apply is disabled - users must click Apply or use filter chips
-  // TODO: Re-enable auto-apply after fixing infinite loop issue
+  // Auto-apply is intentionally disabled for primary filters (trader, status, map).
+  // Users must click Apply button. This prevents:
+  // 1. Excessive API calls while user is still selecting filters
+  // 2. Render loops from filter state changes triggering refetches
+  // Search input auto-applies with debounce (handled above)
 
   // Handle removal of individual filter from chips
   const handleRemoveFilter = (key: keyof Filters, value?: string) => {

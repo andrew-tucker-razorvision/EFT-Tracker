@@ -52,6 +52,7 @@ export function QuestsClient() {
     savingQuestIds,
     lastSynced,
     isOnline,
+    pendingOfflineCount,
   } = useProgress();
   const [selectedQuestId, setSelectedQuestId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("trader-lanes");
@@ -390,6 +391,7 @@ export function QuestsClient() {
             lastSynced={lastSynced}
             isOnline={isOnline}
             isSaving={savingQuestIds.size > 0}
+            pendingOfflineCount={pendingOfflineCount}
           />
         </div>
       )}
