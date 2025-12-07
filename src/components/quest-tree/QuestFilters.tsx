@@ -405,14 +405,10 @@ export function QuestFilters({
     } else if (key === "questsPerTree") {
       onFilterChange({ questsPerTree: 5 });
     }
-    // Primary filters will auto-apply via useEffect above
-    // For advanced filters, apply immediately
-    if (!["traderId", "statuses", "map"].includes(key)) {
-      onApplyFiltersRef.current();
-    }
+    // Filter chip removal requires clicking Apply to take effect
   };
 
-  // Simple filter change handler (auto-apply handled by useEffect)
+  // Simple filter change handler - requires Apply button click
   const handlePrimaryFilterChange = (update: Partial<Filters>) => {
     onFilterChange(update);
   };

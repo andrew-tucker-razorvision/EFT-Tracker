@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function QuestsPage() {
   return (
-    <div className="h-[calc(100vh-4rem)] md:h-[calc(100vh-4.5rem)] flex flex-col">
+    <div className="flex-1 flex flex-col min-h-0">
       <GuestBanner />
       <QuestsClient />
     </div>
