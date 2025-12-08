@@ -1,0 +1,1 @@
+export { QuestDetailModal } from "./QuestDetailModal";

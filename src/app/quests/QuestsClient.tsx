@@ -13,6 +13,7 @@ import { QuestTreeSkeleton } from "@/components/quest-tree/QuestTreeSkeleton";
 import { SkipQuestDialog } from "@/components/quest-tree/SkipQuestDialog";
 import { LevelTimelineView, MapGroupsView } from "@/components/quest-views";
 import { WelcomeModal } from "@/components/onboarding";
+import { QuestDetailModal } from "@/components/quest-detail";
 import { useQuests } from "@/hooks/useQuests";
 import { useProgress } from "@/hooks/useProgress";
 import { getIncompletePrerequisites } from "@/lib/quest-layout";
@@ -65,6 +66,12 @@ export function QuestsClient() {
 
   // Onboarding state
   const [showWelcome, setShowWelcome] = useState(false);
+
+  // Quest detail modal state
+  const [detailQuest, setDetailQuest] = useState<QuestWithProgress | null>(
+    null
+  );
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
 
   // Refs for stable callback references (prevents re-renders from invalidating memoization)
   const questsWithProgressRef = useRef<QuestWithProgress[]>([]);
@@ -171,6 +178,15 @@ export function QuestsClient() {
 
   const handleQuestSelect = useCallback((questId: string) => {
     setSelectedQuestId((prev) => (prev === questId ? null : questId));
+  }, []);
+
+  // Handle opening quest details modal
+  const handleQuestDetails = useCallback((questId: string) => {
+    const quest = questsWithProgressRef.current.find((q) => q.id === questId);
+    if (quest) {
+      setDetailQuest(quest);
+      setDetailModalOpen(true);
+    }
   }, []);
 
   // Get prerequisites for the skip dialog
@@ -345,6 +361,11 @@ export function QuestsClient() {
         onConfirm={handleSkipConfirm}
         isLoading={skipLoading}
       />
+      <QuestDetailModal
+        quest={detailQuest}
+        open={detailModalOpen}
+        onOpenChange={setDetailModalOpen}
+      />
       <QuestFilters
         traders={traders}
         filters={filters}
@@ -368,18 +389,21 @@ export function QuestsClient() {
               savingQuestIds={savingQuestIds}
               onQuestSelect={handleQuestSelect}
               onStatusChange={handleStatusChange}
+              onQuestDetails={handleQuestDetails}
             />
           ) : viewMode === "level-timeline" ? (
             <LevelTimelineView
               quests={questsWithProgress}
               playerLevel={filters.playerLevel}
               onStatusChange={handleStatusChange}
+              onQuestDetails={handleQuestDetails}
             />
           ) : (
             <MapGroupsView
               quests={questsWithProgress}
               playerLevel={filters.playerLevel}
               onStatusChange={handleStatusChange}
+              onQuestDetails={handleQuestDetails}
             />
           )
         ) : (

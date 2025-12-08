@@ -57,6 +57,7 @@ interface QuestTreeProps {
   savingQuestIds?: Set<string>; // Set of quest IDs currently being saved
   onQuestSelect: (questId: string) => void;
   onStatusChange: (questId: string, status: QuestStatus) => void;
+  onQuestDetails?: (questId: string) => void; // Open quest details modal
 }
 
 function QuestTreeInner({
@@ -69,6 +70,7 @@ function QuestTreeInner({
   savingQuestIds,
   onQuestSelect,
   onStatusChange,
+  onQuestDetails,
 }: QuestTreeProps) {
   const isMobile = useIsMobile();
   const { fitView, setViewport, getViewport } = useReactFlow();
@@ -115,6 +117,7 @@ function QuestTreeInner({
       onStatusChange,
       onClick: onQuestSelect,
       onFocus: handleFocus,
+      onDetails: onQuestDetails,
       selectedQuestId,
       focusedQuestId,
       focusChain,
@@ -139,6 +142,7 @@ function QuestTreeInner({
     onStatusChange,
     onQuestSelect,
     handleFocus,
+    onQuestDetails,
   ]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);

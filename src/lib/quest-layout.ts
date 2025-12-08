@@ -73,6 +73,7 @@ interface BuildQuestGraphOptions {
   onStatusChange: (questId: string, status: QuestStatus) => void;
   onClick: (questId: string) => void;
   onFocus: (questId: string) => void;
+  onDetails?: (questId: string) => void; // Open quest details modal
   selectedQuestId?: string | null;
   focusedQuestId?: string | null;
   focusChain?: Set<string>;
@@ -179,6 +180,7 @@ export function buildQuestGraph(
     onStatusChange,
     onClick,
     onFocus,
+    onDetails,
     selectedQuestId,
     focusedQuestId,
     focusChain,
@@ -308,6 +310,7 @@ export function buildQuestGraph(
         onStatusChange,
         onClick,
         onFocus,
+        onDetails,
       },
     };
   });
@@ -634,6 +637,7 @@ export function layoutTraderLane(
     onStatusChange,
     onClick,
     onFocus,
+    onDetails,
     selectedQuestId,
     focusedQuestId,
     focusChain,
@@ -862,6 +866,7 @@ export function layoutTraderLane(
         onStatusChange,
         onClick,
         onFocus,
+        onDetails,
       },
     };
   });

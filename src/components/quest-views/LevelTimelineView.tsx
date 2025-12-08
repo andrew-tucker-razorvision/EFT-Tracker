@@ -19,12 +19,14 @@ interface LevelTimelineViewProps {
   quests: QuestWithProgress[];
   playerLevel?: number | null;
   onStatusChange: (questId: string, status: QuestStatus) => void;
+  onQuestDetails?: (questId: string) => void;
 }
 
 export function LevelTimelineView({
   quests,
   playerLevel,
   onStatusChange,
+  onQuestDetails,
 }: LevelTimelineViewProps) {
   // Group quests by level bracket
   const questsByBracket = useMemo(() => {
@@ -141,6 +143,7 @@ export function LevelTimelineView({
                       quest={quest}
                       playerLevel={playerLevel}
                       onStatusChange={onStatusChange}
+                      onQuestDetails={onQuestDetails}
                     />
                   ))
                 )}
