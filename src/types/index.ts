@@ -84,7 +84,7 @@ export interface QuestFilters {
 }
 
 // View mode for quest display
-export type ViewMode = "trader-lanes" | "level-timeline";
+export type ViewMode = "trader-lanes" | "level-timeline" | "map-groups";
 
 // React Flow node data for quest nodes
 export interface QuestNodeData extends Record<string, unknown> {

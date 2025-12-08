@@ -11,7 +11,7 @@ import {
 } from "@/components/quest-tree";
 import { QuestTreeSkeleton } from "@/components/quest-tree/QuestTreeSkeleton";
 import { SkipQuestDialog } from "@/components/quest-tree/SkipQuestDialog";
-import { LevelTimelineView } from "@/components/quest-views";
+import { LevelTimelineView, MapGroupsView } from "@/components/quest-views";
 import { WelcomeModal } from "@/components/onboarding";
 import { useQuests } from "@/hooks/useQuests";
 import { useProgress } from "@/hooks/useProgress";
@@ -369,8 +369,14 @@ export function QuestsClient() {
               onQuestSelect={handleQuestSelect}
               onStatusChange={handleStatusChange}
             />
-          ) : (
+          ) : viewMode === "level-timeline" ? (
             <LevelTimelineView
+              quests={questsWithProgress}
+              playerLevel={filters.playerLevel}
+              onStatusChange={handleStatusChange}
+            />
+          ) : (
+            <MapGroupsView
               quests={questsWithProgress}
               playerLevel={filters.playerLevel}
               onStatusChange={handleStatusChange}

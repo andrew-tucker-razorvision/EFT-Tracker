@@ -370,7 +370,7 @@ export function QuestFilters({
     setSearchValue("");
     onFilterChange({
       traderId: null,
-      statuses: [],
+      statuses: ["available"], // Default to showing only available quests
       search: "",
       kappaOnly: false,
       map: null,

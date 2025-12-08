@@ -49,7 +49,7 @@ interface UseQuestsReturn {
 
 const defaultFilters: QuestFilters = {
   traderId: null,
-  statuses: [], // Empty = all statuses
+  statuses: ["available"], // Default to showing only available quests
   search: "",
   kappaOnly: false,
   map: null,
