@@ -24,6 +24,7 @@ function createNodeProps(
     onStatusChange: (questId: string, status: QuestStatus) => void;
     onClick: (questId: string) => void;
     onFocus: (questId: string) => void;
+    onDetails: (questId: string) => void;
     isSelected: boolean;
     isRoot: boolean;
     isLeaf: boolean;
@@ -35,6 +36,7 @@ function createNodeProps(
   const onStatusChange = overrides.onStatusChange ?? vi.fn();
   const onClick = overrides.onClick ?? vi.fn();
   const onFocus = overrides.onFocus ?? vi.fn();
+  const onDetails = overrides.onDetails ?? vi.fn();
 
   const data: QuestNodeData = {
     quest,
@@ -49,6 +51,7 @@ function createNodeProps(
     onStatusChange,
     onClick,
     onFocus,
+    onDetails,
   };
 
   return {
@@ -179,10 +182,10 @@ describe("QuestNode", () => {
   });
 
   describe("click handling", () => {
-    it("should call onClick on right-click (context menu)", () => {
+    it("should call onDetails on right-click (context menu)", () => {
       const quest = createQuestWithProgress(mockQuests[0], "available");
-      const onClick = vi.fn();
-      const props = createNodeProps(quest, { onClick });
+      const onDetails = vi.fn();
+      const props = createNodeProps(quest, { onDetails });
 
       const { container } = renderWithReactFlow(<QuestNode {...props} />);
 
@@ -191,7 +194,7 @@ describe("QuestNode", () => {
         fireEvent.contextMenu(nodeDiv);
       }
 
-      expect(onClick).toHaveBeenCalledWith(quest.id);
+      expect(onDetails).toHaveBeenCalledWith(quest.id);
     });
   });
 
