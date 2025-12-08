@@ -13,18 +13,18 @@ export const EFT_COLORS = {
   border: "rgba(196, 170, 106, 0.4)", // Gold-tinted borders for visibility
 } as const;
 
-// All traders use unified gold theme (differentiate by icons instead)
+// Distinct colors per trader for easy visual identification
 export const TRADER_COLORS: Record<string, TraderColor> = {
-  prapor: { primary: EFT_COLORS.goldTwo, bg: EFT_COLORS.gunmetal },
-  therapist: { primary: EFT_COLORS.goldTwo, bg: EFT_COLORS.gunmetal },
-  skier: { primary: EFT_COLORS.goldTwo, bg: EFT_COLORS.gunmetal },
-  peacekeeper: { primary: EFT_COLORS.goldTwo, bg: EFT_COLORS.gunmetal },
-  mechanic: { primary: EFT_COLORS.goldTwo, bg: EFT_COLORS.gunmetal },
-  ragman: { primary: EFT_COLORS.goldTwo, bg: EFT_COLORS.gunmetal },
-  jaeger: { primary: EFT_COLORS.goldTwo, bg: EFT_COLORS.gunmetal },
-  fence: { primary: EFT_COLORS.goldTwo, bg: EFT_COLORS.gunmetal },
-  lightkeeper: { primary: EFT_COLORS.goldTwo, bg: EFT_COLORS.gunmetal },
-  ref: { primary: EFT_COLORS.goldTwo, bg: EFT_COLORS.gunmetal },
+  prapor: { primary: "#c41e3a", bg: EFT_COLORS.gunmetal }, // Red
+  therapist: { primary: "#ff69b4", bg: EFT_COLORS.gunmetal }, // Pink
+  skier: { primary: "#1e90ff", bg: EFT_COLORS.gunmetal }, // Blue
+  peacekeeper: { primary: "#228b22", bg: EFT_COLORS.gunmetal }, // Green
+  mechanic: { primary: "#ff8c00", bg: EFT_COLORS.gunmetal }, // Orange
+  ragman: { primary: "#9370db", bg: EFT_COLORS.gunmetal }, // Purple
+  jaeger: { primary: "#8b4513", bg: EFT_COLORS.gunmetal }, // Brown
+  fence: { primary: "#708090", bg: EFT_COLORS.gunmetal }, // Slate gray
+  lightkeeper: { primary: "#ffd700", bg: EFT_COLORS.gunmetal }, // Gold
+  ref: { primary: "#20b2aa", bg: EFT_COLORS.gunmetal }, // Teal
 };
 
 export function getTraderColor(traderId: string): TraderColor {
@@ -39,7 +39,7 @@ export function getTraderColor(traderId: string): TraderColor {
 // Status colors - dark backgrounds with bright accent borders for readability
 export const STATUS_COLORS = {
   locked: {
-    primary: "#6b6b6b", // Medium gray
+    primary: "#5a5a5a", // Dimmer gray
     bg: "#1a1a1a", // Near-black
     border: "#3a3a3a", // Subtle border
   },
@@ -55,8 +55,8 @@ export const STATUS_COLORS = {
   },
   completed: {
     primary: "#4ade80", // Bright green
-    bg: "#1a1a1a", // Same dark background
-    border: "#2d5a3d", // Muted green border
+    bg: "#1e2e1e", // Tinted green background for clear distinction
+    border: "#4ade80", // Bright green border to stand out
   },
 } as const;
 

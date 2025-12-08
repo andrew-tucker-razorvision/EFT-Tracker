@@ -86,25 +86,17 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
   const isDimmed = hasFocusMode && !isInFocusChain && !isFocused;
 
   // Memoize style objects to prevent breaking memo equality checks
-  const nodeStyle = useMemo(
-    () => ({
+  const nodeStyle = useMemo(() => {
+    // All quests use trader color for border (dimmed gets gray)
+    const borderColor = isDimmed ? "#636363" : traderColor.primary;
+
+    return {
       width: QUEST_NODE_WIDTH,
       minHeight: QUEST_NODE_HEIGHT,
       backgroundColor: isDimmed ? "#424242" : statusColor.bg,
-      borderColor: isDimmed
-        ? "#636363"
-        : quest.computedStatus === "available"
-          ? traderColor.primary
-          : statusColor.border,
-    }),
-    [
-      isDimmed,
-      statusColor.bg,
-      statusColor.border,
-      quest.computedStatus,
-      traderColor.primary,
-    ]
-  );
+      borderColor,
+    };
+  }, [isDimmed, statusColor.bg, traderColor.primary]);
 
   const levelBadgeStyle = useMemo(
     () => ({
@@ -164,7 +156,7 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
           // Visual hierarchy indicators (only when not dimmed)
           isRoot && !isDimmed && "border-l-4 border-l-emerald-500",
           isLeaf && !isDimmed && "border-r-4 border-r-violet-500",
-          quest.kappaRequired && !isDimmed && "ring-2 ring-amber-400/70",
+          // Kappa indicated by badge only, no ring
           // Focus mode styling
           isFocused && "ring-4 ring-blue-500 shadow-lg scale-105",
           isInFocusChain && !isFocused && "ring-2 ring-blue-300",
