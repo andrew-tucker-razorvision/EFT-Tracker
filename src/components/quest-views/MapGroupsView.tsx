@@ -25,12 +25,14 @@ interface MapGroupsViewProps {
   quests: QuestWithProgress[];
   playerLevel?: number | null;
   onStatusChange: (questId: string, status: QuestStatus) => void;
+  onQuestDetails?: (questId: string) => void;
 }
 
 export function MapGroupsView({
   quests,
   playerLevel,
   onStatusChange,
+  onQuestDetails,
 }: MapGroupsViewProps) {
   // Group quests by map (a quest can appear in multiple maps)
   const questsByMap = useMemo(() => {
@@ -159,6 +161,7 @@ export function MapGroupsView({
                       quest={quest}
                       playerLevel={playerLevel}
                       onStatusChange={onStatusChange}
+                      onQuestDetails={onQuestDetails}
                     />
                   ))
                 )}

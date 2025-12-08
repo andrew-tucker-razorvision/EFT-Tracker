@@ -9,12 +9,14 @@ interface LevelQuestCardProps {
   quest: QuestWithProgress;
   playerLevel?: number | null;
   onStatusChange: (questId: string, status: QuestStatus) => void;
+  onQuestDetails?: (questId: string) => void;
 }
 
 export function LevelQuestCard({
   quest,
   playerLevel,
   onStatusChange,
+  onQuestDetails,
 }: LevelQuestCardProps) {
   const traderColor = getTraderColor(quest.traderId);
   const statusColor = STATUS_COLORS[quest.computedStatus];
@@ -67,9 +69,18 @@ export function LevelQuestCard({
     onStatusChange(quest.id, quest.computedStatus);
   };
 
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Right-click to open quest details
+    if (onQuestDetails) {
+      onQuestDetails(quest.id);
+    }
+  };
+
   return (
     <div
       onClick={handleClick}
+      onContextMenu={handleContextMenu}
       className={cn(
         "relative p-2 rounded-lg border transition-all duration-150 cursor-pointer min-h-[44px]",
         "hover:shadow-md",

@@ -54,6 +54,7 @@ function createNodeProps(
     onStatusChange: (questId: string, status: QuestStatus) => void;
     onClick: (questId: string) => void;
     onFocus: (questId: string) => void;
+    onDetails: (questId: string) => void;
     isSelected: boolean;
     isRoot: boolean;
     isLeaf: boolean;
@@ -67,6 +68,7 @@ function createNodeProps(
   const onStatusChange = overrides.onStatusChange ?? vi.fn();
   const onClick = overrides.onClick ?? vi.fn();
   const onFocus = overrides.onFocus ?? vi.fn();
+  const onDetails = overrides.onDetails ?? vi.fn();
 
   const data: QuestNodeData = {
     quest,
@@ -81,6 +83,7 @@ function createNodeProps(
     onStatusChange,
     onClick,
     onFocus,
+    onDetails,
   };
 
   return {
@@ -130,14 +133,14 @@ describe("Quest Completion", () => {
       expect(screen.getByText(availableQuest.title)).toBeInTheDocument();
     });
 
-    it("should call onClick on right-click (context menu)", () => {
+    it("should call onDetails on right-click (context menu)", () => {
       const quests = createMixedStatusQuests();
       const availableQuest = quests.find(
         (q) => q.id === MIXED_STATUS_IDS.AVAILABLE
       )!;
-      const onClick = vi.fn();
+      const onDetails = vi.fn();
 
-      const props = createNodeProps(availableQuest, { onClick });
+      const props = createNodeProps(availableQuest, { onDetails });
       const { container } = renderWithReactFlow(<QuestNode {...props} />);
 
       const nodeDiv = container.querySelector(".cursor-pointer");
@@ -145,7 +148,7 @@ describe("Quest Completion", () => {
         fireEvent.contextMenu(nodeDiv);
       }
 
-      expect(onClick).toHaveBeenCalledWith(availableQuest.id);
+      expect(onDetails).toHaveBeenCalledWith(availableQuest.id);
     });
 
     it("should show saving indicator when isSaving is true", () => {

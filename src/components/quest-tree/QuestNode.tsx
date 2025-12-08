@@ -2,7 +2,7 @@
 
 import { memo, useMemo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { ExternalLink, Loader2 } from "lucide-react";
+import { ExternalLink, Info, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getTraderColor, STATUS_COLORS, EFT_COLORS } from "@/lib/trader-colors";
 import type { QuestNode as QuestNodeType } from "@/types";
@@ -29,7 +29,8 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
   const {
     quest,
     // nodeHeight - dynamic height is passed but we use fixed dimensions for now
-    onClick,
+    // onClick - available for selection, but status change is handled by parent
+    onDetails,
     isRoot,
     isLeaf,
     isFocused,
@@ -112,8 +113,22 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
-    // Right-click to select/view details
-    onClick(quest.id);
+    // Right-click to open quest details
+    if (onDetails) {
+      onDetails(quest.id);
+    }
+  };
+
+  const handleInfoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation(); // Prevents node click/status change
+    if (onDetails) {
+      onDetails(quest.id);
+    }
+  };
+
+  const handleInfoMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent React Flow from intercepting
   };
 
   const handleWikiLinkClick = (e: React.MouseEvent) => {
@@ -184,6 +199,27 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
           >
             K
           </div>
+        )}
+
+        {/* Info button - opens quest details */}
+        {!isDimmed && onDetails && (
+          <Tooltip delayDuration={300}>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={handleInfoClick}
+                onMouseDown={handleInfoMouseDown}
+                className="absolute -bottom-1 -left-1 p-2 opacity-100 sm:opacity-60 sm:hover:opacity-100 transition-colors duration-150 z-10 rounded focus:outline-none focus:ring-2 focus:ring-offset-1 pointer-events-auto"
+                style={WIKI_LINK_STYLE}
+                aria-label={`View ${quest.title} details`}
+              >
+                <Info className="w-[16px] h-[16px]" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="top" sideOffset={4}>
+              <p className="text-xs">View Details</p>
+            </TooltipContent>
+          </Tooltip>
         )}
 
         {/* Wiki link */}

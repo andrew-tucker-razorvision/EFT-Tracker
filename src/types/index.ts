@@ -101,6 +101,7 @@ export interface QuestNodeData extends Record<string, unknown> {
   onStatusChange: (questId: string, status: QuestStatus) => void;
   onClick: (questId: string) => void;
   onFocus: (questId: string) => void; // Focus on this quest's chain
+  onDetails?: (questId: string) => void; // Open quest details modal
 }
 
 // React Flow quest node type
