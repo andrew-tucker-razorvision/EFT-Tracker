@@ -16,10 +16,17 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
+import { Keyboard } from "lucide-react";
 import { QuestNode, QUEST_NODE_WIDTH, QUEST_NODE_HEIGHT } from "./QuestNode";
 import { TraderNode } from "./TraderNode";
 import { buildTraderLaneGraph, getQuestChain } from "@/lib/quest-layout";
 import { getTraderColor } from "@/lib/trader-colors";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type {
   QuestWithProgress,
   QuestStatus,
@@ -32,20 +39,6 @@ const nodeTypes: NodeTypes = {
   quest: QuestNode,
   trader: TraderNode,
 };
-
-// Hook to detect mobile screens
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  return isMobile;
-}
 
 interface QuestTreeProps {
   quests: QuestWithProgress[];
@@ -87,6 +80,11 @@ function QuestTreeInner({
   // Focus mode state
   const [focusedQuestId, setFocusedQuestId] = useState<string | null>(null);
 
+  // Keyboard navigation state - tracks currently keyboard-selected node
+  const [keyboardSelectedId, setKeyboardSelectedId] = useState<string | null>(
+    null
+  );
+
   // Calculate focus chain when focused quest changes
   // Use allQuests to include cross-trader dependencies in the chain
   const focusChain = useMemo(() => {
@@ -99,17 +97,6 @@ function QuestTreeInner({
     // Toggle focus if same quest, otherwise focus on new quest
     setFocusedQuestId((prev) => (prev === questId ? null : questId));
   }, []);
-
-  // Handle ESC key to exit focus mode
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && focusedQuestId) {
-        setFocusedQuestId(null);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [focusedQuestId]);
 
   // Build graph with layout
   const { initialNodes, initialEdges } = useMemo(() => {
@@ -124,6 +111,7 @@ function QuestTreeInner({
       playerLevel,
       maxColumns,
       savingQuestIds,
+      keyboardSelectedId,
     });
     return {
       initialNodes: graph.nodes,
@@ -143,6 +131,7 @@ function QuestTreeInner({
     onQuestSelect,
     handleFocus,
     onQuestDetails,
+    keyboardSelectedId,
   ]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -158,6 +147,162 @@ function QuestTreeInner({
   useEffect(() => {
     nodesRef.current = nodes;
   }, [nodes]);
+
+  // Get quest nodes only (excluding trader nodes) for keyboard navigation
+  const questNodes = useMemo(() => {
+    return nodes.filter((n) => n.type === "quest");
+  }, [nodes]);
+
+  // Find nearest node in a direction for keyboard navigation
+  const findNearestNode = useCallback(
+    (
+      currentId: string,
+      direction: "up" | "down" | "left" | "right"
+    ): string | null => {
+      const currentNode = questNodes.find((n) => n.id === currentId);
+      if (!currentNode) return questNodes[0]?.id || null;
+
+      const { x: cx, y: cy } = currentNode.position;
+
+      // Filter nodes in the desired direction
+      const candidates = questNodes.filter((n) => {
+        if (n.id === currentId) return false;
+        const { x, y } = n.position;
+        switch (direction) {
+          case "up":
+            return y < cy;
+          case "down":
+            return y > cy;
+          case "left":
+            return x < cx;
+          case "right":
+            return x > cx;
+        }
+      });
+
+      if (candidates.length === 0) return null;
+
+      // Find the closest node in that direction
+      // Weight the primary direction more heavily
+      const getDistance = (node: Node) => {
+        const dx = Math.abs(node.position.x - cx);
+        const dy = Math.abs(node.position.y - cy);
+        // Primary direction weighted more
+        if (direction === "up" || direction === "down") {
+          return dy + dx * 0.5;
+        }
+        return dx + dy * 0.5;
+      };
+
+      candidates.sort((a, b) => getDistance(a) - getDistance(b));
+      return candidates[0]?.id || null;
+    },
+    [questNodes]
+  );
+
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't handle if user is typing in an input
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      // ESC exits focus mode
+      if (e.key === "Escape") {
+        if (focusedQuestId) {
+          setFocusedQuestId(null);
+        } else if (keyboardSelectedId) {
+          setKeyboardSelectedId(null);
+        }
+        return;
+      }
+
+      // Arrow keys for navigation
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+        e.preventDefault();
+
+        // If no node selected, select the first quest node
+        if (!keyboardSelectedId) {
+          const firstQuest = questNodes[0];
+          if (firstQuest) {
+            setKeyboardSelectedId(firstQuest.id);
+          }
+          return;
+        }
+
+        const direction = e.key.replace("Arrow", "").toLowerCase() as
+          | "up"
+          | "down"
+          | "left"
+          | "right";
+        const nextId = findNearestNode(keyboardSelectedId, direction);
+        if (nextId) {
+          setKeyboardSelectedId(nextId);
+          // Center view on the selected node
+          const node = nodesRef.current.find((n) => n.id === nextId);
+          if (node) {
+            fitView({
+              nodes: [node],
+              duration: 150,
+              padding: 0.5,
+              maxZoom: 1.5,
+            });
+          }
+        }
+        return;
+      }
+
+      // Only handle action keys if a node is selected
+      if (!keyboardSelectedId) return;
+
+      const selectedNode = nodesRef.current.find(
+        (n) => n.id === keyboardSelectedId
+      );
+      const data = selectedNode?.data as QuestNodeData | undefined;
+      if (!data?.quest) return;
+
+      // Enter: Toggle quest status
+      if (e.key === "Enter") {
+        e.preventDefault();
+        onStatusChange(data.quest.id, data.quest.computedStatus);
+        return;
+      }
+
+      // Space: Open quest details
+      if (e.key === " ") {
+        e.preventDefault();
+        if (onQuestDetails) {
+          onQuestDetails(data.quest.id);
+        }
+        return;
+      }
+
+      // F: Enter focus mode on selected quest
+      if (e.key === "f" || e.key === "F") {
+        e.preventDefault();
+        handleFocus(data.quest.id);
+        return;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [
+    focusedQuestId,
+    keyboardSelectedId,
+    questNodes,
+    findNearestNode,
+    onStatusChange,
+    onQuestDetails,
+    handleFocus,
+    fitView,
+  ]);
 
   // Set initial viewport to center content with appropriate zoom when React Flow is ready
   // Uses nodesRef to avoid callback recreation on every nodes change
@@ -338,6 +483,66 @@ function QuestTreeInner({
           </div>
         )}
       </div>
+      {/* Keyboard shortcuts help - top right, hidden on mobile */}
+      {!isMobile && (
+        <div className="absolute top-2 right-2 z-10">
+          <Tooltip delayDuration={200}>
+            <TooltipTrigger asChild>
+              <button
+                className="p-2 rounded-md bg-background/80 border border-border shadow-sm hover:bg-background transition-colors"
+                aria-label="Keyboard shortcuts"
+              >
+                <Keyboard className="w-4 h-4 text-muted-foreground" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="left" align="start" className="max-w-xs">
+              <div className="space-y-2 text-xs">
+                <p className="font-semibold text-foreground">
+                  Keyboard Shortcuts
+                </p>
+                <div className="space-y-1 text-muted-foreground">
+                  <div className="flex justify-between gap-4">
+                    <span>Navigate quests</span>
+                    <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">
+                      Arrow keys
+                    </kbd>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span>Toggle status</span>
+                    <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">
+                      Enter
+                    </kbd>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span>Quest details</span>
+                    <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">
+                      Space
+                    </kbd>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span>Focus mode</span>
+                    <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">
+                      F
+                    </kbd>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span>Search quests</span>
+                    <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">
+                      /
+                    </kbd>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span>Exit / Clear</span>
+                    <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">
+                      Esc
+                    </kbd>
+                  </div>
+                </div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      )}
       <ReactFlow
         nodes={nodes}
         edges={edges}

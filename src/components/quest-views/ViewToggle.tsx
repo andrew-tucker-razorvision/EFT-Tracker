@@ -19,7 +19,7 @@ export function ViewToggle({ viewMode, onViewModeChange }: ViewToggleProps) {
         onClick={() => onViewModeChange("trader-lanes")}
         title="View quests organized by trader"
         className={cn(
-          "h-8 px-3",
+          "h-10 px-3",
           viewMode === "trader-lanes" && "bg-background shadow-sm"
         )}
       >
@@ -32,7 +32,7 @@ export function ViewToggle({ viewMode, onViewModeChange }: ViewToggleProps) {
         onClick={() => onViewModeChange("level-timeline")}
         title="View quests organized by level"
         className={cn(
-          "h-8 px-3",
+          "h-10 px-3",
           viewMode === "level-timeline" && "bg-background shadow-sm"
         )}
       >
@@ -45,7 +45,7 @@ export function ViewToggle({ viewMode, onViewModeChange }: ViewToggleProps) {
         onClick={() => onViewModeChange("map-groups")}
         title="View quests organized by map"
         className={cn(
-          "h-8 px-3",
+          "h-10 px-3",
           viewMode === "map-groups" && "bg-background shadow-sm"
         )}
       >
