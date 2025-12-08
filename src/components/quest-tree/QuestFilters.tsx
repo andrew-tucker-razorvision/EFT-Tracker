@@ -198,6 +198,7 @@ export function QuestFilters({
   const [searchValue, setSearchValue] = useState(filters.search);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const initialPrefsLoaded = useRef(false);
   const prefsFullyLoaded = useRef(false); // True only after prefs fetch completes
   const lastSavedLevel = useRef<number | null>(null);
@@ -365,6 +366,29 @@ export function QuestFilters({
 
     return () => clearTimeout(timer);
   }, [searchValue, filters.search, onFilterChange]);
+
+  // Keyboard shortcut: "/" to focus search input
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input or textarea
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      if (e.key === "/") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const handleReset = () => {
     setSearchValue("");
@@ -617,6 +641,7 @@ export function QuestFilters({
             {/* Search */}
             <div className="w-[200px]">
               <Input
+                ref={searchInputRef}
                 type="text"
                 placeholder="Search quests... (press /)"
                 value={searchValue}

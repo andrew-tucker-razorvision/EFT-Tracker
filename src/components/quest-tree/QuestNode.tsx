@@ -38,6 +38,7 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
     hasFocusMode,
     playerLevel,
     isSaving,
+    isKeyboardSelected,
   } = data;
   const traderColor = getTraderColor(quest.traderId);
   const statusColor = STATUS_COLORS[quest.computedStatus];
@@ -176,17 +177,23 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
           isFocused && "ring-4 ring-blue-500 shadow-lg scale-105",
           isInFocusChain && !isFocused && "ring-2 ring-blue-300",
           isDimmed && "opacity-40 pointer-events-auto",
-          // Level-based highlighting (only for available quests)
+          // Level-based highlighting (only for available quests, not when keyboard selected)
           isLevelAppropriate &&
             quest.computedStatus === "available" &&
             !isDimmed &&
             !isFocused &&
+            !isKeyboardSelected &&
             "ring-2 ring-emerald-400 shadow-emerald-100",
           isUpcoming &&
             quest.computedStatus !== "completed" &&
             !isDimmed &&
             !isFocused &&
-            "ring-1 ring-amber-300"
+            !isKeyboardSelected &&
+            "ring-1 ring-amber-300",
+          // Keyboard navigation selection (orange ring to distinguish from focus) - applied last to take precedence
+          isKeyboardSelected &&
+            !isFocused &&
+            "ring-2 ring-orange-400 ring-offset-1 shadow-lg"
         )}
         style={nodeStyle}
       >
@@ -201,7 +208,7 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
           </div>
         )}
 
-        {/* Info button - opens quest details */}
+        {/* Info button - opens quest details (min 44px touch target) */}
         {!isDimmed && onDetails && (
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
@@ -209,11 +216,11 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
                 type="button"
                 onClick={handleInfoClick}
                 onMouseDown={handleInfoMouseDown}
-                className="absolute -bottom-1 -left-1 p-2 opacity-100 sm:opacity-60 sm:hover:opacity-100 transition-colors duration-150 z-10 rounded focus:outline-none focus:ring-2 focus:ring-offset-1 pointer-events-auto"
+                className="absolute -bottom-2 -left-2 p-3 opacity-100 sm:opacity-60 sm:hover:opacity-100 transition-colors duration-150 z-10 rounded focus:outline-none focus:ring-2 focus:ring-offset-1 pointer-events-auto"
                 style={WIKI_LINK_STYLE}
                 aria-label={`View ${quest.title} details`}
               >
-                <Info className="w-[16px] h-[16px]" />
+                <Info className="w-[18px] h-[18px]" />
               </button>
             </TooltipTrigger>
             <TooltipContent side="top" sideOffset={4}>
@@ -222,7 +229,7 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
           </Tooltip>
         )}
 
-        {/* Wiki link */}
+        {/* Wiki link (min 44px touch target) */}
         {quest.wikiLink && !isDimmed && (
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
@@ -232,7 +239,7 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
                 rel="noopener noreferrer"
                 onClick={handleWikiLinkClick}
                 onMouseDown={handleWikiLinkMouseDown}
-                className="absolute -bottom-1 -right-1 p-2 opacity-100 sm:opacity-60 sm:hover:opacity-100 transition-colors duration-150 z-10 rounded focus:outline-none focus:ring-2 focus:ring-offset-1 pointer-events-auto"
+                className="absolute -bottom-2 -right-2 p-3 opacity-100 sm:opacity-60 sm:hover:opacity-100 transition-colors duration-150 z-10 rounded focus:outline-none focus:ring-2 focus:ring-offset-1 pointer-events-auto"
                 style={WIKI_LINK_STYLE}
                 aria-label={`Open ${quest.title} wiki page`}
               >
