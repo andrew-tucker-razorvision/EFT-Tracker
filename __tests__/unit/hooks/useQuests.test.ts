@@ -37,7 +37,7 @@ describe("useQuests", () => {
       const { result } = renderHook(() => useQuests());
       expect(result.current.filters).toEqual({
         traderId: null,
-        statuses: [], // Empty array = all statuses
+        statuses: ["available"], // Default to showing only available quests
         search: "",
         kappaOnly: false,
         map: null,

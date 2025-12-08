@@ -56,7 +56,7 @@ export const loadingSession = {
  */
 export const defaultTestFilters: QuestFilters = {
   traderId: null,
-  statuses: [],
+  statuses: ["available"], // Default to showing only available quests
   search: "",
   kappaOnly: false,
   map: null,
