@@ -53,6 +53,20 @@ function Button({
   }) {
   const Comp = asChild ? Slot : "button";
 
+  // When asChild is true, Slot requires exactly one child element.
+  // Loading state is not supported with asChild - use a regular button instead.
+  if (asChild) {
+    return (
+      <Comp
+        data-slot="button"
+        className={cn(buttonVariants({ variant, size, className }))}
+        {...props}
+      >
+        {children}
+      </Comp>
+    );
+  }
+
   return (
     <Comp
       data-slot="button"
