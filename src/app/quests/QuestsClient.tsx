@@ -12,6 +12,7 @@ import {
 import { QuestTreeSkeleton } from "@/components/quest-tree/QuestTreeSkeleton";
 import { SkipQuestDialog } from "@/components/quest-tree/SkipQuestDialog";
 import { LevelTimelineView, MapGroupsView } from "@/components/quest-views";
+import { RaidPlanner } from "@/components/raid-planner";
 import { WelcomeModal } from "@/components/onboarding";
 import { QuestDetailModal } from "@/components/quest-detail";
 import { useQuests } from "@/hooks/useQuests";
@@ -393,6 +394,7 @@ export function QuestsClient() {
       />
       <QuestFilters
         traders={traders}
+        quests={allQuestsWithProgress}
         filters={filters}
         onFilterChange={setFilters}
         onApplyFilters={applyFilters}
@@ -421,6 +423,11 @@ export function QuestsClient() {
               quests={questsWithProgress}
               playerLevel={filters.playerLevel}
               onStatusChange={handleStatusChange}
+              onQuestDetails={handleQuestDetails}
+            />
+          ) : viewMode === "raid-planner" ? (
+            <RaidPlanner
+              quests={allQuestsWithProgress}
               onQuestDetails={handleQuestDetails}
             />
           ) : (

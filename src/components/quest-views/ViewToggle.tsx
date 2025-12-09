@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { GitBranch, Calendar, Map } from "lucide-react";
+import { GitBranch, Calendar, Map, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ViewMode } from "@/types";
 
@@ -51,6 +51,19 @@ export function ViewToggle({ viewMode, onViewModeChange }: ViewToggleProps) {
       >
         <Map className="h-4 w-4 mr-1" />
         <span className="hidden sm:inline">Maps</span>
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => onViewModeChange("raid-planner")}
+        title="Plan your next raid - objectives by map"
+        className={cn(
+          "h-10 px-3",
+          viewMode === "raid-planner" && "bg-background shadow-sm"
+        )}
+      >
+        <ClipboardList className="h-4 w-4 mr-1" />
+        <span className="hidden sm:inline">Raid</span>
       </Button>
     </div>
   );
