@@ -292,8 +292,8 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
             Lv.{quest.levelRequired}
           </div>
           {/* Action buttons - info and wiki link */}
-          {/* Touch targets: min 44px for accessibility, using negative margin to keep visual compact */}
-          <div className="flex items-center -mr-2">
+          {/* Touch targets: 24px visible area with padding for easier clicking */}
+          <div className="flex items-center gap-1">
             {/* Info button - opens quest details */}
             {!isDimmed && onDetails && (
               <Tooltip delayDuration={300}>
@@ -302,7 +302,13 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
                     type="button"
                     onClick={handleInfoClick}
                     onMouseDown={handleInfoMouseDown}
-                    className="min-w-[44px] min-h-[44px] -m-3 flex items-center justify-center opacity-60 hover:opacity-100 transition-colors duration-150 rounded focus:outline-none focus:ring-1 focus:ring-offset-1 pointer-events-auto"
+                    onTouchStart={(e) => e.stopPropagation()}
+                    onTouchEnd={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      if (onDetails) onDetails(quest.id);
+                    }}
+                    className="w-6 h-6 flex items-center justify-center opacity-60 hover:opacity-100 transition-colors duration-150 rounded-full hover:bg-black/20 focus:outline-none focus:ring-1 focus:ring-offset-1 pointer-events-auto"
                     style={WIKI_LINK_STYLE}
                     aria-label={`View ${quest.title} details`}
                   >
@@ -318,18 +324,28 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
             {quest.wikiLink && !isDimmed && (
               <Tooltip delayDuration={300}>
                 <TooltipTrigger asChild>
-                  <a
-                    role="button"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    type="button"
                     onClick={handleWikiLinkClick}
                     onMouseDown={handleWikiLinkMouseDown}
-                    className="min-w-[44px] min-h-[44px] -m-3 flex items-center justify-center opacity-60 hover:opacity-100 transition-colors duration-150 rounded focus:outline-none focus:ring-1 focus:ring-offset-1 pointer-events-auto"
+                    onTouchStart={(e) => e.stopPropagation()}
+                    onTouchEnd={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      if (quest.wikiLink) {
+                        window.open(
+                          quest.wikiLink,
+                          "_blank",
+                          "noopener,noreferrer"
+                        );
+                      }
+                    }}
+                    className="w-6 h-6 flex items-center justify-center opacity-60 hover:opacity-100 transition-colors duration-150 rounded-full hover:bg-black/20 focus:outline-none focus:ring-1 focus:ring-offset-1 pointer-events-auto"
                     style={WIKI_LINK_STYLE}
                     aria-label={`Open ${quest.title} wiki page`}
                   >
                     <ExternalLink className="w-[14px] h-[14px]" />
-                  </a>
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent side="top" sideOffset={4}>
                   <p className="text-xs">View on Tarkov Wiki</p>

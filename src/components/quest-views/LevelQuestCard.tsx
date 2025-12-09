@@ -1,9 +1,18 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Info, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getTraderColor, STATUS_COLORS } from "@/lib/trader-colors";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import type { QuestWithProgress, QuestStatus } from "@/types";
+
+// Static style for icon buttons
+const ICON_BUTTON_STYLE = { color: "#636363" };
 
 interface LevelQuestCardProps {
   quest: QuestWithProgress;
@@ -77,6 +86,30 @@ export function LevelQuestCard({
     }
   };
 
+  const handleInfoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation(); // Prevents card click/status change
+    if (onQuestDetails) {
+      onQuestDetails(quest.id);
+    }
+  };
+
+  const handleInfoMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent parent from intercepting
+  };
+
+  const handleWikiLinkClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation(); // Prevents card click/status change
+    if (quest.wikiLink) {
+      window.open(quest.wikiLink, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  const handleWikiLinkMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent parent from intercepting
+  };
+
   return (
     <div
       onClick={handleClick}
@@ -146,34 +179,97 @@ export function LevelQuestCard({
 
       {/* Quest title */}
       <div
-        className="font-medium text-sm leading-tight line-clamp-2"
+        className="font-semibold text-[14px] leading-tight line-clamp-2"
         style={{ color: "#c7c5b3" }}
         title={quest.title}
       >
         {quest.title}
       </div>
 
-      {/* Bottom row: trader + level */}
+      {/* Bottom row: trader + level + action buttons */}
       <div className="flex items-center justify-between mt-1">
-        <span
-          className="text-[10px] font-medium"
-          style={{ color: traderColor.primary }}
-        >
-          {quest.trader.name}
-        </span>
-        <span
-          className="text-[10px]"
-          style={{
-            color: isLevelAppropriate
-              ? "#00a700"
-              : isUpcoming
-                ? "#ca8a00"
-                : "#636363",
-            fontWeight: isLevelAppropriate ? 500 : 400,
-          }}
-        >
-          Lv.{quest.levelRequired}
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span
+            className="text-[12px] font-medium"
+            style={{ color: traderColor.primary }}
+          >
+            {quest.trader.name}
+          </span>
+          <span
+            className="text-[12px]"
+            style={{
+              color: isLevelAppropriate
+                ? "#00a700"
+                : isUpcoming
+                  ? "#ca8a00"
+                  : "#636363",
+              fontWeight: isLevelAppropriate ? 600 : 400,
+            }}
+          >
+            Lv.{quest.levelRequired}
+          </span>
+        </div>
+        {/* Action buttons - info and wiki link */}
+        <div className="flex items-center gap-1">
+          {/* Info button - opens quest details */}
+          {onQuestDetails && (
+            <Tooltip delayDuration={300}>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={handleInfoClick}
+                  onMouseDown={handleInfoMouseDown}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  onTouchEnd={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    if (onQuestDetails) onQuestDetails(quest.id);
+                  }}
+                  className="w-6 h-6 flex items-center justify-center opacity-60 hover:opacity-100 transition-colors duration-150 rounded-full hover:bg-black/20 focus:outline-none focus:ring-1 focus:ring-offset-1 pointer-events-auto"
+                  style={ICON_BUTTON_STYLE}
+                  aria-label={`View ${quest.title} details`}
+                >
+                  <Info className="w-[14px] h-[14px]" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" sideOffset={4}>
+                <p className="text-xs">View Details</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+          {/* Wiki link */}
+          {quest.wikiLink && (
+            <Tooltip delayDuration={300}>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={handleWikiLinkClick}
+                  onMouseDown={handleWikiLinkMouseDown}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  onTouchEnd={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    if (quest.wikiLink) {
+                      window.open(
+                        quest.wikiLink,
+                        "_blank",
+                        "noopener,noreferrer"
+                      );
+                    }
+                  }}
+                  className="w-6 h-6 flex items-center justify-center opacity-60 hover:opacity-100 transition-colors duration-150 rounded-full hover:bg-black/20 focus:outline-none focus:ring-1 focus:ring-offset-1 pointer-events-auto"
+                  style={ICON_BUTTON_STYLE}
+                  aria-label={`Open ${quest.title} wiki page`}
+                >
+                  <ExternalLink className="w-[14px] h-[14px]" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" sideOffset={4}>
+                <p className="text-xs">View on Tarkov Wiki</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
       </div>
 
       {/* Completed checkmark overlay */}
