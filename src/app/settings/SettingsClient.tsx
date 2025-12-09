@@ -10,6 +10,9 @@ import {
   AlertCircle,
   Loader2,
   ExternalLink,
+  Download,
+  RotateCcw,
+  Database,
 } from "lucide-react";
 
 interface CompanionToken {
@@ -47,6 +50,12 @@ export function SettingsClient() {
 
   // Revoking
   const [revoking, setRevoking] = useState<string | null>(null);
+
+  // Data management
+  const [resetting, setResetting] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState<string | null>(null);
 
   const fetchTokens = useCallback(async () => {
     try {
@@ -176,6 +185,61 @@ export function SettingsClient() {
       return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
     if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
     return formatDate(dateStr);
+  };
+
+  const handleExportProgress = async () => {
+    setExporting(true);
+    setError(null);
+
+    try {
+      const res = await fetch("/api/progress/export");
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to export progress");
+      }
+
+      // Get the blob and trigger download
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `eft-tracker-progress-${new Date().toISOString().split("T")[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      setError(String(err));
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleResetProgress = async () => {
+    setResetting(true);
+    setError(null);
+
+    try {
+      const res = await fetch("/api/progress", {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to reset progress");
+      }
+
+      const data = await res.json();
+      setResetSuccess(data.message);
+      setShowResetConfirm(false);
+
+      // Clear success message after 5 seconds
+      setTimeout(() => setResetSuccess(null), 5000);
+    } catch (err) {
+      setError(String(err));
+    } finally {
+      setResetting(false);
+    }
   };
 
   return (
@@ -397,7 +461,92 @@ export function SettingsClient() {
           </div>
         </section>
 
-        {/* Other settings can be added here */}
+        {/* Data Management Section */}
+        <section className="bg-[#2d2d2d] rounded-lg border border-[#404040] p-6 mb-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Database className="w-6 h-6 text-[#d4a574]" />
+            <h2 className="text-lg font-semibold">Data Management</h2>
+          </div>
+
+          <p className="text-[#9ca3af] text-sm mb-6">
+            Export your quest progress for backup or reset all progress for a
+            new wipe.
+          </p>
+
+          {/* Reset success message */}
+          {resetSuccess && (
+            <div className="mb-4 p-3 bg-green-500/10 border border-green-500 rounded-lg flex items-start gap-2">
+              <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-green-400">{resetSuccess}</p>
+            </div>
+          )}
+
+          <div className="space-y-4">
+            {/* Export Progress */}
+            <div className="flex items-center justify-between p-4 bg-[#1a1a1a] rounded-lg border border-[#404040]">
+              <div>
+                <h3 className="font-medium">Export Progress</h3>
+                <p className="text-sm text-[#9ca3af] mt-1">
+                  Download your quest progress as a JSON file for backup.
+                </p>
+              </div>
+              <button
+                onClick={handleExportProgress}
+                disabled={exporting}
+                className="px-4 py-2 bg-[#404040] hover:bg-[#505050] disabled:opacity-50 rounded-lg font-medium flex items-center gap-2"
+              >
+                {exporting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
+                Export
+              </button>
+            </div>
+
+            {/* Reset Progress */}
+            <div className="flex items-center justify-between p-4 bg-[#1a1a1a] rounded-lg border border-red-500/30">
+              <div>
+                <h3 className="font-medium text-red-400">Reset All Progress</h3>
+                <p className="text-sm text-[#9ca3af] mt-1">
+                  Clear all quest progress for a new wipe. This cannot be
+                  undone.
+                </p>
+              </div>
+              {showResetConfirm ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowResetConfirm(false)}
+                    disabled={resetting}
+                    className="px-3 py-2 bg-[#404040] hover:bg-[#505050] rounded-lg text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleResetProgress}
+                    disabled={resetting}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 rounded-lg font-medium flex items-center gap-2 text-white"
+                  >
+                    {resetting ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-4 h-4" />
+                    )}
+                    Confirm Reset
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowResetConfirm(true)}
+                  className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg font-medium flex items-center gap-2"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Reset Progress
+                </button>
+              )}
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );

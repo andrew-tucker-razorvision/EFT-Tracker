@@ -123,3 +123,30 @@ export async function POST(request: Request) {
     );
   }
 }
+
+// DELETE /api/progress - Reset all progress (wipe)
+export async function DELETE() {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Delete all progress for the user
+    const result = await prisma.questProgress.deleteMany({
+      where: { userId: session.user.id },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: `Reset ${result.count} quests`,
+      count: result.count,
+    });
+  } catch (error) {
+    console.error("Error resetting progress:", error);
+    return NextResponse.json(
+      { error: "Failed to reset progress" },
+      { status: 500 }
+    );
+  }
+}
