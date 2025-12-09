@@ -677,7 +677,7 @@ describe("Wiki Link", () => {
 
     const { container } = renderWithReactFlow(<QuestNode {...props} />);
 
-    const wikiIcon = container.querySelector('a[aria-label*="wiki"]');
+    const wikiIcon = container.querySelector('button[aria-label*="wiki"]');
     if (wikiIcon) {
       fireEvent.click(wikiIcon);
     }
@@ -704,7 +704,7 @@ describe("Wiki Link", () => {
 
     const { container } = renderWithReactFlow(<QuestNode {...props} />);
 
-    const wikiIcon = container.querySelector('a[aria-label*="wiki"]');
+    const wikiIcon = container.querySelector('button[aria-label*="wiki"]');
     if (wikiIcon) {
       fireEvent.click(wikiIcon);
     }

@@ -221,10 +221,8 @@ describe("QuestNode", () => {
 
         const { container } = renderWithReactFlow(<QuestNode {...props} />);
 
-        const wikiIcon = container.querySelector('a[aria-label*="wiki"]');
+        const wikiIcon = container.querySelector('button[aria-label*="wiki"]');
         expect(wikiIcon).toBeInTheDocument();
-        // Note: href attribute removed to prevent page refresh, now uses window.open() programmatically
-        expect(wikiIcon).toHaveAttribute("role", "button");
       });
 
       it("should not show wiki link icon when wikiLink is null", () => {
@@ -235,7 +233,7 @@ describe("QuestNode", () => {
         const { container } = renderWithReactFlow(<QuestNode {...props} />);
 
         expect(
-          container.querySelector('a[aria-label*="wiki"]')
+          container.querySelector('button[aria-label*="wiki"]')
         ).not.toBeInTheDocument();
       });
 
@@ -251,7 +249,7 @@ describe("QuestNode", () => {
 
         // isDimmed = true, icon should not render
         expect(
-          container.querySelector('a[aria-label*="wiki"]')
+          container.querySelector('button[aria-label*="wiki"]')
         ).not.toBeInTheDocument();
       });
     });
@@ -266,7 +264,7 @@ describe("QuestNode", () => {
 
         const { container } = renderWithReactFlow(<QuestNode {...props} />);
 
-        const wikiIcon = container.querySelector('a[aria-label*="wiki"]');
+        const wikiIcon = container.querySelector('button[aria-label*="wiki"]');
         if (wikiIcon) {
           fireEvent.click(wikiIcon);
         }
@@ -288,7 +286,7 @@ describe("QuestNode", () => {
 
         const { container } = renderWithReactFlow(<QuestNode {...props} />);
 
-        const wikiIcon = container.querySelector('a[aria-label*="wiki"]');
+        const wikiIcon = container.querySelector('button[aria-label*="wiki"]');
         if (wikiIcon) {
           fireEvent.click(wikiIcon);
         }
@@ -305,22 +303,11 @@ describe("QuestNode", () => {
 
         const { container } = renderWithReactFlow(<QuestNode {...props} />);
 
-        const wikiIcon = container.querySelector("a[aria-label]");
+        const wikiIcon = container.querySelector('button[aria-label*="wiki"]');
         expect(wikiIcon).toHaveAttribute(
           "aria-label",
           `Open ${quest.title} wiki page`
         );
-      });
-
-      it("should have security attributes on link", () => {
-        const quest = createQuestWithProgress(mockQuests[0], "available");
-        const props = createNodeProps(quest);
-
-        const { container } = renderWithReactFlow(<QuestNode {...props} />);
-
-        const wikiIcon = container.querySelector('a[aria-label*="wiki"]');
-        expect(wikiIcon).toHaveAttribute("target", "_blank");
-        expect(wikiIcon).toHaveAttribute("rel", "noopener noreferrer");
       });
     });
   });

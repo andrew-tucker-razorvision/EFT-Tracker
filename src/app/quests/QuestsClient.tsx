@@ -56,7 +56,7 @@ export function QuestsClient() {
     pendingOfflineCount,
   } = useProgress();
   const [selectedQuestId, setSelectedQuestId] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<ViewMode>("trader-lanes");
+  const [viewMode, setViewMode] = useState<ViewMode>("map-groups");
 
   // Skip quest dialog state
   const [skipDialogOpen, setSkipDialogOpen] = useState(false);
@@ -175,6 +175,31 @@ export function QuestsClient() {
     localStorage.setItem("eft-tracker-onboarding", "completed");
     setShowWelcome(false);
   }, []);
+
+  // Track if this is the first render (to skip initial effect)
+  const isFirstViewRender = useRef(true);
+
+  // Apply view-specific default filters when view mode changes
+  // Maps view: show only available quests (focused on what to do next)
+  // Other views: show all quests (for planning and overview)
+  useEffect(() => {
+    // Skip on first render - don't change filters from defaults
+    if (isFirstViewRender.current) {
+      isFirstViewRender.current = false;
+      return;
+    }
+
+    if (viewMode === "map-groups") {
+      // Maps view: filter to available quests, bypass level requirement
+      setFilters({ statuses: ["available"], bypassLevelRequirement: true });
+    } else {
+      // Traders/Levels view: show all quests for full picture
+      setFilters({ statuses: [], bypassLevelRequirement: false });
+    }
+    // Auto-apply the filter changes
+    // Note: Using setTimeout to ensure setFilters has updated pendingFilters
+    setTimeout(() => applyFilters(), 0);
+  }, [viewMode, setFilters, applyFilters]);
 
   const handleQuestSelect = useCallback((questId: string) => {
     setSelectedQuestId((prev) => (prev === questId ? null : questId));
