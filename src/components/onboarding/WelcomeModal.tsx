@@ -13,8 +13,9 @@ import {
   MousePointerClick,
   Filter,
   Trophy,
-  Target,
   Sparkles,
+  Keyboard,
+  Focus,
 } from "lucide-react";
 
 interface WelcomeModalProps {
@@ -28,19 +29,25 @@ const tips = [
     icon: MousePointerClick,
     title: "Click to Complete",
     description:
-      "Click any available quest to mark it as completed. Click again to reset.",
+      "Click any quest to mark it as completed. Long-press on mobile for details.",
+  },
+  {
+    icon: Focus,
+    title: "Focus Mode",
+    description:
+      "Double-click a quest to highlight its entire chain of prerequisites and dependents.",
+  },
+  {
+    icon: Keyboard,
+    title: "Keyboard Navigation",
+    description:
+      "Use arrow keys to navigate, Enter to complete, Space for details, F for focus.",
   },
   {
     icon: Filter,
-    title: "Filter by Trader",
+    title: "Smart Filters",
     description:
-      "Use the filter dropdown to focus on specific traders or quest types.",
-  },
-  {
-    icon: Target,
-    title: "Track Your Level",
-    description:
-      "Set your PMC level to see which quests are available at your level.",
+      "Filter by trader, status, or search. Set your PMC level to highlight available quests.",
   },
   {
     icon: Trophy,

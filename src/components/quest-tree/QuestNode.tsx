@@ -11,6 +11,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
+import { useLongPress } from "@/hooks/useLongPress";
 
 // Responsive node sizes - built around 14px title / 12px level fonts
 export const QUEST_NODE_WIDTH = 155;
@@ -145,6 +146,16 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
     e.stopPropagation(); // Prevent React Flow from intercepting
   };
 
+  // Long-press handler for mobile (alternative to right-click context menu)
+  const longPressHandlers = useLongPress({
+    threshold: 500,
+    onLongPress: () => {
+      if (onDetails && !isDimmed) {
+        onDetails(quest.id);
+      }
+    },
+  });
+
   return (
     <>
       {/* Only show left handle if quest has dependencies (not a root node) */}
@@ -158,6 +169,7 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
       )}
       <div
         onContextMenu={handleContextMenu}
+        {...longPressHandlers}
         className={cn(
           "relative cursor-pointer rounded border-2 p-2 transition-all duration-150",
           "hover:shadow-md active:scale-95",
@@ -280,7 +292,8 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
             Lv.{quest.levelRequired}
           </div>
           {/* Action buttons - info and wiki link */}
-          <div className="flex items-center gap-1">
+          {/* Touch targets: min 44px for accessibility, using negative margin to keep visual compact */}
+          <div className="flex items-center -mr-2">
             {/* Info button - opens quest details */}
             {!isDimmed && onDetails && (
               <Tooltip delayDuration={300}>
@@ -289,7 +302,7 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
                     type="button"
                     onClick={handleInfoClick}
                     onMouseDown={handleInfoMouseDown}
-                    className="p-0.5 opacity-60 hover:opacity-100 transition-colors duration-150 rounded focus:outline-none focus:ring-1 focus:ring-offset-1 pointer-events-auto"
+                    className="min-w-[44px] min-h-[44px] -m-3 flex items-center justify-center opacity-60 hover:opacity-100 transition-colors duration-150 rounded focus:outline-none focus:ring-1 focus:ring-offset-1 pointer-events-auto"
                     style={WIKI_LINK_STYLE}
                     aria-label={`View ${quest.title} details`}
                   >
@@ -311,7 +324,7 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
                     rel="noopener noreferrer"
                     onClick={handleWikiLinkClick}
                     onMouseDown={handleWikiLinkMouseDown}
-                    className="p-0.5 opacity-60 hover:opacity-100 transition-colors duration-150 rounded focus:outline-none focus:ring-1 focus:ring-offset-1 pointer-events-auto"
+                    className="min-w-[44px] min-h-[44px] -m-3 flex items-center justify-center opacity-60 hover:opacity-100 transition-colors duration-150 rounded focus:outline-none focus:ring-1 focus:ring-offset-1 pointer-events-auto"
                     style={WIKI_LINK_STYLE}
                     aria-label={`Open ${quest.title} wiki page`}
                   >
