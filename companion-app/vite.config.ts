@@ -4,10 +4,10 @@ import react from "@vitejs/plugin-react";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  // Tauri expects a fixed port, fail if that port is not available
+  // Prefer port 1420, but fall back to next available if busy
   server: {
     port: 1420,
-    strictPort: true,
+    strictPort: false,
   },
   // Env variables starting with TAURI_ will be exposed to the frontend
   envPrefix: ["VITE_", "TAURI_"],
