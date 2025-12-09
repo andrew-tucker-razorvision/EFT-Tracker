@@ -5,6 +5,8 @@ import {
   CheckCircle,
   AlertCircle,
   Loader2,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { validateToken, type TokenValidation } from "../lib/tauri";
 
@@ -15,6 +17,7 @@ interface LinkAccountProps {
 
 export function LinkAccount({ onComplete, onBack }: LinkAccountProps) {
   const [token, setToken] = useState("");
+  const [showToken, setShowToken] = useState(false);
   const [validating, setValidating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [validation, setValidation] = useState<TokenValidation | null>(null);
@@ -104,7 +107,7 @@ export function LinkAccount({ onComplete, onBack }: LinkAccountProps) {
             <div className="relative flex-1">
               <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-tarkov-muted" />
               <input
-                type="password"
+                type={showToken ? "text" : "password"}
                 value={token}
                 onChange={(e) => {
                   setToken(e.target.value);
@@ -112,8 +115,20 @@ export function LinkAccount({ onComplete, onBack }: LinkAccountProps) {
                   setValidation(null);
                 }}
                 placeholder="cmp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                className="w-full bg-tarkov-bg border border-tarkov-border rounded-lg py-2 pl-10 pr-4 text-tarkov-text placeholder-tarkov-muted/50 focus:outline-none focus:border-tarkov-accent"
+                className="w-full bg-tarkov-bg border border-tarkov-border rounded-lg py-2 pl-10 pr-10 text-tarkov-text placeholder-tarkov-muted/50 focus:outline-none focus:border-tarkov-accent"
               />
+              <button
+                type="button"
+                onClick={() => setShowToken(!showToken)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-tarkov-muted hover:text-tarkov-text"
+                title={showToken ? "Hide token" : "Show token"}
+              >
+                {showToken ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
             </div>
             <button
               onClick={handleValidate}

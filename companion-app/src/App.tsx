@@ -12,6 +12,8 @@ import {
   Clock,
   Volume2,
   VolumeX,
+  ArrowRight,
+  ExternalLink,
 } from "lucide-react";
 
 import { useStore } from "./hooks/useStore";
@@ -32,11 +34,16 @@ import {
 import { LinkAccount } from "./components/LinkAccount";
 import { RecentEvents } from "./components/RecentEvents";
 import { SettingsPanel } from "./components/SettingsPanel";
+import { ToastContainer, useToast } from "./components/Toast";
+import { UpdateBanner } from "./components/UpdateBanner";
+import { useVersionCheck } from "./hooks/useVersionCheck";
 
 type View = "main" | "link" | "settings";
 
 function App() {
   const { settings, loading: settingsLoading, setSetting } = useStore();
+  const toast = useToast();
+  const versionCheck = useVersionCheck();
 
   const [view, setView] = useState<View>("main");
   const [eftPath, setEftPathState] = useState<string | null>(null);
@@ -157,14 +164,18 @@ function App() {
       setSyncStatus(status);
 
       if (result.errors.length > 0) {
-        setError(`Synced ${result.synced}, ${result.errors.length} errors`);
+        toast.error(`Synced ${result.synced}, ${result.errors.length} errors`);
+      } else if (result.synced > 0) {
+        toast.success(`Synced ${result.synced} quest${result.synced !== 1 ? "s" : ""} successfully`);
+      } else {
+        toast.info("No pending events to sync");
       }
     } catch (err) {
-      setError(String(err));
+      toast.error(String(err));
     } finally {
       setSyncing(false);
     }
-  }, [syncing]);
+  }, [syncing, toast]);
 
   const handleUnlink = useCallback(async () => {
     await setSetting("companionToken", null);
@@ -239,6 +250,17 @@ function App() {
 
       {/* Main content */}
       <main className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* Update banner */}
+        {versionCheck.hasUpdate && versionCheck.latestVersion && versionCheck.downloadUrl && (
+          <UpdateBanner
+            currentVersion={versionCheck.currentVersion}
+            latestVersion={versionCheck.latestVersion}
+            downloadUrl={versionCheck.downloadUrl}
+            releaseNotes={versionCheck.releaseNotes}
+            onDismiss={versionCheck.dismissUpdate}
+          />
+        )}
+
         {/* Error banner */}
         {error && (
           <div className="bg-tarkov-error/20 border border-tarkov-error rounded-lg p-3 flex items-start gap-2">
@@ -344,6 +366,64 @@ function App() {
             </div>
           )}
         </div>
+
+        {/* Onboarding guide when not linked */}
+        {!isLinked && (
+          <div className="bg-tarkov-accent/10 rounded-lg p-4 border border-tarkov-accent/30">
+            <h2 className="font-medium text-tarkov-accent mb-3 flex items-center gap-2">
+              <ArrowRight className="w-5 h-5" />
+              Get Started
+            </h2>
+            <div className="space-y-3 text-sm">
+              <div className="flex items-start gap-3">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-tarkov-accent/20 text-tarkov-accent flex items-center justify-center text-xs font-medium">
+                  1
+                </span>
+                <div>
+                  <p className="text-tarkov-text">Create an EFT Tracker account</p>
+                  <a
+                    href="https://eft-tracker.vercel.app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-tarkov-accent hover:underline flex items-center gap-1 text-xs"
+                  >
+                    eft-tracker.vercel.app
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-tarkov-accent/20 text-tarkov-accent flex items-center justify-center text-xs font-medium">
+                  2
+                </span>
+                <div>
+                  <p className="text-tarkov-text">Generate a companion token</p>
+                  <p className="text-tarkov-muted text-xs">
+                    Go to Settings → Companion App → Generate Token
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-tarkov-accent/20 text-tarkov-accent flex items-center justify-center text-xs font-medium">
+                  3
+                </span>
+                <div>
+                  <p className="text-tarkov-text">Link your account here</p>
+                  <p className="text-tarkov-muted text-xs">
+                    Click &quot;Link Account&quot; above and paste your token
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => setView("link")}
+              className="w-full mt-4 bg-tarkov-accent hover:bg-tarkov-accent/80 text-tarkov-bg font-medium rounded-lg py-2 px-4 flex items-center justify-center gap-2"
+            >
+              <Link className="w-4 h-4" />
+              Link Account
+            </button>
+          </div>
+        )}
 
         {/* Watching controls */}
         {isLinked && eftPath && (
@@ -456,6 +536,9 @@ function App() {
           </button>
         </div>
       </footer>
+
+      {/* Toast notifications */}
+      <ToastContainer toasts={toast.toasts} onDismiss={toast.dismissToast} />
     </div>
   );
 }

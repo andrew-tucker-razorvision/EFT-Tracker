@@ -35,6 +35,7 @@ export function SettingsPanel({
   const [customPath, setCustomPath] = useState(settings.eftPath || "");
   const [pathError, setPathError] = useState<string | null>(null);
   const [pathValid, setPathValid] = useState(false);
+  const [validating, setValidating] = useState(false);
 
   const handlePathChange = async () => {
     if (!customPath.trim()) {
@@ -42,13 +43,23 @@ export function SettingsPanel({
       return;
     }
 
+    setValidating(true);
     const valid = await onSetEftPath(customPath);
+    setValidating(false);
+
     if (valid) {
       setPathValid(true);
       setPathError(null);
     } else {
       setPathError("Invalid EFT installation path");
       setPathValid(false);
+    }
+  };
+
+  const handlePathBlur = async () => {
+    // Only validate on blur if there's a path and it hasn't been validated yet
+    if (customPath.trim() && !pathValid && !pathError) {
+      await handlePathChange();
     }
   };
 
@@ -140,21 +151,24 @@ export function SettingsPanel({
                     setPathError(null);
                     setPathValid(false);
                   }}
+                  onBlur={handlePathBlur}
                   placeholder="C:\Battlestate Games\EFT"
                   className="flex-1 bg-tarkov-bg border border-tarkov-border rounded-lg py-2 px-3 text-tarkov-text placeholder-tarkov-muted/50 focus:outline-none focus:border-tarkov-accent text-sm"
                 />
                 <button
                   onClick={handleBrowse}
-                  className="p-2 bg-tarkov-border hover:bg-tarkov-muted/30 text-tarkov-text rounded-lg"
+                  disabled={validating}
+                  className="p-2 bg-tarkov-border hover:bg-tarkov-muted/30 text-tarkov-text rounded-lg disabled:opacity-50"
                   title="Browse for folder"
                 >
                   <FolderOpen className="w-5 h-5" />
                 </button>
                 <button
                   onClick={handlePathChange}
-                  className="bg-tarkov-accent hover:bg-tarkov-accent/80 text-tarkov-bg font-medium rounded-lg px-4 py-2 text-sm"
+                  disabled={validating}
+                  className="bg-tarkov-accent hover:bg-tarkov-accent/80 text-tarkov-bg font-medium rounded-lg px-4 py-2 text-sm disabled:opacity-50"
                 >
-                  Set
+                  {validating ? "..." : "Set"}
                 </button>
               </div>
               {pathError && (
