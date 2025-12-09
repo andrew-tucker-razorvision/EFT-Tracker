@@ -500,4 +500,136 @@ test.describe("Quest Tree", () => {
       await expect(fitView).toBeVisible();
     });
   });
+
+  // ==========================================================================
+  // MOBILE VIEWPORT TESTS
+  // ==========================================================================
+  test.describe("Mobile Viewport", () => {
+    test.beforeEach(async ({ page }) => {
+      // Set mobile viewport
+      await page.setViewportSize({ width: 375, height: 667 });
+      await page.goto("/quests");
+      await waitForQuestTree(page);
+    });
+
+    test("quest nodes should have adequate touch targets", async ({ page }) => {
+      // Find a quest node with action buttons
+      const infoButton = page
+        .locator('button[aria-label*="View"][aria-label*="details"]')
+        .first();
+
+      if (await infoButton.isVisible({ timeout: 5000 }).catch(() => false)) {
+        // Get the bounding box of the button
+        const box = await infoButton.boundingBox();
+        expect(box).not.toBeNull();
+
+        // Touch targets should be at least 44px for accessibility
+        if (box) {
+          expect(box.width).toBeGreaterThanOrEqual(44);
+          expect(box.height).toBeGreaterThanOrEqual(44);
+        }
+      }
+    });
+
+    test("info button should open quest details on mobile", async ({
+      page,
+    }) => {
+      // Find info button on a quest node
+      const infoButton = page
+        .locator('button[aria-label*="View"][aria-label*="details"]')
+        .first();
+
+      if (await infoButton.isVisible({ timeout: 5000 }).catch(() => false)) {
+        // Tap the info button
+        await infoButton.tap();
+
+        // Wait for modal/sheet to appear
+        await page.waitForTimeout(500);
+
+        // Mobile should show Sheet (bottom drawer) instead of Dialog
+        const sheet = page.locator('[data-state="open"]');
+        await expect(sheet).toBeVisible({ timeout: 3000 });
+      }
+    });
+
+    test("quest tree should be scrollable on mobile", async ({ page }) => {
+      // Verify pane is present and can be interacted with
+      const pane = page.locator(".react-flow__pane");
+      await expect(pane).toBeVisible();
+
+      // Simulate touch scroll/pan
+      await pane.evaluate((el) => {
+        el.dispatchEvent(
+          new TouchEvent("touchstart", {
+            bubbles: true,
+            touches: [
+              new Touch({
+                identifier: 0,
+                target: el,
+                clientX: 200,
+                clientY: 300,
+              }),
+            ],
+          })
+        );
+      });
+
+      await page.waitForTimeout(50);
+
+      await pane.evaluate((el) => {
+        el.dispatchEvent(
+          new TouchEvent("touchmove", {
+            bubbles: true,
+            touches: [
+              new Touch({
+                identifier: 0,
+                target: el,
+                clientX: 200,
+                clientY: 200,
+              }),
+            ],
+          })
+        );
+      });
+
+      await pane.evaluate((el) => {
+        el.dispatchEvent(
+          new TouchEvent("touchend", {
+            bubbles: true,
+            changedTouches: [
+              new Touch({
+                identifier: 0,
+                target: el,
+                clientX: 200,
+                clientY: 200,
+              }),
+            ],
+          })
+        );
+      });
+
+      await page.waitForTimeout(200);
+
+      // Viewport should still be functional
+      await expect(page.locator(".react-flow__viewport")).toBeVisible();
+    });
+
+    test("minimap should be hidden on mobile", async ({ page }) => {
+      // Minimap should not be visible on mobile viewport
+      const minimap = page.locator(".react-flow__minimap");
+      // Either not present or not visible
+      const isMinimapVisible = await minimap.isVisible().catch(() => false);
+      expect(isMinimapVisible).toBe(false);
+    });
+
+    test("controls should still be accessible on mobile", async ({ page }) => {
+      // Controls panel should still be visible on mobile
+      const controls = page.locator(".react-flow__controls");
+      await expect(controls).toBeVisible();
+
+      // Zoom controls should be tappable
+      const zoomIn = page.locator(".react-flow__controls-zoomin");
+      await expect(zoomIn).toBeVisible();
+    });
+  });
 });

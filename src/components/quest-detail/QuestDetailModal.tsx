@@ -6,8 +6,14 @@ import {
   Target,
   Award,
   ChevronRight,
+  Gift,
+  Package,
+  Loader2,
+  AlertCircle,
+  Key,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { useQuestDetails } from "@/hooks/useQuestDetails";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +32,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getTraderColor, STATUS_COLORS } from "@/lib/trader-colors";
 import type { QuestWithProgress } from "@/types";
+import type { TarkovQuestDetails, TarkovObjectiveItem } from "@/lib/tarkov-api";
 
 interface QuestDetailModalProps {
   quest: QuestWithProgress | null;
@@ -33,7 +40,30 @@ interface QuestDetailModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-function QuestDetailContent({ quest }: { quest: QuestWithProgress }) {
+// Helper to extract item objectives that require turning in items
+function getItemObjectives(
+  objectives: TarkovObjectiveItem[]
+): TarkovObjectiveItem[] {
+  return objectives.filter(
+    (obj) =>
+      (obj.type === "giveItem" || obj.type === "findQuestItem") &&
+      (obj.item || (obj.items && obj.items.length > 0))
+  );
+}
+
+interface QuestDetailContentProps {
+  quest: QuestWithProgress;
+  details: TarkovQuestDetails | null;
+  detailsLoading: boolean;
+  detailsError: string | null;
+}
+
+function QuestDetailContent({
+  quest,
+  details,
+  detailsLoading,
+  detailsError,
+}: QuestDetailContentProps) {
   const statusColor = STATUS_COLORS[quest.computedStatus];
 
   // Group objectives by map
@@ -52,6 +82,19 @@ function QuestDetailContent({ quest }: { quest: QuestWithProgress }) {
 
   // Get prerequisite quests
   const prerequisites = quest.dependsOn || [];
+
+  // Extract required items from objectives
+  const itemObjectives = details ? getItemObjectives(details.objectives) : [];
+
+  // Check if there are rewards
+  const hasRewards =
+    details &&
+    (details.experience > 0 ||
+      details.finishRewards.items.length > 0 ||
+      details.finishRewards.traderStanding.length > 0);
+
+  // Check for needed keys
+  const hasKeys = details && details.neededKeys.length > 0;
 
   return (
     <div className="space-y-6">
@@ -75,7 +118,88 @@ function QuestDetailContent({ quest }: { quest: QuestWithProgress }) {
             Kappa Required
           </Badge>
         )}
+        {details && details.experience > 0 && (
+          <Badge variant="secondary">
+            {details.experience.toLocaleString()} XP
+          </Badge>
+        )}
       </div>
+
+      {/* Required Items Section */}
+      {itemObjectives.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+            <Package className="w-4 h-4" />
+            Required Items ({itemObjectives.length})
+          </h3>
+          <ul className="space-y-2">
+            {itemObjectives.map((obj) => {
+              const item = obj.item || obj.items?.[0];
+              if (!item) return null;
+              return (
+                <li key={obj.id} className="flex items-center gap-3 text-sm">
+                  {item.iconLink && (
+                    <img
+                      src={item.iconLink}
+                      alt={item.shortName}
+                      className="w-8 h-8 object-contain bg-muted rounded"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <span className="text-foreground/90">{item.name}</span>
+                    {obj.count && obj.count > 1 && (
+                      <span className="text-muted-foreground ml-1">
+                        x{obj.count}
+                      </span>
+                    )}
+                    {obj.foundInRaid && (
+                      <Badge variant="outline" className="ml-2 text-xs py-0">
+                        FIR
+                      </Badge>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
+      {/* Needed Keys Section */}
+      {hasKeys && (
+        <div>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+            <Key className="w-4 h-4" />
+            Required Keys ({details!.neededKeys.length})
+          </h3>
+          <ul className="space-y-2">
+            {details!.neededKeys.map((keyReq, idx) =>
+              keyReq.keys.map((key) => (
+                <li
+                  key={`${idx}-${key.shortName}`}
+                  className="flex items-center gap-3 text-sm"
+                >
+                  {key.iconLink && (
+                    <img
+                      src={key.iconLink}
+                      alt={key.shortName}
+                      className="w-8 h-8 object-contain bg-muted rounded"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <span className="text-foreground/90">{key.name}</span>
+                    {keyReq.map && (
+                      <span className="text-xs text-muted-foreground ml-2">
+                        ({keyReq.map.name})
+                      </span>
+                    )}
+                  </div>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
+      )}
 
       {/* Objectives Section */}
       <div>
@@ -112,6 +236,71 @@ function QuestDetailContent({ quest }: { quest: QuestWithProgress }) {
           </p>
         )}
       </div>
+
+      {/* Rewards Section */}
+      {detailsLoading && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Loading rewards...
+        </div>
+      )}
+      {detailsError && (
+        <div className="flex items-center gap-2 text-sm text-destructive">
+          <AlertCircle className="w-4 h-4" />
+          {detailsError}
+        </div>
+      )}
+      {hasRewards && (
+        <div>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+            <Gift className="w-4 h-4" />
+            Rewards
+          </h3>
+          <div className="space-y-3">
+            {/* Trader Standing Changes */}
+            {details!.finishRewards.traderStanding.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {details!.finishRewards.traderStanding.map((standing, idx) => (
+                  <Badge
+                    key={idx}
+                    variant={
+                      standing.standing >= 0 ? "secondary" : "destructive"
+                    }
+                    className="text-xs"
+                  >
+                    {standing.trader.name} {standing.standing >= 0 ? "+" : ""}
+                    {standing.standing.toFixed(2)}
+                  </Badge>
+                ))}
+              </div>
+            )}
+            {/* Item Rewards */}
+            {details!.finishRewards.items.length > 0 && (
+              <ul className="space-y-2">
+                {details!.finishRewards.items.map((reward, idx) => (
+                  <li key={idx} className="flex items-center gap-3 text-sm">
+                    {reward.item.iconLink && (
+                      <img
+                        src={reward.item.iconLink}
+                        alt={reward.item.shortName}
+                        className="w-8 h-8 object-contain bg-muted rounded"
+                      />
+                    )}
+                    <span className="text-foreground/90">
+                      {reward.item.name}
+                      {reward.count > 1 && (
+                        <span className="text-muted-foreground ml-1">
+                          x{reward.count.toLocaleString()}
+                        </span>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Prerequisites Section */}
       {prerequisites.length > 0 && (
@@ -210,6 +399,12 @@ export function QuestDetailModal({
   onOpenChange,
 }: QuestDetailModalProps) {
   const isMobile = useIsMobile();
+  // Fetch extended details from tarkov.dev when modal opens
+  const {
+    details,
+    loading: detailsLoading,
+    error: detailsError,
+  } = useQuestDetails(open && quest ? quest.id : null);
 
   if (!quest) return null;
 
@@ -236,7 +431,12 @@ export function QuestDetailModal({
             </SheetDescription>
           </SheetHeader>
           <div className="pt-4">
-            <QuestDetailContent quest={quest} />
+            <QuestDetailContent
+              quest={quest}
+              details={details}
+              detailsLoading={detailsLoading}
+              detailsError={detailsError}
+            />
           </div>
         </SheetContent>
       </Sheet>
@@ -261,7 +461,12 @@ export function QuestDetailModal({
             Quest details for {quest.title}
           </DialogDescription>
         </DialogHeader>
-        <QuestDetailContent quest={quest} />
+        <QuestDetailContent
+          quest={quest}
+          details={details}
+          detailsLoading={detailsLoading}
+          detailsError={detailsError}
+        />
       </DialogContent>
     </Dialog>
   );
