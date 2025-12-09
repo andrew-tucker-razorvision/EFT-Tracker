@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { SlidersHorizontal, Filter } from "lucide-react";
 import { ViewToggle } from "@/components/quest-views";
+import { ProgressStats } from "@/components/progress-stats";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -32,7 +33,12 @@ import {
 import { StatusMultiSelect } from "./StatusMultiSelect";
 import { ActiveFilterChips } from "./ActiveFilterChips";
 import { getTraderColor } from "@/lib/trader-colors";
-import type { Trader, QuestFilters as Filters, ViewMode } from "@/types";
+import type {
+  Trader,
+  QuestFilters as Filters,
+  ViewMode,
+  QuestWithProgress,
+} from "@/types";
 
 const MAPS = [
   "Factory",
@@ -56,6 +62,7 @@ const COLUMNS_OPTIONS: { value: number | null; label: string }[] = [
 
 interface QuestFiltersProps {
   traders: Trader[];
+  quests: QuestWithProgress[];
   filters: Filters;
   onFilterChange: (filters: Partial<Filters>) => void;
   onApplyFilters: () => void;
@@ -186,6 +193,7 @@ function AdvancedFilters({
 
 export function QuestFilters({
   traders,
+  quests,
   filters,
   onFilterChange,
   onApplyFilters,
@@ -761,8 +769,14 @@ export function QuestFilters({
             </Popover>
           </div>
 
-          {/* View Toggle */}
-          <ViewToggle viewMode={viewMode} onViewModeChange={onViewModeChange} />
+          {/* Progress Stats + View Toggle */}
+          <div className="flex items-center gap-3">
+            <ProgressStats quests={quests} traders={traders} />
+            <ViewToggle
+              viewMode={viewMode}
+              onViewModeChange={onViewModeChange}
+            />
+          </div>
         </div>
 
         {/* Active filter chips (desktop) */}
