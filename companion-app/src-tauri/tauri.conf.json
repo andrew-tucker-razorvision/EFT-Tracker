@@ -49,11 +49,5 @@
       "timestampUrl": ""
     }
   },
-  "plugins": {
-    "autostart": {
-      "macOSExtraArgs": ["--flag1", "flag2"]
-    },
-    "notification": {},
-    "store": {}
-  }
+  "plugins": {}
 }
