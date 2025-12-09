@@ -126,6 +126,53 @@ Examples of things to check:
 
 Don't rely on the user to catch visual issues - proactively identify and fix them yourself.
 
+### Feature Testing with Playwright MCP
+
+**IMPORTANT:** After implementing new features, use Playwright MCP tools to test them interactively before presenting to the user. This provides additional automated testing beyond unit tests.
+
+**Testing workflow:**
+
+1. **Start dev server** - Ensure `npm run dev` is running on port 3000
+2. **Navigate to feature** - Use `browser_navigate` to go to the relevant page
+3. **Wait for load** - Use `browser_wait_for` if needed for async content
+4. **Test interactions** - Use `browser_snapshot` to see the accessibility tree, then:
+   - `browser_click` to click buttons/links
+   - `browser_type` to fill inputs
+   - `browser_select_option` for dropdowns
+5. **Verify results** - Check the page snapshot after each action
+6. **Iterate on failures** - If something doesn't work:
+   - Identify the issue from the snapshot or console messages
+   - Fix the code
+   - Re-test until it works
+7. **Clean up** - Always call `browser_close` when done
+
+**Example test flow:**
+
+```
+1. browser_navigate -> http://localhost:3000/quests
+2. browser_wait_for -> time: 2 (wait for data load)
+3. browser_snapshot -> verify UI elements exist
+4. browser_click -> click a button (use ref from snapshot)
+5. browser_snapshot -> verify expected changes occurred
+6. browser_close -> clean up session
+```
+
+**What to test:**
+
+- New UI components render correctly
+- Buttons/links trigger expected actions
+- Forms submit and show success/error states
+- Navigation works between views
+- Data displays correctly after API calls
+- Popovers/modals open and close properly
+
+**Interpreting snapshots:**
+
+- The snapshot shows an accessibility tree with `ref` attributes
+- Use the `ref` value to target elements for clicks/interactions
+- Look for `[active]`, `[expanded]`, `[disabled]` states
+- Check for expected text content and structure
+
 ### Running E2E Tests
 
 ```bash
