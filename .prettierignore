@@ -51,3 +51,6 @@ yarn.lock
 
 # Logs
 *.log
+
+# Companion app (has its own config)
+companion-app
