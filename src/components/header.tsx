@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X, User, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -125,6 +125,12 @@ export function Header() {
                 <DropdownMenuItem asChild>
                   <Link href="/quests">My Quests</Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings" className="flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    Settings
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleSignOut}
@@ -184,6 +190,14 @@ export function Header() {
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       My Quests
+                    </Link>
+                    <Link
+                      href="/settings"
+                      className="px-2 py-2 text-sm hover:bg-muted rounded-md flex items-center gap-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Settings className="h-4 w-4" />
+                      Settings
                     </Link>
                     <Button
                       variant="outline"

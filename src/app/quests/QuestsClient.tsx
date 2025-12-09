@@ -15,6 +15,7 @@ import { LevelTimelineView, MapGroupsView } from "@/components/quest-views";
 import { RaidPlanner } from "@/components/raid-planner";
 import { WelcomeModal } from "@/components/onboarding";
 import { QuestDetailModal } from "@/components/quest-detail";
+import { CatchUpDialog } from "@/components/catch-up";
 import { useQuests } from "@/hooks/useQuests";
 import { useProgress } from "@/hooks/useProgress";
 import { getIncompletePrerequisites } from "@/lib/quest-layout";
@@ -67,6 +68,9 @@ export function QuestsClient() {
 
   // Onboarding state
   const [showWelcome, setShowWelcome] = useState(false);
+
+  // Catch-up dialog state
+  const [showCatchUp, setShowCatchUp] = useState(false);
 
   // Quest detail modal state
   const [detailQuest, setDetailQuest] = useState<QuestWithProgress | null>(
@@ -176,6 +180,18 @@ export function QuestsClient() {
     localStorage.setItem("eft-tracker-onboarding", "completed");
     setShowWelcome(false);
   }, []);
+
+  // Handle catch-up from welcome modal
+  const handleCatchUpFromWelcome = useCallback(() => {
+    localStorage.setItem("eft-tracker-onboarding", "completed");
+    setShowWelcome(false);
+    setShowCatchUp(true);
+  }, []);
+
+  // Handle catch-up completion
+  const handleCatchUpComplete = useCallback(() => {
+    refetch();
+  }, [refetch]);
 
   // Track if this is the first render (to skip initial effect)
   const isFirstViewRender = useRef(true);
@@ -378,6 +394,13 @@ export function QuestsClient() {
         open={showWelcome}
         onOpenChange={setShowWelcome}
         onGetStarted={handleOnboardingComplete}
+        onCatchUp={handleCatchUpFromWelcome}
+      />
+      <CatchUpDialog
+        open={showCatchUp}
+        onOpenChange={setShowCatchUp}
+        quests={allQuestsWithProgress}
+        onComplete={handleCatchUpComplete}
       />
       <SkipQuestDialog
         open={skipDialogOpen}

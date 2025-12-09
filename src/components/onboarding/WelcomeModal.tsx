@@ -16,12 +16,14 @@ import {
   Sparkles,
   Keyboard,
   Focus,
+  FastForward,
 } from "lucide-react";
 
 interface WelcomeModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onGetStarted: () => void;
+  onCatchUp?: () => void;
 }
 
 const tips = [
@@ -61,6 +63,7 @@ export function WelcomeModal({
   open,
   onOpenChange,
   onGetStarted,
+  onCatchUp,
 }: WelcomeModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -93,10 +96,16 @@ export function WelcomeModal({
           ))}
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex-col gap-2 sm:flex-col">
           <Button onClick={onGetStarted} className="w-full">
-            Get Started
+            Start Fresh
           </Button>
+          {onCatchUp && (
+            <Button variant="outline" onClick={onCatchUp} className="w-full">
+              <FastForward className="h-4 w-4 mr-2" />
+              Already mid-wipe? Catch up
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -13,7 +13,10 @@ import {
   Download,
   RotateCcw,
   Database,
+  FastForward,
 } from "lucide-react";
+import { CatchUpDialog } from "@/components/catch-up";
+import type { QuestWithProgress } from "@/types";
 
 interface CompanionToken {
   id: string;
@@ -57,6 +60,11 @@ export function SettingsClient() {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resetSuccess, setResetSuccess] = useState<string | null>(null);
 
+  // Catch-up dialog
+  const [showCatchUp, setShowCatchUp] = useState(false);
+  const [quests, setQuests] = useState<QuestWithProgress[]>([]);
+  const [questsLoading, setQuestsLoading] = useState(false);
+
   const fetchTokens = useCallback(async () => {
     try {
       const res = await fetch("/api/companion/link");
@@ -73,6 +81,28 @@ export function SettingsClient() {
   useEffect(() => {
     fetchTokens();
   }, [fetchTokens]);
+
+  const fetchQuests = useCallback(async () => {
+    setQuestsLoading(true);
+    try {
+      const res = await fetch("/api/quests");
+      if (!res.ok) throw new Error("Failed to fetch quests");
+      const data = await res.json();
+      setQuests(data.quests);
+    } catch (err) {
+      setError(String(err));
+    } finally {
+      setQuestsLoading(false);
+    }
+  }, []);
+
+  const handleOpenCatchUp = useCallback(async () => {
+    // Fetch quests if not already loaded
+    if (quests.length === 0) {
+      await fetchQuests();
+    }
+    setShowCatchUp(true);
+  }, [quests.length, fetchQuests]);
 
   const handleCreateToken = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -244,6 +274,12 @@ export function SettingsClient() {
 
   return (
     <div className="min-h-screen bg-[#1a1a1a] text-[#e5e5e5]">
+      <CatchUpDialog
+        open={showCatchUp}
+        onOpenChange={setShowCatchUp}
+        quests={quests}
+        onComplete={fetchQuests}
+      />
       <div className="max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-8">Settings</h1>
 
@@ -482,6 +518,31 @@ export function SettingsClient() {
           )}
 
           <div className="space-y-4">
+            {/* Catch Up Progress */}
+            <div className="flex items-center justify-between p-4 bg-[#1a1a1a] rounded-lg border border-[#d4a574]/30">
+              <div>
+                <h3 className="font-medium text-[#d4a574]">
+                  Catch Up Progress
+                </h3>
+                <p className="text-sm text-[#9ca3af] mt-1">
+                  Already mid-wipe? Select your current quests and auto-complete
+                  all prerequisites.
+                </p>
+              </div>
+              <button
+                onClick={handleOpenCatchUp}
+                disabled={questsLoading}
+                className="px-4 py-2 bg-[#d4a574] hover:bg-[#d4a574]/80 disabled:opacity-50 text-[#1a1a1a] rounded-lg font-medium flex items-center gap-2"
+              >
+                {questsLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <FastForward className="w-4 h-4" />
+                )}
+                Catch Up
+              </button>
+            </div>
+
             {/* Export Progress */}
             <div className="flex items-center justify-between p-4 bg-[#1a1a1a] rounded-lg border border-[#404040]">
               <div>
