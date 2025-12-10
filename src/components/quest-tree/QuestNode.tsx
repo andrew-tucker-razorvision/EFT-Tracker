@@ -29,7 +29,7 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
   const {
     quest,
     // nodeHeight - dynamic height is passed but we use fixed dimensions for now
-    // onClick - available for selection, but status change is handled by parent
+    onClick,
     onDetails,
     isRoot,
     isLeaf,
@@ -113,9 +113,11 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
-    // Right-click to open quest details
+    // Right-click to open quest details (or call onClick for backward compatibility)
     if (onDetails) {
       onDetails(quest.id);
+    } else if (onClick) {
+      onClick(quest.id);
     }
   };
 
