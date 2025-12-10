@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { LevelQuestCard } from "./LevelQuestCard";
+import { NextUpPanel } from "@/components/next-up";
 import type { QuestWithProgress, QuestStatus } from "@/types";
 
 // Maps in standard order (matching QuestFilters.tsx)
@@ -23,6 +24,7 @@ const ANY_LOCATION = "Any Location";
 
 interface MapGroupsViewProps {
   quests: QuestWithProgress[];
+  allQuests?: QuestWithProgress[];
   playerLevel?: number | null;
   onStatusChange: (questId: string, status: QuestStatus) => void;
   onQuestDetails?: (questId: string) => void;
@@ -30,6 +32,7 @@ interface MapGroupsViewProps {
 
 export function MapGroupsView({
   quests,
+  allQuests,
   playerLevel,
   onStatusChange,
   onQuestDetails,
@@ -104,9 +107,24 @@ export function MapGroupsView({
   // Get ordered list of maps (standard maps + Any Location at end)
   const orderedMaps = [...MAPS, ANY_LOCATION];
 
+  // Handler for clicking a quest in the NextUpPanel
+  const handleNextUpQuestClick = (questId: string) => {
+    onQuestDetails?.(questId);
+  };
+
   return (
     <div className="h-full overflow-auto">
       <div className="flex gap-2 p-4 min-w-max">
+        {/* Next Up Panel - sticky first column */}
+        {allQuests && allQuests.length > 0 && (
+          <div className="flex-shrink-0 w-48 sticky left-4 z-20">
+            <NextUpPanel
+              quests={allQuests}
+              playerLevel={playerLevel}
+              onQuestClick={handleNextUpQuestClick}
+            />
+          </div>
+        )}
         {orderedMaps.map((map) => {
           const questList = questsByMap.get(map) || [];
           const stats = mapStats.get(map)!;

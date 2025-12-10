@@ -17,6 +17,7 @@ Thumbs.db
 
 # Tauri
 src-tauri/Cargo.lock
+src-tauri/gen/
 
 # Local env files
 .env
