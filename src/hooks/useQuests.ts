@@ -56,6 +56,8 @@ const defaultFilters: QuestFilters = {
   playerLevel: 1, // Default to level 1 for all users
   questsPerTree: 5, // Default to showing 5 columns (depth levels) per trader
   bypassLevelRequirement: false, // Show all quests regardless of level when true
+  questType: null, // Default to all quest types
+  hideReputationQuests: true, // Hide Fence reputation quests by default
 };
 
 export function useQuests(): UseQuestsReturn {
@@ -124,6 +126,24 @@ export function useQuests(): UseQuestsReturn {
         filteredQuests = filteredQuests.filter((q: QuestWithProgress) =>
           appliedFilters.statuses.includes(q.computedStatus)
         );
+      }
+
+      // Quest type filtering (null = all types)
+      // Compare case-insensitively since Prisma returns UPPERCASE, but filters use lowercase
+      if (appliedFilters.questType) {
+        const filterType = appliedFilters.questType.toUpperCase();
+        filteredQuests = filteredQuests.filter(
+          (q: QuestWithProgress) => q.questType?.toUpperCase() === filterType
+        );
+      }
+
+      // Hide reputation and prestige quests if enabled (default: true)
+      // Prestige quests require The Collector and are end-game content
+      if (appliedFilters.hideReputationQuests) {
+        filteredQuests = filteredQuests.filter((q: QuestWithProgress) => {
+          const questType = q.questType?.toUpperCase();
+          return questType !== "REPUTATION" && questType !== "PRESTIGE";
+        });
       }
 
       // Hide quests more than 5 levels above player level (skip if bypassLevelRequirement is enabled)

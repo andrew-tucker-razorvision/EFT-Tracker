@@ -29,6 +29,8 @@ export const mockQuests: Quest[] = [
     wikiLink: "https://escapefromtarkov.fandom.com/wiki/Debut",
     levelRequired: 1,
     kappaRequired: true,
+    questType: "standard",
+    factionName: null,
     traderId: "trader_prapor",
     trader: mockTraders[0],
     objectives: [
@@ -43,6 +45,8 @@ export const mockQuests: Quest[] = [
     wikiLink: "https://escapefromtarkov.fandom.com/wiki/Checking",
     levelRequired: 2,
     kappaRequired: true,
+    questType: "standard",
+    factionName: null,
     traderId: "trader_prapor",
     trader: mockTraders[0],
     objectives: [
@@ -64,6 +68,8 @@ export const mockQuests: Quest[] = [
     wikiLink: "https://escapefromtarkov.fandom.com/wiki/Shortage",
     levelRequired: 5,
     kappaRequired: true,
+    questType: "standard",
+    factionName: null,
     traderId: "trader_therapist",
     trader: mockTraders[1],
     objectives: [
@@ -83,6 +89,8 @@ export const mockQuests: Quest[] = [
     wikiLink: "https://escapefromtarkov.fandom.com/wiki/Delivery_from_the_Past",
     levelRequired: 7,
     kappaRequired: true,
+    questType: "standard",
+    factionName: null,
     traderId: "trader_prapor",
     trader: mockTraders[0],
     objectives: [
@@ -108,6 +116,8 @@ export const mockQuests: Quest[] = [
     wikiLink: "https://escapefromtarkov.fandom.com/wiki/BP_Depot",
     levelRequired: 10,
     kappaRequired: false, // Not required for Kappa
+    questType: "standard",
+    factionName: null,
     traderId: "trader_prapor",
     trader: mockTraders[0],
     objectives: [

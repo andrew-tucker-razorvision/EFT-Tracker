@@ -94,7 +94,8 @@ function QuestDetailContent({
       details.finishRewards.traderStanding.length > 0);
 
   // Check for needed keys
-  const hasKeys = details && details.neededKeys.length > 0;
+  const hasKeys =
+    details && details.neededKeys && details.neededKeys.length > 0;
 
   return (
     <div className="space-y-6">

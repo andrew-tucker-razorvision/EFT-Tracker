@@ -1,13 +1,24 @@
 "use client";
 
 import { X } from "lucide-react";
-import type { QuestFilters, Trader, QuestStatus } from "@/types";
+import type { QuestFilters, Trader, QuestStatus, QuestType } from "@/types";
 
 const STATUS_LABELS: Record<QuestStatus, string> = {
   available: "Available",
   in_progress: "In Progress",
   completed: "Completed",
   locked: "Locked",
+};
+
+const QUEST_TYPE_LABELS: Record<QuestType, string> = {
+  standard: "Standard",
+  pvp_zone: "PVP Zone",
+  reputation: "Reputation (Fence)",
+  lightkeeper: "Lightkeeper",
+  faction_bear: "BEAR Only",
+  faction_usec: "USEC Only",
+  story: "Story",
+  prestige: "Prestige (New Beginning)",
 };
 
 interface ActiveFilterChipsProps {
@@ -71,6 +82,15 @@ export function ActiveFilterChips({
       key: `map-${filters.map}`,
       label: filters.map,
       onRemove: () => onRemoveFilter("map"),
+    });
+  }
+
+  // Quest type filter
+  if (filters.questType) {
+    chips.push({
+      key: `questType-${filters.questType}`,
+      label: QUEST_TYPE_LABELS[filters.questType],
+      onRemove: () => onRemoveFilter("questType"),
     });
   }
 

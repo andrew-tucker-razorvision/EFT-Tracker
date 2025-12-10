@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, QuestType } from "@prisma/client";
 
 // Prisma 7 requires a driver adapter
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -26,6 +26,59 @@ const TRADER_COLORS: Record<string, string> = {
   "mr-kerman": "#4682b4", // Steel blue
   voevoda: "#800080", // Purple
 };
+
+// Known prestige quest IDs (New Beginning variants) - these require The Collector
+const PRESTIGE_QUEST_IDS = [
+  "6761f28a022f60bb320f3e95", // New Beginning (Prestige 1)
+  "6761ff17cdc36bd66102e9d0", // New Beginning (Prestige 2)
+  "6848100b00afffa81f09e365", // New Beginning (Prestige 3)
+  "68481881f43abfdda2058369", // New Beginning (Prestige 4)
+  // Add more as they're discovered
+];
+
+// The Collector quest ID - prerequisite for all prestige quests
+const THE_COLLECTOR_QUEST_ID = "5c51aac186f77432ea65c552";
+
+/**
+ * Determine quest type based on task properties
+ * Auto-detects: PVP Zone, Reputation (Fence), Lightkeeper, Faction-specific, Prestige
+ * Story quests will need manual tagging when API data is available
+ */
+function determineQuestType(
+  task: TarkovDevTask,
+  traderNormalizedName: string
+): QuestType {
+  // Prestige quests (New Beginning) - detected by known IDs
+  if (PRESTIGE_QUEST_IDS.includes(task.id)) {
+    return "PRESTIGE";
+  }
+
+  // PVP Zone quests - detected by name pattern
+  if (task.name.includes("[PVP ZONE]")) {
+    return "PVP_ZONE";
+  }
+
+  // Fence reputation repair quests
+  if (traderNormalizedName === "fence") {
+    return "REPUTATION";
+  }
+
+  // Lightkeeper quests
+  if (traderNormalizedName === "lightkeeper") {
+    return "LIGHTKEEPER";
+  }
+
+  // Faction-specific quests
+  if (task.factionName === "BEAR") {
+    return "FACTION_BEAR";
+  }
+  if (task.factionName === "USEC") {
+    return "FACTION_USEC";
+  }
+
+  // Default to standard quest
+  return "STANDARD";
+}
 
 // tarkov.dev GraphQL API types
 interface TarkovDevTrader {
@@ -212,6 +265,9 @@ async function main() {
       }
     }
 
+    // Determine quest type based on task properties
+    const questType = determineQuestType(task, task.trader.normalizedName);
+
     await prisma.quest.create({
       data: {
         id: questId,
@@ -219,6 +275,8 @@ async function main() {
         wikiLink: task.wikiLink || null,
         levelRequired: task.minPlayerLevel || 1,
         kappaRequired: task.kappaRequired ?? false,
+        questType: questType,
+        factionName: task.factionName || null,
         traderId: traderId,
         objectives: {
           create: (task.objectives || []).map((obj) => ({
@@ -269,6 +327,35 @@ async function main() {
     }
   }
 
+  // Add manual dependencies for prestige quests -> The Collector
+  // These aren't in the tarkov.dev API but are required in-game
+  const collectorQuestId = questIdMap.get(THE_COLLECTOR_QUEST_ID);
+  if (collectorQuestId) {
+    let prestigeDepsAdded = 0;
+    for (const prestigeId of PRESTIGE_QUEST_IDS) {
+      const prestigeQuestId = questIdMap.get(prestigeId);
+      if (prestigeQuestId) {
+        await prisma.questDependency.create({
+          data: {
+            dependentId: prestigeQuestId,
+            requiredId: collectorQuestId,
+            requirementStatus: ["complete"],
+          },
+        });
+        prestigeDepsAdded++;
+      }
+    }
+    if (prestigeDepsAdded > 0) {
+      console.log(
+        `Added ${prestigeDepsAdded} prestige quest dependencies to The Collector`
+      );
+    }
+  } else {
+    console.warn(
+      "The Collector quest not found - skipping prestige dependencies"
+    );
+  }
+
   if (skippedDeps > 0) {
     console.warn(`Skipped ${skippedDeps} dependencies due to unknown tasks`);
   }
@@ -288,11 +375,21 @@ async function main() {
   const objectiveCount = await prisma.objective.count();
   const dependencyCount = await prisma.questDependency.count();
 
+  // Quest type counts
+  const questTypeCounts = await prisma.quest.groupBy({
+    by: ["questType"],
+    _count: { questType: true },
+  });
+
   console.log("\nSeed completed!");
   console.log(`- ${traderCount} traders`);
   console.log(`- ${questCount} quests (${kappaCount} required for Kappa)`);
   console.log(`- ${objectiveCount} objectives`);
   console.log(`- ${dependencyCount} dependencies`);
+  console.log("\nQuest types:");
+  for (const { questType, _count } of questTypeCounts) {
+    console.log(`  ${questType}: ${_count.questType}`);
+  }
 }
 
 main()

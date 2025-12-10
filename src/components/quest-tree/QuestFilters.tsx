@@ -38,6 +38,7 @@ import type {
   QuestFilters as Filters,
   ViewMode,
   QuestWithProgress,
+  QuestType,
 } from "@/types";
 
 const MAPS = [
@@ -58,6 +59,19 @@ const COLUMNS_OPTIONS: { value: number | null; label: string }[] = [
   { value: 5, label: "5 columns" },
   { value: 10, label: "10 columns" },
   { value: null, label: "All columns" },
+];
+
+// Quest type options for filtering
+const QUEST_TYPE_OPTIONS: { value: QuestType | "all"; label: string }[] = [
+  { value: "all", label: "All Types" },
+  { value: "standard", label: "Standard" },
+  { value: "pvp_zone", label: "PVP Zone" },
+  { value: "reputation", label: "Reputation (Fence)" },
+  { value: "lightkeeper", label: "Lightkeeper" },
+  { value: "faction_bear", label: "BEAR Only" },
+  { value: "faction_usec", label: "USEC Only" },
+  { value: "story", label: "Story" },
+  { value: "prestige", label: "Prestige (New Beginning)" },
 ];
 
 interface QuestFiltersProps {
@@ -409,6 +423,8 @@ export function QuestFilters({
       playerLevel: 1,
       questsPerTree: 5,
       bypassLevelRequirement: false,
+      questType: null,
+      hideReputationQuests: true, // Default to hiding reputation quests
     });
     onApplyFilters();
   };
@@ -436,6 +452,10 @@ export function QuestFilters({
       onFilterChange({ bypassLevelRequirement: false });
     } else if (key === "questsPerTree") {
       onFilterChange({ questsPerTree: 5 });
+    } else if (key === "questType") {
+      onFilterChange({ questType: null });
+    } else if (key === "hideReputationQuests") {
+      onFilterChange({ hideReputationQuests: false });
     }
     // Filter chip removal requires clicking Apply to take effect
   };
@@ -459,6 +479,7 @@ export function QuestFilters({
     filters.statuses.length > 0 ? filters.statuses : null,
     filters.kappaOnly,
     filters.map,
+    filters.questType,
     filters.playerLevel !== 1 ? filters.playerLevel : null,
     filters.questsPerTree !== 5 ? filters.questsPerTree : null,
     filters.bypassLevelRequirement ? true : null,
@@ -596,6 +617,33 @@ export function QuestFilters({
                   </Select>
                 </div>
 
+                {/* Quest Type */}
+                <div>
+                  <Label className="text-xs text-muted-foreground">
+                    Quest Type
+                  </Label>
+                  <Select
+                    value={filters.questType || "all"}
+                    onValueChange={(value) =>
+                      handlePrimaryFilterChange({
+                        questType:
+                          value === "all" ? null : (value as QuestType),
+                      })
+                    }
+                  >
+                    <SelectTrigger className="h-9 mt-1">
+                      <SelectValue placeholder="All Types" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {QUEST_TYPE_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 {/* Advanced Filters */}
                 <div className="pt-4 border-t">
                   <AdvancedFilters
@@ -711,6 +759,27 @@ export function QuestFilters({
                 {MAPS.map((map) => (
                   <SelectItem key={map} value={map}>
                     {map}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Quest Type */}
+            <Select
+              value={filters.questType || "all"}
+              onValueChange={(value) =>
+                handlePrimaryFilterChange({
+                  questType: value === "all" ? null : (value as QuestType),
+                })
+              }
+            >
+              <SelectTrigger className="h-9 w-[150px]">
+                <SelectValue placeholder="All Types" />
+              </SelectTrigger>
+              <SelectContent>
+                {QUEST_TYPE_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
                   </SelectItem>
                 ))}
               </SelectContent>

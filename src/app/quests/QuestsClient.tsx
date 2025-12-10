@@ -458,6 +458,7 @@ export function QuestsClient() {
               quests={questsWithProgress}
               allQuests={allQuestsWithProgress}
               playerLevel={filters.playerLevel}
+              hideReputationQuests={filters.hideReputationQuests}
               onStatusChange={handleStatusChange}
               onQuestDetails={handleQuestDetails}
             />

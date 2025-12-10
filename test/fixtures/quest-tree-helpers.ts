@@ -63,6 +63,8 @@ export const defaultTestFilters: QuestFilters = {
   playerLevel: 1,
   questsPerTree: 5,
   bypassLevelRequirement: false,
+  questType: null,
+  hideReputationQuests: true, // Default to hiding reputation quests
 };
 
 // ============================================================================
@@ -86,6 +88,8 @@ function createQuest(
     wikiLink: `https://escapefromtarkov.fandom.com/wiki/${title.replace(/ /g, "_")}`,
     levelRequired,
     kappaRequired: true,
+    questType: "standard",
+    factionName: null,
     traderId,
     trader,
     objectives: [],

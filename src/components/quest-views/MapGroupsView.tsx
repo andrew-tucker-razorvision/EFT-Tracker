@@ -26,6 +26,7 @@ interface MapGroupsViewProps {
   quests: QuestWithProgress[];
   allQuests?: QuestWithProgress[];
   playerLevel?: number | null;
+  hideReputationQuests?: boolean;
   onStatusChange: (questId: string, status: QuestStatus) => void;
   onQuestDetails?: (questId: string) => void;
 }
@@ -34,6 +35,7 @@ export function MapGroupsView({
   quests,
   allQuests,
   playerLevel,
+  hideReputationQuests = true,
   onStatusChange,
   onQuestDetails,
 }: MapGroupsViewProps) {
@@ -107,6 +109,17 @@ export function MapGroupsView({
   // Get ordered list of maps (standard maps + Any Location at end)
   const orderedMaps = [...MAPS, ANY_LOCATION];
 
+  // Filter quests for NextUpPanel based on hideReputationQuests setting
+  // Also hides prestige quests (New Beginning) which require The Collector
+  const nextUpQuests = useMemo(() => {
+    if (!allQuests) return [];
+    if (!hideReputationQuests) return allQuests;
+    return allQuests.filter((q) => {
+      const questType = q.questType?.toUpperCase();
+      return questType !== "REPUTATION" && questType !== "PRESTIGE";
+    });
+  }, [allQuests, hideReputationQuests]);
+
   // Handler for clicking a quest in the NextUpPanel
   const handleNextUpQuestClick = (questId: string) => {
     onQuestDetails?.(questId);
@@ -116,10 +129,10 @@ export function MapGroupsView({
     <div className="h-full overflow-auto">
       <div className="flex gap-2 p-4 min-w-max">
         {/* Next Up Panel - sticky first column */}
-        {allQuests && allQuests.length > 0 && (
+        {nextUpQuests && nextUpQuests.length > 0 && (
           <div className="flex-shrink-0 w-48 sticky left-4 z-20">
             <NextUpPanel
-              quests={allQuests}
+              quests={nextUpQuests}
               playerLevel={playerLevel}
               onQuestClick={handleNextUpQuestClick}
             />

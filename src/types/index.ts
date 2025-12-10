@@ -3,6 +3,17 @@ import type { Node, Edge } from "@xyflow/react";
 // Quest status enum
 export type QuestStatus = "locked" | "available" | "in_progress" | "completed";
 
+// Quest type enum for categorization
+export type QuestType =
+  | "standard" // Regular trader quests
+  | "pvp_zone" // PVP Zone quests (Arena)
+  | "reputation" // Fence reputation repair quests
+  | "lightkeeper" // Lightkeeper questline
+  | "faction_bear" // BEAR-only quests
+  | "faction_usec" // USEC-only quests
+  | "story" // Main story quests (1.0)
+  | "prestige"; // Prestige quests (New Beginning) - require The Collector
+
 // Trader from database
 export interface Trader {
   id: string;
@@ -42,6 +53,8 @@ export interface Quest {
   wikiLink: string | null;
   levelRequired: number;
   kappaRequired: boolean;
+  questType: QuestType;
+  factionName: string | null;
   traderId: string;
   trader: Trader;
   objectives: Objective[];
@@ -81,6 +94,8 @@ export interface QuestFilters {
   playerLevel: number | null;
   questsPerTree: number | null; // null = show all
   bypassLevelRequirement: boolean; // Show all quests regardless of level
+  questType: QuestType | null; // null = all quest types
+  hideReputationQuests: boolean; // Hide Fence reputation quests by default
 }
 
 // View mode for quest display
