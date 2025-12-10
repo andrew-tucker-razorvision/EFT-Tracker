@@ -182,14 +182,43 @@ Verify the implementation meets requirements.
    npm test
    ```
 
-3. **Manual Testing**
-   - Start dev server: `npm run dev`
-   - Test the happy path
+3. **Playwright MCP Interactive Testing**
+
+   Use Playwright MCP tools to interactively test the implementation in the browser. This provides real-world verification beyond unit tests.
+
+   **Testing workflow:**
+
+   ```
+   1. Ensure dev server is running on port 3000
+   2. browser_navigate -> http://localhost:3000/[relevant-page]
+   3. browser_wait_for -> time: 2 (wait for data load if needed)
+   4. browser_snapshot -> verify UI elements exist and are correct
+   5. browser_click -> test buttons/links (use ref from snapshot)
+   6. browser_snapshot -> verify expected changes occurred
+   7. Repeat for each interaction to test
+   8. browser_close -> clean up session when done
+   ```
+
+   **What to verify:**
+   - New UI components render correctly
+   - Buttons/links trigger expected actions
+   - Forms submit and show success/error states
+   - Data displays correctly after API calls
+   - Popovers/modals open and close properly
+   - Navigation works between views
+
+   **Important:**
+   - Always call `browser_close` when done
+   - If issues found, fix them and re-test before moving on
+   - Take screenshots (`browser_take_screenshot`) for visual changes
+
+4. **Manual Testing** (if Playwright can't cover it)
    - Test edge cases from the write-up
    - Test error scenarios
+   - Test with different data states
 
-4. **Visual Verification** (for UI changes)
-   - Take screenshots
+5. **Visual Verification** (for UI changes)
+   - Take screenshots with `browser_take_screenshot`
    - Self-evaluate: Does it look right?
    - Check responsive behavior
 
@@ -246,6 +275,7 @@ When complete, provide a summary:
 - Lint: ✅
 - Type Check: ✅
 - Unit Tests: ✅ (X passed)
+- Playwright Testing: ✅ (interactive verification complete)
 - Manual Testing: ✅
 
 ### Ready for PR
