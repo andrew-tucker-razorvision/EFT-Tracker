@@ -185,6 +185,10 @@ Recent commits:
 2. [High impact task] - [why it matters]
 3. [High impact task] - [why it matters]
 
+### Dev Environment
+- Server: Running on http://localhost:3000
+- Cache: Cleared (.next removed, Prisma regenerated)
+
 ### Quick Actions
 - [ ] Push unpushed commits
 - [ ] Review PR #X (CI passed)
@@ -192,6 +196,32 @@ Recent commits:
 ```
 
 ## Automatic Actions
+
+### Start local dev environment
+
+After all checks complete, automatically start the local development environment:
+
+```bash
+# Check if port 3000 is already in use
+netstat -ano | findstr :3000
+
+# If in use, kill the process (get PID from netstat output)
+# cmd /c "taskkill /F /PID <PID>"
+
+# Clear Next.js cache and regenerate Prisma client
+rm -rf .next && npx prisma generate
+
+# Start dev server in background
+npm run dev
+```
+
+**Important:** Always use port 3000. Never use alternative ports as this causes NextAuth callback issues.
+
+After starting, verify the server is running by waiting a few seconds and checking:
+
+```bash
+curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 2>/dev/null || echo "starting..."
+```
 
 ### Offer to push unpushed commits
 
