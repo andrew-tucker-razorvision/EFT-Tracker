@@ -104,10 +104,9 @@ impl LogWatcher {
         };
 
         // Start watching the logs directory
-        watcher_instance._watcher.watch(
-            Path::new(&logs_path),
-            RecursiveMode::NonRecursive,
-        )?;
+        watcher_instance
+            ._watcher
+            .watch(Path::new(&logs_path), RecursiveMode::NonRecursive)?;
 
         // Initial scan of existing log files
         watcher_instance.initial_scan()?;
@@ -177,8 +176,7 @@ impl LogWatcher {
     {
         // Regex patterns for parsing quest events
         // Pattern: "Got notification | ChatMessageReceived" followed by JSON
-        let notification_pattern =
-            Regex::new(r"Got notification \| ChatMessageReceived").unwrap();
+        let notification_pattern = Regex::new(r"Got notification \| ChatMessageReceived").unwrap();
 
         // Pattern to extract quest info from the notification JSON
         // Actual EFT log format:
@@ -278,11 +276,13 @@ impl LogWatcher {
 
         // Get or create file state
         let mut states = file_states.lock().unwrap();
-        let state = states.entry(path.to_path_buf()).or_insert_with(|| LogFileState {
-            path: path.to_path_buf(),
-            position: 0,
-            last_modified: modified,
-        });
+        let state = states
+            .entry(path.to_path_buf())
+            .or_insert_with(|| LogFileState {
+                path: path.to_path_buf(),
+                position: 0,
+                last_modified: modified,
+            });
 
         // Skip if file hasn't changed
         if state.position >= file_size {
@@ -398,6 +398,7 @@ impl Drop for LogWatcher {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::path::PathBuf;
 
     #[test]
     fn test_status_parsing() {
@@ -440,5 +441,179 @@ mod tests {
         let caps = caps.unwrap();
         assert_eq!(caps.get(1).unwrap().as_str(), "started");
         assert_eq!(caps.get(2).unwrap().as_str(), "5d4bec3486f7743cac246665");
+    }
+
+    #[test]
+    fn test_quest_pattern_finished() {
+        let quest_pattern = Regex::new(
+            r#""text"\s*:\s*"quest (started|finished|failed)"[\s\S]*?"templateId"\s*:\s*"([a-f0-9]{24})"#,
+        )
+        .unwrap();
+
+        let sample_log = r#"    "text": "quest finished",
+    "templateId": "59ca2eb686f77445a80ed049 successMessageText","#;
+
+        let caps = quest_pattern.captures(sample_log);
+        assert!(caps.is_some());
+        let caps = caps.unwrap();
+        assert_eq!(caps.get(1).unwrap().as_str(), "finished");
+        assert_eq!(caps.get(2).unwrap().as_str(), "59ca2eb686f77445a80ed049");
+    }
+
+    #[test]
+    fn test_quest_pattern_failed() {
+        let quest_pattern = Regex::new(
+            r#""text"\s*:\s*"quest (started|finished|failed)"[\s\S]*?"templateId"\s*:\s*"([a-f0-9]{24})"#,
+        )
+        .unwrap();
+
+        let sample_log = r#"    "text": "quest failed",
+    "templateId": "5936d90786f7742b1420ba5b successMessageText","#;
+
+        let caps = quest_pattern.captures(sample_log);
+        assert!(caps.is_some());
+        let caps = caps.unwrap();
+        assert_eq!(caps.get(1).unwrap().as_str(), "failed");
+        assert_eq!(caps.get(2).unwrap().as_str(), "5936d90786f7742b1420ba5b");
+    }
+
+    #[test]
+    fn test_parse_quest_event_primary_pattern() {
+        let quest_pattern = Regex::new(
+            r#""text"\s*:\s*"quest (started|finished|failed)"[\s\S]*?"templateId"\s*:\s*"([a-f0-9]{24})"#,
+        )
+        .unwrap();
+        let quest_pattern_alt = Regex::new(
+            r#""templateId"\s*:\s*"([a-f0-9]{24})[\s\S]*?"text"\s*:\s*"quest (started|finished|failed)""#,
+        )
+        .unwrap();
+
+        let log_content = r#"Got notification | ChatMessageReceived {
+    "text": "quest finished",
+    "templateId": "59ca2eb686f77445a80ed049 successMessageText",
+}"#;
+
+        let log_path = PathBuf::from("test.log");
+        let event = LogWatcher::parse_quest_event(
+            log_content,
+            &quest_pattern,
+            &quest_pattern_alt,
+            &log_path,
+        );
+
+        assert!(event.is_some());
+        let event = event.unwrap();
+        assert_eq!(event.quest_id, "59ca2eb686f77445a80ed049");
+        assert_eq!(event.status, QuestEventStatus::Finished);
+        assert_eq!(event.log_file, "test.log");
+    }
+
+    #[test]
+    fn test_parse_quest_event_alternative_pattern() {
+        let quest_pattern = Regex::new(
+            r#""text"\s*:\s*"quest (started|finished|failed)"[\s\S]*?"templateId"\s*:\s*"([a-f0-9]{24})"#,
+        )
+        .unwrap();
+        let quest_pattern_alt = Regex::new(
+            r#""templateId"\s*:\s*"([a-f0-9]{24})[\s\S]*?"text"\s*:\s*"quest (started|finished|failed)""#,
+        )
+        .unwrap();
+
+        // Alternative order: templateId before text
+        let log_content = r#"Got notification | ChatMessageReceived {
+    "templateId": "5d4bec3486f7743cac246665",
+    "text": "quest started",
+}"#;
+
+        let log_path = PathBuf::from("test.log");
+        let event = LogWatcher::parse_quest_event(
+            log_content,
+            &quest_pattern,
+            &quest_pattern_alt,
+            &log_path,
+        );
+
+        assert!(event.is_some());
+        let event = event.unwrap();
+        assert_eq!(event.quest_id, "5d4bec3486f7743cac246665");
+        assert_eq!(event.status, QuestEventStatus::Started);
+    }
+
+    #[test]
+    fn test_parse_quest_event_no_match() {
+        let quest_pattern = Regex::new(
+            r#""text"\s*:\s*"quest (started|finished|failed)"[\s\S]*?"templateId"\s*:\s*"([a-f0-9]{24})"#,
+        )
+        .unwrap();
+        let quest_pattern_alt = Regex::new(
+            r#""templateId"\s*:\s*"([a-f0-9]{24})[\s\S]*?"text"\s*:\s*"quest (started|finished|failed)""#,
+        )
+        .unwrap();
+
+        // Non-quest notification
+        let log_content = r#"Got notification | SystemMessage {
+    "text": "Server maintenance in 10 minutes",
+}"#;
+
+        let log_path = PathBuf::from("test.log");
+        let event = LogWatcher::parse_quest_event(
+            log_content,
+            &quest_pattern,
+            &quest_pattern_alt,
+            &log_path,
+        );
+
+        assert!(event.is_none());
+    }
+
+    #[test]
+    fn test_notification_pattern() {
+        let notification_pattern = Regex::new(r"Got notification \| ChatMessageReceived").unwrap();
+
+        // Should match
+        assert!(notification_pattern
+            .is_match("2024.01.15 10:30:45|Got notification | ChatMessageReceived {"));
+        assert!(notification_pattern.is_match("Got notification | ChatMessageReceived"));
+
+        // Should not match
+        assert!(!notification_pattern.is_match("Got notification | SystemMessage"));
+        assert!(!notification_pattern.is_match("Regular log line"));
+    }
+
+    #[test]
+    fn test_quest_id_format() {
+        // Quest IDs are 24-character hex strings
+        let quest_id_pattern = Regex::new(r"^[a-f0-9]{24}$").unwrap();
+
+        // Valid quest IDs
+        assert!(quest_id_pattern.is_match("59ca2eb686f77445a80ed049"));
+        assert!(quest_id_pattern.is_match("5d4bec3486f7743cac246665"));
+        assert!(quest_id_pattern.is_match("5936d90786f7742b1420ba5b"));
+
+        // Invalid quest IDs
+        assert!(!quest_id_pattern.is_match("invalid"));
+        assert!(!quest_id_pattern.is_match("59ca2eb686f77445a80ed04")); // 23 chars
+        assert!(!quest_id_pattern.is_match("59ca2eb686f77445a80ed0499")); // 25 chars
+        assert!(!quest_id_pattern.is_match("59CA2EB686F77445A80ED049")); // uppercase
+    }
+
+    #[test]
+    fn test_quest_event_serialization() {
+        let event = QuestEvent {
+            quest_id: "59ca2eb686f77445a80ed049".to_string(),
+            status: QuestEventStatus::Finished,
+            timestamp: chrono::Utc::now(),
+            log_file: "test.log".to_string(),
+        };
+
+        let json = serde_json::to_string(&event).unwrap();
+        assert!(json.contains("59ca2eb686f77445a80ed049"));
+        assert!(json.contains("Finished"));
+        assert!(json.contains("test.log"));
+
+        // Deserialize back
+        let deserialized: QuestEvent = serde_json::from_str(&json).unwrap();
+        assert_eq!(deserialized.quest_id, event.quest_id);
+        assert_eq!(deserialized.status, event.status);
     }
 }

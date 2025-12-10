@@ -5,13 +5,12 @@ mod eft_detector;
 mod log_watcher;
 mod sync_manager;
 
-use log::{info, error};
+use log::{error, info};
 use std::sync::Arc;
 use tauri::{
-    AppHandle, Manager, State,
-    tray::{TrayIconBuilder, TrayIconEvent, MouseButton, MouseButtonState},
     menu::{Menu, MenuItem},
-    Emitter,
+    tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
+    AppHandle, Emitter, Manager, State,
 };
 use tokio::sync::Mutex;
 
@@ -42,16 +41,15 @@ async fn set_eft_path(state: State<'_, AppState>, path: String) -> Result<bool, 
 
 /// Start watching EFT logs
 #[tauri::command]
-async fn start_watching(
-    app: AppHandle,
-    state: State<'_, AppState>,
-) -> Result<(), String> {
+async fn start_watching(app: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
     let mut is_watching = state.is_watching.lock().await;
     if *is_watching {
         return Ok(());
     }
 
-    let eft_path = state.eft_detector.get_eft_path()
+    let eft_path = state
+        .eft_detector
+        .get_eft_path()
         .ok_or("EFT installation not found")?;
 
     let logs_path = std::path::Path::new(&eft_path).join("Logs");
@@ -66,16 +64,45 @@ async fn start_watching(
         let sync_manager = sync_manager.clone();
         let app_handle = app_handle.clone();
 
-        tokio::spawn(async move {
-            let mut manager = sync_manager.lock().await;
-            if let Err(e) = manager.queue_event(event.clone()).await {
-                error!("Failed to queue event: {}", e);
-            }
+        // Use tauri's async runtime to spawn the task
+        // This avoids the "no reactor running" panic when called from std::thread
+        tauri::async_runtime::spawn(async move {
+            let should_auto_sync = {
+                let mut manager = sync_manager.lock().await;
+                match manager.queue_event(event.clone()).await {
+                    Ok(should_sync) => should_sync,
+                    Err(e) => {
+                        error!("Failed to queue event: {}", e);
+                        false
+                    }
+                }
+            };
 
             // Emit event to frontend
             let _ = app_handle.emit("quest-event", &event);
+
+            // Auto-sync after a short delay to batch rapid events
+            if should_auto_sync {
+                tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+
+                let mut manager = sync_manager.lock().await;
+                if manager.pending_count() > 0 {
+                    info!("Auto-syncing {} pending events", manager.pending_count());
+                    match manager.sync_pending().await {
+                        Ok(result) => {
+                            let _ = app_handle.emit("sync-complete", &result);
+                            info!("Auto-sync complete: {:?}", result);
+                        }
+                        Err(e) => {
+                            error!("Auto-sync failed: {}", e);
+                            let _ = app_handle.emit("sync-error", &e);
+                        }
+                    }
+                }
+            }
         });
-    }).map_err(|e| e.to_string())?;
+    })
+    .map_err(|e| e.to_string())?;
 
     let mut log_watcher = state.log_watcher.lock().await;
     *log_watcher = Some(watcher);
@@ -90,10 +117,7 @@ async fn start_watching(
 
 /// Stop watching EFT logs
 #[tauri::command]
-async fn stop_watching(
-    app: AppHandle,
-    state: State<'_, AppState>,
-) -> Result<(), String> {
+async fn stop_watching(app: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
     let mut is_watching = state.is_watching.lock().await;
     let mut log_watcher = state.log_watcher.lock().await;
 
@@ -115,10 +139,7 @@ async fn is_watching(state: State<'_, AppState>) -> Result<bool, String> {
 
 /// Set companion token for syncing
 #[tauri::command]
-async fn set_companion_token(
-    state: State<'_, AppState>,
-    token: String,
-) -> Result<(), String> {
+async fn set_companion_token(state: State<'_, AppState>, token: String) -> Result<(), String> {
     let mut sync_manager = state.sync_manager.lock().await;
     sync_manager.set_token(token);
     Ok(())
@@ -185,37 +206,35 @@ fn setup_tray(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
                 }
             }
         })
-        .on_menu_event(|app, event| {
-            match event.id.as_ref() {
-                "show" => {
-                    if let Some(window) = app.get_webview_window("main") {
-                        let _ = window.show();
-                        let _ = window.set_focus();
-                    }
+        .on_menu_event(|app, event| match event.id.as_ref() {
+            "show" => {
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = window.show();
+                    let _ = window.set_focus();
                 }
-                "start" => {
-                    let app_handle = app.clone();
-                    tauri::async_runtime::spawn(async move {
-                        let state: State<AppState> = app_handle.state();
-                        if let Err(e) = start_watching(app_handle.clone(), state).await {
-                            error!("Failed to start watching: {}", e);
-                        }
-                    });
-                }
-                "stop" => {
-                    let app_handle = app.clone();
-                    tauri::async_runtime::spawn(async move {
-                        let state: State<AppState> = app_handle.state();
-                        if let Err(e) = stop_watching(app_handle.clone(), state).await {
-                            error!("Failed to stop watching: {}", e);
-                        }
-                    });
-                }
-                "quit" => {
-                    app.exit(0);
-                }
-                _ => {}
             }
+            "start" => {
+                let app_handle = app.clone();
+                tauri::async_runtime::spawn(async move {
+                    let state: State<AppState> = app_handle.state();
+                    if let Err(e) = start_watching(app_handle.clone(), state).await {
+                        error!("Failed to start watching: {}", e);
+                    }
+                });
+            }
+            "stop" => {
+                let app_handle = app.clone();
+                tauri::async_runtime::spawn(async move {
+                    let state: State<AppState> = app_handle.state();
+                    if let Err(e) = stop_watching(app_handle.clone(), state).await {
+                        error!("Failed to stop watching: {}", e);
+                    }
+                });
+            }
+            "quit" => {
+                app.exit(0);
+            }
+            _ => {}
         })
         .build(app)?;
 

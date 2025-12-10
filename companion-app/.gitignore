@@ -30,3 +30,7 @@ npm-debug.log*
 
 # Test coverage
 coverage/
+
+# E2E test screenshots (except .gitkeep)
+tests/e2e/screenshots/*
+!tests/e2e/screenshots/.gitkeep

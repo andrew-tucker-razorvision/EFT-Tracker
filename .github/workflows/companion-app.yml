@@ -1,0 +1,176 @@
+name: Companion App Tests
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "companion-app/**"
+  pull_request:
+    paths:
+      - "companion-app/**"
+
+jobs:
+  # Combined Rust job - faster than running two separate Windows jobs
+  rust:
+    name: Rust Tests & Lint
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: companion-app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: companion-app/package-lock.json
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            companion-app/src-tauri/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('companion-app/src-tauri/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      # Check formatting first (fast, no build needed)
+      - name: Check Rust formatting
+        working-directory: companion-app/src-tauri
+        run: cargo fmt --check
+
+      # Build frontend once for both clippy and tests
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      # Now run clippy and tests (they share the compiled artifacts)
+      - name: Run clippy
+        working-directory: companion-app/src-tauri
+        run: cargo clippy -- -D warnings
+
+      - name: Run Rust tests
+        working-directory: companion-app/src-tauri
+        run: cargo test --verbose
+
+  frontend-tests:
+    name: Frontend Unit Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: companion-app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: companion-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+  frontend-lint:
+    name: Frontend Lint & Typecheck
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: companion-app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: companion-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run typecheck
+        run: npm run typecheck
+
+  # E2E tests only run on master merges (they're slow)
+  e2e-tests:
+    name: E2E Tests
+    runs-on: windows-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    defaults:
+      run:
+        working-directory: companion-app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: companion-app/package-lock.json
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            companion-app/src-tauri/target/
+          key: ${{ runner.os }}-cargo-e2e-${{ hashFiles('companion-app/src-tauri/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-e2e-
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Install tauri-driver
+        run: cargo install tauri-driver
+
+      - name: Build Tauri app
+        run: npm run tauri:build
+
+      - name: Start tauri-driver
+        run: Start-Process -FilePath "tauri-driver" -NoNewWindow
+        shell: pwsh
+
+      - name: Wait for tauri-driver to start
+        run: Start-Sleep -Seconds 5
+        shell: pwsh
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-failure-screenshots
+          path: companion-app/tests/e2e/screenshots/
+          if-no-files-found: ignore
