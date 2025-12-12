@@ -20,13 +20,14 @@
         "minWidth": 350,
         "minHeight": 400,
         "visible": false,
+        "skipTaskbar": true,
         "center": true,
         "decorations": true
       }
     ],
     "trayIcon": {
-      "iconPath": "icons/icon.png",
-      "iconAsTemplate": true,
+      "iconPath": "icons/icon.ico",
+      "iconAsTemplate": false,
       "menuOnLeftClick": false
     },
     "security": {

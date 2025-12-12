@@ -274,6 +274,10 @@ fn main() {
 
             // Hide window on close instead of exiting
             let window = app.get_webview_window("main").unwrap();
+
+            // Set window to skip taskbar (tray-only app)
+            let _ = window.set_skip_taskbar(true);
+
             let window_clone = window.clone();
             window.on_window_event(move |event| {
                 if let tauri::WindowEvent::CloseRequested { api, .. } = event {

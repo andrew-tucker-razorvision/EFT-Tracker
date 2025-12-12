@@ -12,8 +12,8 @@ RUN apk add --no-cache libc6-compat
 # Copy package files
 COPY package.json package-lock.json* ./
 
-# Install dependencies
-RUN npm ci --only=production && \
+# Install ALL dependencies (needed for build tools like Prisma CLI)
+RUN npm ci && \
     npm cache clean --force
 
 # Stage 2: Builder
