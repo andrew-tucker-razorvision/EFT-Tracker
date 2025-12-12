@@ -4,6 +4,8 @@ import { auth } from "@/lib/auth";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { logger } from "@/lib/logger";
+import { withRateLimit } from "@/lib/middleware/rate-limit-middleware";
+import { RATE_LIMITS } from "@/lib/rate-limit";
 
 const unlinkByIdSchema = z.object({
   tokenId: z.string().min(1, "Token ID is required"),
@@ -14,7 +16,7 @@ const unlinkByIdSchema = z.object({
  * Revoke a companion token by ID (from web UI).
  * Requires user authentication.
  */
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -78,7 +80,7 @@ export async function POST(request: Request) {
  * Self-revoke the current companion token (from companion app).
  * Requires companion token authentication.
  */
-export async function DELETE(request: Request) {
+async function handleDELETE(request: Request) {
   try {
     const authHeader = request.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
@@ -135,3 +137,7 @@ export async function DELETE(request: Request) {
     );
   }
 }
+
+// Apply rate limiting - sensitive operations
+export const POST = withRateLimit(handlePOST, RATE_LIMITS.API_DATA_WRITE);
+export const DELETE = withRateLimit(handleDELETE, RATE_LIMITS.API_DATA_WRITE);

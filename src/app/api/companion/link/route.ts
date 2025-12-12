@@ -5,6 +5,8 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { logger } from "@/lib/logger";
+import { withRateLimit } from "@/lib/middleware/rate-limit-middleware";
+import { RATE_LIMITS } from "@/lib/rate-limit";
 
 const linkSchema = z.object({
   deviceName: z.string().min(1, "Device name is required").max(100),
@@ -16,7 +18,7 @@ const linkSchema = z.object({
  * Generate a new companion token for linking the desktop app.
  * Requires user authentication.
  */
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -83,7 +85,7 @@ export async function POST(request: Request) {
  * GET /api/companion/link
  * List all companion tokens for the authenticated user.
  */
-export async function GET() {
+async function handleGET() {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -117,3 +119,7 @@ export async function GET() {
     );
   }
 }
+
+// Apply rate limiting - lower limits for sensitive operations
+export const POST = withRateLimit(handlePOST, RATE_LIMITS.API_DATA_WRITE);
+export const GET = withRateLimit(handleGET, RATE_LIMITS.API_AUTHENTICATED);

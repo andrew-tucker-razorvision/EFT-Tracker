@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { logger } from "@/lib/logger";
+import { withRateLimit } from "@/lib/middleware/rate-limit-middleware";
+import { RATE_LIMITS } from "@/lib/rate-limit";
 
 /**
  * Validate companion token from Authorization header.
@@ -53,7 +55,7 @@ async function validateCompanionToken(request: Request) {
  * Check companion token validity and return user/connection info.
  * Used by companion app to verify connection and display status.
  */
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     const tokenRecord = await validateCompanionToken(request);
 
@@ -117,3 +119,6 @@ export async function GET(request: Request) {
     );
   }
 }
+
+// Apply rate limiting for companion API
+export const GET = withRateLimit(handleGET, RATE_LIMITS.API_COMPANION);

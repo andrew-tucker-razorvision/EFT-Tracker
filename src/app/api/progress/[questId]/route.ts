@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { logger } from "@/lib/logger";
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 type QuestDependencyWithStatus = Prisma.QuestDependencyGetPayload<{
   select: { requiredId: true; requirementStatus: true };
@@ -26,6 +27,27 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ questId: string }> }
 ) {
+  // Apply rate limiting
+  const clientIp = getClientIp(request);
+  const rateLimitResult = rateLimit(clientIp, RATE_LIMITS.API_DATA_WRITE);
+
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      {
+        status: 429,
+        headers: {
+          "X-RateLimit-Limit": rateLimitResult.limit.toString(),
+          "X-RateLimit-Remaining": rateLimitResult.remaining.toString(),
+          "X-RateLimit-Reset": new Date(rateLimitResult.reset).toISOString(),
+          "Retry-After": Math.ceil(
+            (rateLimitResult.reset - Date.now()) / 1000
+          ).toString(),
+        },
+      }
+    );
+  }
+
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -418,6 +440,27 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ questId: string }> }
 ) {
+  // Apply rate limiting
+  const clientIp = getClientIp(request);
+  const rateLimitResult = rateLimit(clientIp, RATE_LIMITS.API_AUTHENTICATED);
+
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      {
+        status: 429,
+        headers: {
+          "X-RateLimit-Limit": rateLimitResult.limit.toString(),
+          "X-RateLimit-Remaining": rateLimitResult.remaining.toString(),
+          "X-RateLimit-Reset": new Date(rateLimitResult.reset).toISOString(),
+          "Retry-After": Math.ceil(
+            (rateLimitResult.reset - Date.now()) / 1000
+          ).toString(),
+        },
+      }
+    );
+  }
+
   try {
     const session = await auth();
     if (!session?.user?.id) {

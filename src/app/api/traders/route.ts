@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { logger } from "@/lib/logger";
+import { withRateLimit } from "@/lib/middleware/rate-limit-middleware";
+import { RATE_LIMITS } from "@/lib/rate-limit";
 
 type TraderWithCount = Prisma.TraderGetPayload<{
   include: {
@@ -11,7 +13,7 @@ type TraderWithCount = Prisma.TraderGetPayload<{
   };
 }>;
 
-export async function GET() {
+async function handleGET() {
   try {
     const traders = await prisma.trader.findMany({
       orderBy: { name: "asc" },
@@ -41,3 +43,6 @@ export async function GET() {
     );
   }
 }
+
+// Apply rate limiting - data read endpoint
+export const GET = withRateLimit(handleGET, RATE_LIMITS.API_DATA_READ);

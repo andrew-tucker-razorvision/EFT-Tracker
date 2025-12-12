@@ -4,13 +4,15 @@ import { auth } from "@/lib/auth";
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { logger } from "@/lib/logger";
+import { withRateLimit } from "@/lib/middleware/rate-limit-middleware";
+import { RATE_LIMITS } from "@/lib/rate-limit";
 
 type QuestDependency = Prisma.QuestDependencyGetPayload<{
   select: { requiredId: true };
 }>;
 
 // GET /api/progress - Get all progress for authenticated user
-export async function GET() {
+async function handleGET() {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -43,7 +45,7 @@ const initProgressSchema = z.object({
 });
 
 // POST /api/progress - Initialize progress for a quest
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -126,7 +128,7 @@ export async function POST(request: Request) {
 }
 
 // DELETE /api/progress - Reset all progress (wipe)
-export async function DELETE() {
+async function handleDELETE() {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -151,3 +153,8 @@ export async function DELETE() {
     );
   }
 }
+
+// Apply rate limiting - authenticated users get higher limits
+export const GET = withRateLimit(handleGET, RATE_LIMITS.API_AUTHENTICATED);
+export const POST = withRateLimit(handlePOST, RATE_LIMITS.API_DATA_WRITE);
+export const DELETE = withRateLimit(handleDELETE, RATE_LIMITS.API_DATA_WRITE);

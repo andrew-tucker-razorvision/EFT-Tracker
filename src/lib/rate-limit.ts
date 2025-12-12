@@ -130,4 +130,39 @@ export const RATE_LIMITS = {
     limit: 30,
     window: 60 * 1000, // 1 minute
   },
+  /**
+   * 60 requests per minute for data read operations (GET)
+   */
+  API_DATA_READ: {
+    limit: 60,
+    window: 60 * 1000, // 1 minute
+  },
+  /**
+   * 10 requests per minute for data write operations (POST/PUT/DELETE)
+   */
+  API_DATA_WRITE: {
+    limit: 10,
+    window: 60 * 1000, // 1 minute
+  },
+  /**
+   * 100 requests per minute for authenticated users
+   */
+  API_AUTHENTICATED: {
+    limit: 100,
+    window: 60 * 1000, // 1 minute
+  },
+  /**
+   * 20 requests per minute for search operations
+   */
+  API_SEARCH: {
+    limit: 20,
+    window: 60 * 1000, // 1 minute
+  },
+  /**
+   * 30 requests per minute for companion app API
+   */
+  API_COMPANION: {
+    limit: 30,
+    window: 60 * 1000, // 1 minute
+  },
 } as const;
