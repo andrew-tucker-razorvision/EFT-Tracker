@@ -183,6 +183,249 @@ stringData:
 
 ## Container Orchestration
 
+### Coolify Deployment
+
+Coolify is a self-hosted Platform-as-a-Service (PaaS) that simplifies deployment and auto-deployment from Git.
+
+#### Initial Setup
+
+1. **Access Coolify Dashboard**
+   - Navigate to your Coolify instance (e.g., `https://coolify.yourdomain.com`)
+   - Log in with admin credentials
+
+2. **Create New Resource**
+   - Click "New Resource" → "Application"
+   - Select "Public Repository" or connect your GitHub account
+   - Enter repository: `https://github.com/andrew-tucker-razorvision/EFT-Tracker`
+   - Branch: `master`
+   - Build pack: `Dockerfile`
+
+3. **Configure Build Settings**
+   - Dockerfile path: `./Dockerfile`
+   - Build context: `.`
+   - Port: `3000`
+   - Health check path: `/api/health`
+
+4. **Set Environment Variables**
+
+   Navigate to Environment Variables tab and add:
+
+   ```bash
+   NODE_ENV=production
+   DATABASE_URL=postgresql://user:pass@host:5432/db?sslmode=require
+   AUTH_SECRET=<generated-with-openssl-rand-base64-32>
+   NEXTAUTH_URL=https://learntotarkov.com
+   ```
+
+   Mark all as **Secret** (encrypted at rest).
+
+5. **Configure Health Checks**
+   - Health check endpoint: `/api/health`
+   - Health check timeout: `30s`
+   - Health check interval: `30s`
+   - Health check retries: `3`
+   - Start period: `40s`
+
+6. **Set Resource Limits**
+   - Memory limit: `2GB`
+   - Memory reservation: `512MB`
+   - CPU limit: `2` cores
+   - CPU reservation: `0.5` cores
+
+7. **Configure Restart Policy**
+   - Restart policy: `on-failure`
+   - Max restart attempts: `3`
+
+#### Auto-Deployment from GitHub
+
+1. **Enable Webhooks**
+   - In Coolify application settings, go to "Deployment" tab
+   - Enable "Automatic Deployment"
+   - Select branch: `master`
+   - Coolify will automatically create a GitHub webhook
+
+2. **Verify Webhook**
+   - Go to GitHub repository → Settings → Webhooks
+   - You should see a Coolify webhook with:
+     - Payload URL: `https://coolify.yourdomain.com/api/v1/webhooks/<app-id>`
+     - Content type: `application/json`
+     - Events: `push`
+   - Test the webhook by clicking "Test" → "Push event"
+
+3. **Test Auto-Deployment**
+
+   ```bash
+   # Make a test commit
+   git commit --allow-empty -m "test: trigger Coolify auto-deployment"
+   git push origin master
+
+   # Monitor in Coolify UI
+   # Should see:
+   # 1. Webhook received
+   # 2. Build started
+   # 3. Build logs streaming
+   # 4. Deployment triggered
+   # 5. Health checks passing
+   # 6. New version live
+   ```
+
+#### Deployment Pipeline Flow
+
+```text
+Push to master → GitHub webhook → Coolify webhook handler →
+Git pull latest → Docker build → Database migrations (if any) →
+Stop old container → Start new container → Health check →
+Route traffic if healthy → Keep old container for rollback
+```
+
+#### Monitoring Deployments
+
+1. **Build Logs**
+   - Click on application in Coolify dashboard
+   - Go to "Logs" tab
+   - View real-time build output
+   - Filter by: Build, Runtime, Error
+
+2. **Deployment History**
+   - View all past deployments
+   - Git commit SHA for each deployment
+   - Build duration and status
+   - One-click rollback to previous version
+
+3. **Container Metrics**
+   - CPU usage graph
+   - Memory usage graph
+   - Network I/O
+   - Request rate (if metrics endpoint added)
+
+#### Rollback Process
+
+1. **Automatic Rollback**
+   - If health checks fail, Coolify automatically keeps old container running
+   - New container is stopped
+   - Traffic continues to old version
+
+2. **Manual Rollback**
+   - Go to Coolify dashboard → Application → Deployments
+   - Find previous successful deployment
+   - Click "Redeploy"
+   - Confirm rollback
+
+#### Coolify-Specific Configuration
+
+Add these settings in Coolify UI:
+
+**Domains:**
+
+- Primary: `learntotarkov.com`
+- Aliases: `www.learntotarkov.com`
+- SSL: Let's Encrypt (auto-renewal enabled)
+
+**Build Settings:**
+
+- Build timeout: `10 minutes`
+- Build command: `docker build -f Dockerfile -t $IMAGE_NAME .`
+- No additional build args needed (Dockerfile handles it)
+
+**Deployment Settings:**
+
+- Deployment timeout: `5 minutes`
+- Zero-downtime deployment: `enabled`
+- Pre-deployment command: `npx prisma migrate deploy` (runs migrations)
+
+**Notifications:**
+
+- Enable deployment notifications (optional)
+- Webhook for successful deployments
+- Webhook for failed deployments
+- Email notifications for failures
+
+#### Troubleshooting Coolify Deployments
+
+**Webhook Not Triggering:**
+
+```bash
+# Check GitHub webhook delivery
+# GitHub → Settings → Webhooks → Recent Deliveries
+# Look for 200 OK response
+
+# If webhook is missing, recreate it manually:
+# 1. Get webhook URL from Coolify app settings
+# 2. Add webhook in GitHub repository settings
+# 3. Payload URL: <coolify-webhook-url>
+# 4. Content type: application/json
+# 5. Events: Just the push event
+```
+
+**Build Failing:**
+
+```bash
+# Check build logs in Coolify dashboard
+# Common issues:
+# 1. Dockerfile syntax error
+# 2. Missing files in .dockerignore
+# 3. Build timeout (increase in settings)
+# 4. Out of memory during build (increase build memory)
+
+# Test build locally:
+docker build -f Dockerfile -t test .
+```
+
+**Container Won't Start:**
+
+```bash
+# Check runtime logs in Coolify
+# Common issues:
+# 1. Missing environment variables
+# 2. Database connection failing
+# 3. Port already in use
+# 4. Health check failing
+
+# Verify env vars in Coolify UI
+# Check container logs for specific error
+```
+
+**Health Checks Failing:**
+
+```bash
+# Coolify marks container as unhealthy if /api/health returns non-200
+# Check health check logs in Coolify
+# Verify health check configuration:
+# - Path: /api/health
+# - Timeout: 30s (increase if needed)
+# - Start period: 40s (time before first check)
+
+# Test health endpoint manually:
+curl https://learntotarkov.com/api/health
+```
+
+#### Coolify Best Practices
+
+1. **Environment Variables**
+   - Always mark secrets as "Secret" in Coolify
+   - Use different AUTH_SECRET for production vs development
+   - Never commit production env vars to Git
+
+2. **Resource Limits**
+   - Start with: 512MB memory, 0.5 CPU
+   - Monitor usage and adjust as needed
+   - Set limits to prevent one container from consuming all resources
+
+3. **Deployment Strategy**
+   - Use zero-downtime deployments
+   - Enable auto-rollback on health check failure
+   - Test in staging branch first (if you set one up)
+
+4. **Monitoring**
+   - Check build logs after each deployment
+   - Monitor container resource usage
+   - Set up notifications for failed deployments
+
+5. **Backups**
+   - Coolify doesn't backup your application data
+   - Ensure database backups are configured separately
+   - Keep container images in a registry as backup
+
 ### Kubernetes Deployment
 
 Example `deployment.yaml`:
