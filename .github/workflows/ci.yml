@@ -148,6 +148,7 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: production
+          SKIP_ENV_VALIDATION: "1"
 
       - name: Upload build artifacts
         if: hashFiles('dist/**') != ''
