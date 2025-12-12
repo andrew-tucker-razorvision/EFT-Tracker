@@ -21,12 +21,13 @@ Sentry.init({
   environment: process.env.NODE_ENV || "development",
 
   // Performance Monitoring
+  // Free tier: 5M spans/month. With 10% sampling, supports ~50M requests/month
   tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
 
   // Session Replay - capture user sessions for debugging
-  // Only enable in production with low sample rate to manage quota
-  replaysSessionSampleRate: process.env.NODE_ENV === "production" ? 0.01 : 0,
-  replaysOnErrorSampleRate: 1.0, // Always capture replays when errors occur
+  // Free tier: 50 replays/month. Very conservative sampling to stay within limits
+  replaysSessionSampleRate: 0, // Disable random session sampling
+  replaysOnErrorSampleRate: process.env.NODE_ENV === "production" ? 0.5 : 1.0, // 50% of errors
 
   // PII Redaction - strip sensitive data from events
   beforeSend(event) {

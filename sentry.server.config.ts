@@ -21,6 +21,7 @@ Sentry.init({
   environment: process.env.NODE_ENV || "development",
 
   // Performance Monitoring
+  // Free tier: 5M spans/month. With 10% sampling, supports ~50M requests/month
   tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
 
   // PII Redaction - strip sensitive data from events
