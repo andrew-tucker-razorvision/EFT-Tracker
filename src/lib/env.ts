@@ -40,6 +40,16 @@ const envSchema = z.object({
     .enum(["error", "warn", "info", "debug"])
     .default("info")
     .optional(),
+
+  // Optional: Error Monitoring (Sentry)
+  SENTRY_DSN: z.string().url("SENTRY_DSN must be a valid URL").optional(),
+  NEXT_PUBLIC_SENTRY_DSN: z
+    .string()
+    .url("NEXT_PUBLIC_SENTRY_DSN must be a valid URL")
+    .optional(),
+  SENTRY_ORG: z.string().optional(),
+  SENTRY_PROJECT: z.string().optional(),
+  SENTRY_AUTH_TOKEN: z.string().optional(),
 });
 
 /**
