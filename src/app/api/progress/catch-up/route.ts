@@ -16,7 +16,7 @@ type QuestWithDependencies = Prisma.QuestGetPayload<{
 }>;
 
 const catchUpSchema = z.object({
-  targetQuests: z.array(z.string().min(1)).min(1).max(50),
+  targetQuests: z.array(z.string().min(1)).min(1).max(100),
 });
 
 /**
