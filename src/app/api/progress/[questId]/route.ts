@@ -29,7 +29,7 @@ export async function PATCH(
 ) {
   // Apply rate limiting
   const clientIp = getClientIp(request);
-  const rateLimitResult = rateLimit(clientIp, RATE_LIMITS.API_DATA_WRITE);
+  const rateLimitResult = await rateLimit(clientIp, RATE_LIMITS.API_DATA_WRITE);
 
   if (!rateLimitResult.success) {
     return NextResponse.json(
@@ -442,7 +442,10 @@ export async function GET(
 ) {
   // Apply rate limiting
   const clientIp = getClientIp(request);
-  const rateLimitResult = rateLimit(clientIp, RATE_LIMITS.API_AUTHENTICATED);
+  const rateLimitResult = await rateLimit(
+    clientIp,
+    RATE_LIMITS.API_AUTHENTICATED
+  );
 
   if (!rateLimitResult.success) {
     return NextResponse.json(

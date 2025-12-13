@@ -16,7 +16,7 @@ async function POST(request: NextRequest) {
 
   if (isCredentialsLogin) {
     const clientIp = getClientIp(request);
-    const rateLimitResult = rateLimit(clientIp, RATE_LIMITS.AUTH_LOGIN);
+    const rateLimitResult = await rateLimit(clientIp, RATE_LIMITS.AUTH_LOGIN);
 
     if (!rateLimitResult.success) {
       // Log rate limit exceeded
