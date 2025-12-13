@@ -5,6 +5,7 @@ This document contains operational runbooks for EFT-Tracker production deploymen
 ## Table of Contents
 
 - [Database Backup and Restore](#database-backup-and-restore)
+- [Database Migrations](#database-migrations)
 - [Deployment Procedures](#deployment-procedures)
 - [Incident Response](#incident-response)
 - [Monitoring](#monitoring)
@@ -30,6 +31,73 @@ For comprehensive backup procedures, see [DATABASE_BACKUPS.md](./DATABASE_BACKUP
 # 2. Update DATABASE_URL in Coolify
 # 3. Redeploy application
 # 4. Verify data integrity
+```
+
+## Database Migrations
+
+For comprehensive migration strategy, see [DATABASE_MIGRATIONS.md](./DATABASE_MIGRATIONS.md).
+
+### Quick Reference: Safe Migration Deployment
+
+**For safe operations (adding columns, tables, indexes):**
+
+```bash
+# 1. Test on staging branch first
+DATABASE_URL="<staging-url>" npx prisma migrate deploy
+
+# 2. Verify schema
+npx prisma db pull
+
+# 3. Run tests
+npm test
+
+# 4. Deploy to production
+# Merge PR → Auto-deploys → Prisma migrate runs
+```
+
+**For unsafe operations (dropping, renaming, type changes):**
+
+Use 2-phase deployment process:
+
+**Phase 1:** Add new schema, deploy code that writes to both old and new
+**Phase 2:** (1+ week later) Remove old schema after verifying Phase 1
+
+See [DATABASE_MIGRATIONS.md](./DATABASE_MIGRATIONS.md) for detailed patterns.
+
+### Migration Testing Checklist
+
+Before deploying database migrations:
+
+- [ ] Tested on Neon staging branch
+- [ ] Verified schema changes with `npx prisma db pull`
+- [ ] All tests pass (`npm test`)
+- [ ] Reviewed generated SQL
+- [ ] Created pre-migration backup (if destructive)
+- [ ] Verified backward compatibility (for 2-phase migrations)
+- [ ] Documented rollback plan
+
+### Common Migration Patterns
+
+**Adding nullable column:**
+
+```prisma
+model User {
+  newField String? // ✅ Safe to add
+}
+```
+
+**Dropping column (2-phase):**
+
+```text
+Phase 1: Stop using column in code → Deploy
+Phase 2: Drop column from schema → Deploy
+```
+
+**Renaming column (2-phase):**
+
+```text
+Phase 1: Add new column, write to both → Deploy
+Phase 2: Remove old column → Deploy
 ```
 
 ## Deployment Procedures
@@ -337,6 +405,7 @@ curl https://learntotarkov.com/api/health
 
 - [Production Deployment Guide](./PRODUCTION_DEPLOYMENT.md)
 - [Database Backup Procedures](./DATABASE_BACKUPS.md)
+- [Database Migration Strategy](./DATABASE_MIGRATIONS.md)
 - [Incident Response and Disaster Recovery](./INCIDENT_RESPONSE.md)
 - [Database Branching Strategy](./DATABASE_BRANCHING.md)
 - [Security Hardening](./security/SECURITY.md)

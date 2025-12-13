@@ -737,6 +737,8 @@ Retention: Delete after 2025-01-20 (7 days)
 
 For detailed backup and restoration procedures, see [DATABASE_BACKUPS.md](./DATABASE_BACKUPS.md).
 
+For safe database migration strategies and 2-phase deployment patterns, see [DATABASE_MIGRATIONS.md](./DATABASE_MIGRATIONS.md).
+
 ## Production Checklist
 
 ### Pre-Deployment Checklist
@@ -774,6 +776,7 @@ For detailed backup and restoration procedures, see [DATABASE_BACKUPS.md](./DATA
 ### Project Documentation
 
 - [Database Backup Procedures](./DATABASE_BACKUPS.md)
+- [Database Migration Strategy](./DATABASE_MIGRATIONS.md)
 - [Incident Response and Disaster Recovery](./INCIDENT_RESPONSE.md)
 - [Production Runbooks](./RUNBOOKS.md)
 
