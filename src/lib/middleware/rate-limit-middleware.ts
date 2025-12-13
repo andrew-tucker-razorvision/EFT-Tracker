@@ -37,7 +37,7 @@ export function withRateLimit(
 ) {
   return async (req: Request): Promise<NextResponse> => {
     const clientIp = getClientIp(req);
-    const result: RateLimitResult = rateLimit(clientIp, config);
+    const result: RateLimitResult = await rateLimit(clientIp, config);
 
     // Add rate limit headers to response
     const headers = {
