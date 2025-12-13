@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
+import { logSecurityEvent } from "@/lib/security-logger";
 
 const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -18,6 +19,14 @@ export async function POST(request: Request) {
     const rateLimitResult = rateLimit(clientIp, RATE_LIMITS.AUTH_REGISTER);
 
     if (!rateLimitResult.success) {
+      // Log rate limit exceeded
+      await logSecurityEvent({
+        type: "RATE_LIMIT_EXCEEDED",
+        ipAddress: clientIp,
+        userAgent: request.headers.get("user-agent") ?? undefined,
+        metadata: { endpoint: "/api/auth/register" },
+      });
+
       return NextResponse.json(
         { error: "Too many registration attempts. Please try again later." },
         {
@@ -59,6 +68,15 @@ export async function POST(request: Request) {
         password: hashedPassword,
         name: name || null,
       },
+    });
+
+    // Log successful account creation
+    await logSecurityEvent({
+      type: "ACCOUNT_CREATED",
+      userId: user.id,
+      email,
+      ipAddress: clientIp,
+      userAgent: request.headers.get("user-agent") ?? undefined,
     });
 
     return NextResponse.json(

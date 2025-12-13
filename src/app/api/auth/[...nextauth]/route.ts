@@ -1,6 +1,7 @@
 import { handlers } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
+import { logSecurityEvent } from "@/lib/security-logger";
 
 // Wrap POST handler with rate limiting for login attempts
 const originalPOST = handlers.POST;
@@ -18,6 +19,14 @@ async function POST(request: NextRequest) {
     const rateLimitResult = rateLimit(clientIp, RATE_LIMITS.AUTH_LOGIN);
 
     if (!rateLimitResult.success) {
+      // Log rate limit exceeded
+      await logSecurityEvent({
+        type: "RATE_LIMIT_EXCEEDED",
+        ipAddress: clientIp,
+        userAgent: request.headers.get("user-agent") ?? undefined,
+        metadata: { endpoint: "/api/auth/[...nextauth]" },
+      });
+
       return NextResponse.json(
         { error: "Too many login attempts. Please try again later." },
         {

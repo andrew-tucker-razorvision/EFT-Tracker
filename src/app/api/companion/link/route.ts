@@ -7,6 +7,8 @@ import crypto from "crypto";
 import { logger } from "@/lib/logger";
 import { withRateLimit } from "@/lib/middleware/rate-limit-middleware";
 import { RATE_LIMITS } from "@/lib/rate-limit";
+import { logSecurityEvent } from "@/lib/security-logger";
+import { getClientIp } from "@/lib/rate-limit";
 
 const linkSchema = z.object({
   deviceName: z.string().min(1, "Device name is required").max(100),
@@ -51,6 +53,15 @@ async function handlePOST(request: Request) {
         gameMode: true,
         createdAt: true,
       },
+    });
+
+    // Log token generation
+    await logSecurityEvent({
+      type: "TOKEN_GENERATED",
+      userId: session.user.id,
+      ipAddress: getClientIp(request),
+      userAgent: request.headers.get("user-agent") ?? undefined,
+      metadata: { deviceName, gameMode, tokenHint },
     });
 
     // Return the raw token (only time it's visible)

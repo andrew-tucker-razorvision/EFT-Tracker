@@ -18,6 +18,7 @@ model User {
   updatedAt              DateTime         @updatedAt
   questProgress          QuestProgress[]
   companionTokens        CompanionToken[]
+  securityEvents         SecurityEvent[]
 }
 
 model Trader {
@@ -121,4 +122,31 @@ model CompanionToken {
 
   @@index([userId])
   @@index([token])
+}
+
+model SecurityEvent {
+  id        String              @id @default(cuid())
+  type      SecurityEventType
+  userId    String?
+  ipAddress String
+  userAgent String?
+  metadata  Json?               // Additional context (emailHash, reason, etc.)
+  createdAt DateTime            @default(now())
+
+  user      User?               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([ipAddress])
+  @@index([type])
+  @@index([createdAt])
+}
+
+enum SecurityEventType {
+  LOGIN_SUCCESS
+  LOGIN_FAILED
+  ACCOUNT_CREATED
+  TOKEN_GENERATED
+  TOKEN_REVOKED
+  PASSWORD_RESET_REQUESTED
+  RATE_LIMIT_EXCEEDED
 }

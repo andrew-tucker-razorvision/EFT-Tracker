@@ -5,7 +5,8 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { logger } from "@/lib/logger";
 import { withRateLimit } from "@/lib/middleware/rate-limit-middleware";
-import { RATE_LIMITS } from "@/lib/rate-limit";
+import { RATE_LIMITS, getClientIp } from "@/lib/rate-limit";
+import { logSecurityEvent } from "@/lib/security-logger";
 
 const unlinkByIdSchema = z.object({
   tokenId: z.string().min(1, "Token ID is required"),
@@ -53,6 +54,19 @@ async function handlePOST(request: Request) {
     await prisma.companionToken.update({
       where: { id: tokenId },
       data: { revokedAt: new Date() },
+    });
+
+    // Log token revocation
+    await logSecurityEvent({
+      type: "TOKEN_REVOKED",
+      userId: session.user.id,
+      ipAddress: getClientIp(request),
+      userAgent: request.headers.get("user-agent") ?? undefined,
+      metadata: {
+        tokenId,
+        deviceName: token.deviceName,
+        tokenHint: token.tokenHint,
+      },
     });
 
     return NextResponse.json({
