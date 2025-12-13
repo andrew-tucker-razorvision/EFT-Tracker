@@ -138,10 +138,10 @@ export const RATE_LIMITS = {
     window: 60 * 1000, // 1 minute
   },
   /**
-   * 10 requests per minute for data write operations (POST/PUT/DELETE)
+   * 50 requests per minute for data write operations (POST/PUT/DELETE)
    */
   API_DATA_WRITE: {
-    limit: 10,
+    limit: 50,
     window: 60 * 1000, // 1 minute
   },
   /**
