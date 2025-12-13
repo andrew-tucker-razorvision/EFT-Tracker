@@ -41,6 +41,23 @@ Closes #
 - [ ] Environment variables need updating
 - [ ] Requires specific deployment order
 
+## Database Migration Checklist (if schema changes)
+
+- [ ] Migration type:
+  - [ ] Safe (adding nullable column, index, table)
+  - [ ] Unsafe (dropping, renaming, type change - requires 2-phase)
+- [ ] If 2-phase migration:
+  - [ ] This is Phase 1 (add new schema + dual write)
+  - [ ] This is Phase 2 (remove old schema) - waited 1+ week after Phase 1
+- [ ] Tested on Neon staging branch
+- [ ] Verified schema with `npx prisma db pull`
+- [ ] All tests pass with new schema
+- [ ] Pre-deployment backup created (name: `backup-YYYYMMDD-HHMMSS`)
+- [ ] Rollback plan documented
+- [ ] Verified backward compatibility (old code works with new schema)
+
+See [DATABASE_MIGRATIONS.md](../docs/DATABASE_MIGRATIONS.md) for migration strategy.
+
 ## Screenshots (for UI changes)
 
 **Before:**
