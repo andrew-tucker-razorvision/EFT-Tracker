@@ -3,7 +3,7 @@
  * Wraps route handlers with rate limiting logic
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import {
   rateLimit,
   getClientIp,
