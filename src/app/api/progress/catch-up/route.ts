@@ -131,62 +131,75 @@ export async function POST(request: Request) {
     const prerequisiteArray = Array.from(prerequisitesToComplete);
 
     if (prerequisiteArray.length > 0) {
-      // Use transaction for atomicity
-      await prisma.$transaction(async (tx) => {
-        for (const questId of prerequisiteArray) {
-          await tx.questProgress.upsert({
-            where: {
-              userId_questId: {
+      // Process in chunks to avoid transaction size limits
+      const CHUNK_SIZE = 50;
+      for (let i = 0; i < prerequisiteArray.length; i += CHUNK_SIZE) {
+        const chunk = prerequisiteArray.slice(i, i + CHUNK_SIZE);
+
+        await prisma.$transaction(async (tx) => {
+          for (const questId of chunk) {
+            await tx.questProgress.upsert({
+              where: {
+                userId_questId: {
+                  userId: session.user.id,
+                  questId,
+                },
+              },
+              create: {
                 userId: session.user.id,
                 questId,
+                status: "COMPLETED",
+                syncSource: "WEB",
               },
-            },
-            create: {
-              userId: session.user.id,
-              questId,
-              status: "COMPLETED",
-              syncSource: "WEB",
-            },
-            update: {
-              status: "COMPLETED",
-              syncSource: "WEB",
-            },
-          });
-          completedIds.push(questId);
-        }
-      });
+              update: {
+                status: "COMPLETED",
+                syncSource: "WEB",
+              },
+            });
+            completedIds.push(questId);
+          }
+        });
+      }
     }
 
     // Set target quests as AVAILABLE
     const availableIds: string[] = [];
 
-    await prisma.$transaction(async (tx) => {
-      for (const questId of targetQuests) {
-        const currentStatus = progressMap.get(questId);
-        // Only update if not already completed
-        if (currentStatus !== "COMPLETED") {
-          await tx.questProgress.upsert({
-            where: {
-              userId_questId: {
-                userId: session.user.id,
-                questId,
-              },
-            },
-            create: {
-              userId: session.user.id,
-              questId,
-              status: "AVAILABLE",
-              syncSource: "WEB",
-            },
-            update: {
-              status: "AVAILABLE",
-              syncSource: "WEB",
-            },
-          });
-          availableIds.push(questId);
-        }
+    if (targetQuests.length > 0) {
+      // Process in chunks to avoid transaction size limits
+      const CHUNK_SIZE = 50;
+      for (let i = 0; i < targetQuests.length; i += CHUNK_SIZE) {
+        const chunk = targetQuests.slice(i, i + CHUNK_SIZE);
+
+        await prisma.$transaction(async (tx) => {
+          for (const questId of chunk) {
+            const currentStatus = progressMap.get(questId);
+            // Only update if not already completed
+            if (currentStatus !== "COMPLETED") {
+              await tx.questProgress.upsert({
+                where: {
+                  userId_questId: {
+                    userId: session.user.id,
+                    questId,
+                  },
+                },
+                create: {
+                  userId: session.user.id,
+                  questId,
+                  status: "AVAILABLE",
+                  syncSource: "WEB",
+                },
+                update: {
+                  status: "AVAILABLE",
+                  syncSource: "WEB",
+                },
+              });
+              availableIds.push(questId);
+            }
+          }
+        });
       }
-    });
+    }
 
     return NextResponse.json({
       success: true,

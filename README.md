@@ -42,7 +42,8 @@ cp .env.template .env
 # Edit .env with your database URL and auth secrets:
 #   DATABASE_URL - PostgreSQL connection string
 #   AUTH_SECRET - Generate with: openssl rand -base64 32
-#   NEXTAUTH_URL - http://localhost:3000 for local dev
+#   NEXTAUTH_URL - Your dev server URL (e.g., http://localhost:3000)
+# For local overrides, create .env.local (not committed to git)
 
 # Run database migrations and seed data
 npx prisma migrate dev
@@ -52,7 +53,7 @@ npx prisma db seed
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the app.
+The dev server will start on an available port (typically 3000). Check the console output for the actual URL.
 
 ### Alternative: VS Code Dev Containers
 

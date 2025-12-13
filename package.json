@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3000",
-    "dev:clean": "npm run dev:kill && rm -rf .next && next dev -p 3000",
+    "dev": "next dev",
+    "dev:clean": "rm -rf .next && next dev",
     "dev:kill": "lsof -ti:3000 | xargs kill -9 2>/dev/null; pkill -f 'next-server' 2>/dev/null; true",
-    "dev:fresh": "npm run dev:kill && next dev -p 3000",
+    "dev:fresh": "npm run dev:kill && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

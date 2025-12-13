@@ -42,15 +42,30 @@ Then restart the dev server:
 npm run dev
 ```
 
-### Development Server Port
+### Local Environment Best Practices
 
-**IMPORTANT:** Always use port 3000 for the dev server. Never use alternative ports (3001, 3002, etc.) as this can cause confusion and authentication issues with NextAuth callbacks.
+**Environment Configuration:**
 
-If port 3000 is in use:
+1. **Use `.env.local` for local overrides** - Never commit this file
+   - Set `NEXTAUTH_URL` to match your dev server (e.g., `http://localhost:3000`)
+   - Use `DATABASE_URL_DEVELOP` for local development database
+   - Keep secrets and API keys here, not in `.env`
 
-1. Find the process: `netstat -ano | findstr :3000`
-2. Kill it: `cmd /c "taskkill /F /PID <PID>"`
-3. Then start the server on port 3000
+2. **Port flexibility** - The dev server will auto-assign an available port
+   - If 3000 is taken, Next.js will suggest 3001, 3002, etc.
+   - Update `NEXTAUTH_URL` in `.env.local` to match the actual port
+   - Example: `NEXTAUTH_URL=http://localhost:3001`
+
+3. **Clean restarts** - When switching branches or after pulling changes:
+
+   ```bash
+   rm -rf .next && npx prisma generate && npm run dev
+   ```
+
+4. **Database branches** - Use separate databases for different workflows:
+   - Local feature work: Personal dev database or local PostgreSQL
+   - Testing develop branch: `DATABASE_URL_DEVELOP` (Neon development branch)
+   - Never use production database locally
 
 ### Database Schema Changes
 
@@ -132,8 +147,8 @@ Don't rely on the user to catch visual issues - proactively identify and fix the
 
 **Testing workflow:**
 
-1. **Start dev server** - Ensure `npm run dev` is running on port 3000
-2. **Navigate to feature** - Use `browser_navigate` to go to the relevant page
+1. **Start dev server** - Ensure `npm run dev` is running (note the port in console output)
+2. **Navigate to feature** - Use `browser_navigate` with the actual dev server URL
 3. **Wait for load** - Use `browser_wait_for` if needed for async content
 4. **Test interactions** - Use `browser_snapshot` to see the accessibility tree, then:
    - `browser_click` to click buttons/links
