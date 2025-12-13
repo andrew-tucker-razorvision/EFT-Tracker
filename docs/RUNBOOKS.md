@@ -337,6 +337,7 @@ curl https://learntotarkov.com/api/health
 
 - [Production Deployment Guide](./PRODUCTION_DEPLOYMENT.md)
 - [Database Backup Procedures](./DATABASE_BACKUPS.md)
+- [Incident Response and Disaster Recovery](./INCIDENT_RESPONSE.md)
 - [Database Branching Strategy](./DATABASE_BRANCHING.md)
 - [Security Hardening](./security/SECURITY.md)
 

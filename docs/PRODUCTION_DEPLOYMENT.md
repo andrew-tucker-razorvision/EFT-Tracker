@@ -771,6 +771,14 @@ For detailed backup and restoration procedures, see [DATABASE_BACKUPS.md](./DATA
 
 ## Additional Resources
 
+### Project Documentation
+
+- [Database Backup Procedures](./DATABASE_BACKUPS.md)
+- [Incident Response and Disaster Recovery](./INCIDENT_RESPONSE.md)
+- [Production Runbooks](./RUNBOOKS.md)
+
+### External Resources
+
 - [Next.js Deployment Documentation](https://nextjs.org/docs/deployment)
 - [Docker Security Best Practices](https://docs.docker.com/engine/security/security/)
 - [Prisma Production Best Practices](https://www.prisma.io/docs/guides/performance-and-optimization/connection-management)
