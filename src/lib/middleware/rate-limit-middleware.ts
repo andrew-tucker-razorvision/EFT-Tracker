@@ -3,7 +3,7 @@
  * Wraps route handlers with rate limiting logic
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import {
   rateLimit,
   getClientIp,
@@ -37,7 +37,7 @@ export function withRateLimit(
 ) {
   return async (req: Request): Promise<NextResponse> => {
     const clientIp = getClientIp(req);
-    const result: RateLimitResult = rateLimit(clientIp, config);
+    const result: RateLimitResult = await rateLimit(clientIp, config);
 
     // Add rate limit headers to response
     const headers = {

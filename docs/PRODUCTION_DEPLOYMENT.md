@@ -140,6 +140,50 @@ docker-compose -f docker-compose.prod.yml up -d
 - `PORT` - Port to listen on (default: 3000)
 - `NODE_ENV` - Should be `production`
 - `NEXT_TELEMETRY_DISABLED` - Set to `1` to disable Next.js telemetry
+- `SENTRY_DSN` - Sentry error monitoring DSN
+- `LOG_LEVEL` - Logging verbosity (error, warn, info, debug)
+
+### Environment Validation
+
+All environment variables are validated at application startup using Zod (see [src/lib/env.ts](../src/lib/env.ts)).
+
+**Benefits:**
+
+- **Fail fast**: Application won't start with invalid configuration
+- **Type safety**: Full TypeScript support for all environment variables
+- **Clear errors**: Helpful error messages for missing or invalid values
+
+**Example validation error:**
+
+```json
+ZodError: [
+  {
+    "code": "too_small",
+    "minimum": 32,
+    "path": ["AUTH_SECRET"],
+    "message": "AUTH_SECRET must be at least 32 characters"
+  }
+]
+```
+
+**Usage in code:**
+
+```typescript
+// ❌ Don't use process.env directly (no validation, no types)
+const dbUrl = process.env.DATABASE_URL;
+
+// ✅ Use validated env (type-safe, validated at startup)
+import { env } from "@/lib/env";
+const dbUrl = env.DATABASE_URL;
+```
+
+**Skipping validation (testing only):**
+
+```bash
+SKIP_ENV_VALIDATION=1 npm test
+```
+
+See [.env.template](../.env.template) for complete list of environment variables with documentation.
 
 ### Secrets Management
 
