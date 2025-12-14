@@ -16,7 +16,10 @@ export async function POST(request: Request) {
   try {
     // Apply rate limiting
     const clientIp = getClientIp(request);
-    const rateLimitResult = rateLimit(clientIp, RATE_LIMITS.AUTH_REGISTER);
+    const rateLimitResult = await rateLimit(
+      clientIp,
+      RATE_LIMITS.AUTH_REGISTER
+    );
 
     if (!rateLimitResult.success) {
       // Log rate limit exceeded

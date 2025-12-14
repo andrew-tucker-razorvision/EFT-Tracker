@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { env } from "@/lib/env";
 
 /**
  * Health check endpoint for monitoring and container orchestration
@@ -54,7 +55,7 @@ export async function GET() {
     version: process.env.npm_package_version || "0.1.0",
     timestamp: new Date().toISOString(),
     uptime: Math.floor(process.uptime()),
-    environment: process.env.NODE_ENV || "development",
+    environment: env.NODE_ENV,
     checks: {
       database: databaseCheck,
     },
