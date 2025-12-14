@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
+import { tauriApiClient } from "@/lib/api/tauri-client";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -26,20 +27,26 @@ export default function LoginPage() {
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [showCaptcha, setShowCaptcha] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [isTauri, setIsTauri] = useState(false);
 
-  // Show CAPTCHA after 2 failed login attempts
+  // Detect Tauri environment
   useEffect(() => {
-    if (failedAttempts >= 2) {
+    setIsTauri(typeof window !== "undefined" && "__TAURI__" in window);
+  }, []);
+
+  // Show CAPTCHA after 2 failed login attempts (web only)
+  useEffect(() => {
+    if (!isTauri && failedAttempts >= 2) {
       setShowCaptcha(true);
     }
-  }, [failedAttempts]);
+  }, [failedAttempts, isTauri]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    // Validate CAPTCHA if shown
-    if (showCaptcha && !turnstileToken) {
+    // Validate CAPTCHA if shown (web only)
+    if (!isTauri && showCaptcha && !turnstileToken) {
       setError("Please complete the CAPTCHA verification");
       return;
     }
@@ -47,22 +54,42 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        turnstileToken: showCaptcha ? turnstileToken : undefined,
-        redirect: false,
-      });
+      if (isTauri) {
+        // Tauri: Call production API directly
+        const response = await tauriApiClient.post<{
+          user?: { id: string; email: string; name?: string };
+        }>("/api/auth/callback/credentials", {
+          email,
+          password,
+        });
 
-      if (result?.error) {
-        setError("Invalid email or password");
-        setFailedAttempts((prev) => prev + 1);
-        setTurnstileToken(null); // Reset CAPTCHA on failure
+        if (response.user) {
+          router.push("/quests");
+          router.refresh();
+        } else {
+          setError("Invalid email or password");
+          setFailedAttempts((prev) => prev + 1);
+        }
       } else {
-        router.push("/quests");
-        router.refresh();
+        // Web: Use NextAuth
+        const result = await signIn("credentials", {
+          email,
+          password,
+          turnstileToken: showCaptcha ? turnstileToken : undefined,
+          redirect: false,
+        });
+
+        if (result?.error) {
+          setError("Invalid email or password");
+          setFailedAttempts((prev) => prev + 1);
+          setTurnstileToken(null); // Reset CAPTCHA on failure
+        } else {
+          router.push("/quests");
+          router.refresh();
+        }
       }
-    } catch {
+    } catch (err) {
+      console.error("Login error:", err);
       setError("Something went wrong");
     } finally {
       setLoading(false);
@@ -106,7 +133,7 @@ export default function LoginPage() {
                 required
               />
             </div>
-            {showCaptcha && (
+            {!isTauri && showCaptcha && (
               <div className="pt-2">
                 <TurnstileWidget
                   onVerify={setTurnstileToken}
