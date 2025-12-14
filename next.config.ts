@@ -60,12 +60,16 @@ export default withSentryConfig(nextConfig, {
   // Only show Sentry build logs in CI
   silent: !process.env.CI,
 
-  // Suppress Sentry CLI output
-  disableLogger: true,
-
-  // Automatically annotate React components for better error context
-  reactComponentAnnotation: {
-    enabled: true,
+  // Webpack configuration for Sentry
+  webpack: {
+    // Remove debug logging from production builds
+    treeshake: {
+      removeDebugLogging: true,
+    },
+    // Automatically annotate React components for better error context
+    reactComponentAnnotation: {
+      enabled: true,
+    },
   },
 
   // Automatically upload source maps for error stack traces
