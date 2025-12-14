@@ -291,6 +291,49 @@ curl -s "https://api.github.com/repos/andrew-tucker-razorvision/EFT-Tracker/comm
    - If failed, which checks failed
 5. If checks pass and PR is ready, ask if user wants to merge
 
+## Deployment
+
+### Auto-Deployment from GitHub to Coolify
+
+**Setup completed:** The repository is configured for automatic deployment to production when code is merged to `master`.
+
+**How it works:**
+
+1. Code is merged to `master` branch (via PR after CI checks pass)
+2. GitHub sends a webhook to Coolify with HMAC-SHA256 signature
+3. Coolify validates the webhook signature for security
+4. Deployment is automatically queued and executed:
+   - Clones repository at the specific commit SHA
+   - Builds Docker image using multi-stage Dockerfile
+   - Runs healthcheck on new container
+   - Performs rolling update (zero downtime)
+   - Removes old container after new one is healthy
+
+**Webhook configuration:**
+
+- **URL:** `http://95.217.155.28:8000/webhooks/source/github/events/manual`
+- **Secret:** Stored in both GitHub webhook settings and Coolify configuration
+- **Events:** Push events only (triggers on merge to master)
+- **Content-Type:** application/json
+
+**Deployment timing:**
+
+- Docker build: ~2 minutes
+- Healthcheck wait: ~30 seconds
+- Total deployment time: ~3 minutes from merge to live
+
+**Monitoring deployments:**
+
+- View deployment logs in Coolify: `http://95.217.155.28:8000/`
+- Navigate to: Projects → EFT-Tracker → Deployments
+- Each deployment shows: commit SHA, trigger type (Webhook/Manual), status, logs
+
+**Manual deployment:**
+
+If needed, you can trigger a manual deployment from the Coolify dashboard using the "Redeploy" button.
+
+**Production URL:** `https://learntotarkov.com`
+
 ## Code Quality Guidelines
 
 ### TODO/FIXME Policy

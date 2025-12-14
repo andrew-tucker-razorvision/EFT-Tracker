@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -23,10 +24,17 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    // Validate CAPTCHA token (skip if Turnstile not configured)
+    if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !turnstileToken) {
+      setError("Please complete the CAPTCHA verification");
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match");
@@ -44,7 +52,12 @@ export default function RegisterPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, name: name || undefined }),
+        body: JSON.stringify({
+          email,
+          password,
+          name: name || undefined,
+          turnstileToken,
+        }),
       });
 
       const data = await res.json();
@@ -119,6 +132,12 @@ export default function RegisterPage() {
                 required
               />
             </div>
+            <TurnstileWidget
+              onVerify={setTurnstileToken}
+              onError={() =>
+                setError("CAPTCHA verification failed. Please try again.")
+              }
+            />
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
             <Button type="submit" className="w-full" disabled={loading}>
