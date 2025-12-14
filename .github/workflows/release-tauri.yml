@@ -38,6 +38,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          # Dummy env vars for build-time validation (not used in static export)
+          DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
+          AUTH_SECRET: "dummy-secret-for-build-only"
+          NEXTAUTH_URL: "http://localhost:3000"
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "EFT Quest Tracker Desktop v__VERSION__"
