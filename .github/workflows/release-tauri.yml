@@ -1,0 +1,65 @@
+name: Release Tauri App
+
+on:
+  push:
+    tags:
+      - "tauri-v*" # Trigger on tags like tauri-v1.0.0
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [windows-latest]
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "EFT Quest Tracker Desktop v__VERSION__"
+          releaseBody: |
+            ## EFT Quest Tracker Desktop App
+
+            Download the installer below for your platform:
+            - **Windows (MSI)**: Recommended for most users
+            - **Windows (NSIS)**: Alternative installer
+
+            ### Features
+            - System tray integration
+            - OAuth authentication via system browser
+            - Syncs with your account at https://learntotarkov.com
+            - Auto-updates (future releases will update automatically)
+
+            ### Installation
+            1. Download the installer
+            2. Run the installer
+            3. Launch EFT Quest Tracker from Start Menu or Desktop
+            4. Sign in with your learntotarkov.com account
+
+            See the assets below to download.
+          releaseDraft: true
+          prerelease: false
