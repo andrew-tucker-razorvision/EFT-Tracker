@@ -256,7 +256,7 @@ describe("security-logger", () => {
       const mockEvents = [
         {
           id: "event1",
-          type: "LOGIN_SUCCESS",
+          type: "LOGIN_SUCCESS" as const,
           userId: "user123",
           ipAddress: "1.2.3.4",
           userAgent: "test-agent",
@@ -304,7 +304,7 @@ describe("security-logger", () => {
       const mockEvents = [
         {
           id: "event1",
-          type: "LOGIN_FAILED",
+          type: "LOGIN_FAILED" as const,
           userId: null,
           ipAddress: "1.2.3.4",
           userAgent: null,
