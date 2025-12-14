@@ -16,7 +16,7 @@ export const options = {
 };
 
 // Test scenario
-export default function () {
+export default function homepageTest() {
   // GET homepage
   const res = http.get(__ENV.BASE_URL || 'https://learntotarkov.com');
 

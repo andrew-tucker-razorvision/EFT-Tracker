@@ -28,9 +28,10 @@ const TEST_USERS = [
   'test-user-5',
 ];
 
-export default function () {
+export default function companionSyncTest() {
   // Simulate companion app syncing quest progress for multiple users
-  const userId = TEST_USERS[Math.floor(Math.random() * TEST_USERS.length)];
+  // Note: userId not used until auth is implemented
+  // const userId = TEST_USERS[Math.floor(Math.random() * TEST_USERS.length)];
 
   // Test 1: Fetch user's quest progress
   let res = http.get(`${BASE_URL}/api/progress`, {

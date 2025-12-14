@@ -18,7 +18,7 @@ export const options = {
 
 const BASE_URL = __ENV.BASE_URL || 'https://learntotarkov.com';
 
-export default function () {
+export default function questApiTest() {
   // Test 1: Get all quests
   let res = http.get(`${BASE_URL}/api/quests`);
 

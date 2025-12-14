@@ -18,7 +18,7 @@ export const options = {
 
 const BASE_URL = __ENV.BASE_URL || 'https://learntotarkov.com';
 
-export default function () {
+export default function authFlowTest() {
   // Test flow: 70% login, 30% signup (realistic distribution)
   const isSignup = Math.random() < 0.3;
 
