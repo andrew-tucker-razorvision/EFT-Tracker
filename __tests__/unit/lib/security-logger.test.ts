@@ -259,6 +259,8 @@ describe("security-logger", () => {
           type: "LOGIN_SUCCESS",
           userId: "user123",
           ipAddress: "1.2.3.4",
+          userAgent: "test-agent",
+          metadata: {},
           createdAt: new Date(),
         },
       ];
@@ -303,7 +305,10 @@ describe("security-logger", () => {
         {
           id: "event1",
           type: "LOGIN_FAILED",
+          userId: null,
           ipAddress: "1.2.3.4",
+          userAgent: null,
+          metadata: {},
           createdAt: new Date(),
         },
       ];
