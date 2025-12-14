@@ -16,29 +16,27 @@
 export async function checkForUpdates(): Promise<boolean> {
   try {
     // Dynamic import to avoid issues in web version
-    const { checkUpdate, installUpdate } = await import(
-      "@tauri-apps/api/updater"
-    );
-    const { relaunch } = await import("@tauri-apps/api/process");
+    const { check } = await import("@tauri-apps/plugin-updater");
+    const { relaunch } = await import("@tauri-apps/plugin-process");
 
     console.log("Checking for updates...");
 
-    const { shouldUpdate, manifest } = await checkUpdate();
+    const update = await check();
 
-    if (shouldUpdate) {
-      console.log(`Update available: ${manifest?.version}`);
+    if (update) {
+      console.log(`Update available: ${update.version}`);
 
       const shouldInstall = window.confirm(
-        `A new version is available: ${manifest?.version}\n\n` +
-          `Current version: ${manifest?.currentVersion || "unknown"}\n\n` +
+        `A new version is available: ${update.version}\n\n` +
+          `Current version: ${update.currentVersion}\n\n` +
           `Would you like to install the update now?`
       );
 
       if (shouldInstall) {
         console.log("Downloading and installing update...");
 
-        // Install the update
-        await installUpdate();
+        // Download and install the update
+        await update.downloadAndInstall();
 
         // Prompt to relaunch
         const shouldRelaunch = window.confirm(
@@ -72,11 +70,11 @@ export async function checkForUpdates(): Promise<boolean> {
  */
 export async function checkForUpdatesSilently(): Promise<boolean> {
   try {
-    const { checkUpdate } = await import("@tauri-apps/api/updater");
+    const { check } = await import("@tauri-apps/plugin-updater");
 
-    const { shouldUpdate } = await checkUpdate();
+    const update = await check();
 
-    return shouldUpdate;
+    return update !== null;
   } catch (error) {
     console.error("Silent update check failed:", error);
     return false;

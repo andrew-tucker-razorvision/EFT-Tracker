@@ -14,7 +14,7 @@ export async function openOAuthWindow(
   provider: "google" | "discord"
 ): Promise<void> {
   // Dynamic import to avoid issues in web version
-  const { open } = await import("@tauri-apps/api/shell");
+  const { open } = await import("@tauri-apps/plugin-shell");
 
   const authUrl = `${process.env.NEXT_PUBLIC_API_URL || "https://learntotarkov.com"}/api/auth/signin/${provider}`;
 
