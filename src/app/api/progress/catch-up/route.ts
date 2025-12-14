@@ -136,29 +136,34 @@ export async function POST(request: Request) {
       for (let i = 0; i < prerequisiteArray.length; i += CHUNK_SIZE) {
         const chunk = prerequisiteArray.slice(i, i + CHUNK_SIZE);
 
-        await prisma.$transaction(async (tx) => {
-          for (const questId of chunk) {
-            await tx.questProgress.upsert({
-              where: {
-                userId_questId: {
+        await prisma.$transaction(
+          async (tx) => {
+            for (const questId of chunk) {
+              await tx.questProgress.upsert({
+                where: {
+                  userId_questId: {
+                    userId: session.user.id,
+                    questId,
+                  },
+                },
+                create: {
                   userId: session.user.id,
                   questId,
+                  status: "COMPLETED",
+                  syncSource: "WEB",
                 },
-              },
-              create: {
-                userId: session.user.id,
-                questId,
-                status: "COMPLETED",
-                syncSource: "WEB",
-              },
-              update: {
-                status: "COMPLETED",
-                syncSource: "WEB",
-              },
-            });
-            completedIds.push(questId);
+                update: {
+                  status: "COMPLETED",
+                  syncSource: "WEB",
+                },
+              });
+              completedIds.push(questId);
+            }
+          },
+          {
+            timeout: 15000, // 15 seconds timeout for large batch operations
           }
-        });
+        );
       }
     }
 
@@ -171,33 +176,38 @@ export async function POST(request: Request) {
       for (let i = 0; i < targetQuests.length; i += CHUNK_SIZE) {
         const chunk = targetQuests.slice(i, i + CHUNK_SIZE);
 
-        await prisma.$transaction(async (tx) => {
-          for (const questId of chunk) {
-            const currentStatus = progressMap.get(questId);
-            // Only update if not already completed
-            if (currentStatus !== "COMPLETED") {
-              await tx.questProgress.upsert({
-                where: {
-                  userId_questId: {
+        await prisma.$transaction(
+          async (tx) => {
+            for (const questId of chunk) {
+              const currentStatus = progressMap.get(questId);
+              // Only update if not already completed
+              if (currentStatus !== "COMPLETED") {
+                await tx.questProgress.upsert({
+                  where: {
+                    userId_questId: {
+                      userId: session.user.id,
+                      questId,
+                    },
+                  },
+                  create: {
                     userId: session.user.id,
                     questId,
+                    status: "AVAILABLE",
+                    syncSource: "WEB",
                   },
-                },
-                create: {
-                  userId: session.user.id,
-                  questId,
-                  status: "AVAILABLE",
-                  syncSource: "WEB",
-                },
-                update: {
-                  status: "AVAILABLE",
-                  syncSource: "WEB",
-                },
-              });
-              availableIds.push(questId);
+                  update: {
+                    status: "AVAILABLE",
+                    syncSource: "WEB",
+                  },
+                });
+                availableIds.push(questId);
+              }
             }
+          },
+          {
+            timeout: 15000, // 15 seconds timeout for large batch operations
           }
-        });
+        );
       }
     }
 

@@ -37,6 +37,18 @@ export function withRateLimit(
 ) {
   return async (req: Request): Promise<NextResponse> => {
     const clientIp = getClientIp(req);
+
+    // Check if IP is in whitelist (excluded from rate limiting)
+    const whitelist =
+      process.env.RATE_LIMIT_WHITELIST?.split(",").map((ip) => ip.trim()) || [];
+    if (whitelist.includes(clientIp)) {
+      logger.debug(
+        { clientIp, path: new URL(req.url).pathname },
+        "IP whitelisted, skipping rate limit"
+      );
+      return handler(req);
+    }
+
     const result: RateLimitResult = await rateLimit(clientIp, config);
 
     // Add rate limit headers to response
