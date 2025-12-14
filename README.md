@@ -11,6 +11,16 @@ A web application to track your Escape from Tarkov quest progress across all tra
 - **User Accounts** - Sign up/login to save your progress across devices
 - **Filter & Search** - Find quests by name, trader, status, or level requirement
 
+## User Documentation
+
+New to EFT Quest Tracker? Check out our comprehensive guides:
+
+- **[Getting Started Guide](docs/user-guide/getting-started.md)** - Set up your account and start tracking quests
+- **[Quest Tracking Tutorial](docs/user-guide/quest-tracking.md)** - Master all features and keyboard shortcuts
+- **[Companion App Guide](docs/user-guide/companion-app.md)** - Learn about the desktop overlay (coming soon)
+- **[Troubleshooting](docs/user-guide/troubleshooting.md)** - Fix common issues
+- **[FAQ](docs/user-guide/faq.md)** - Answers to frequently asked questions
+
 ## Tech Stack
 
 - **Frontend**: Next.js 14 (App Router), TypeScript, Tailwind CSS, shadcn/ui
