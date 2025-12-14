@@ -8,6 +8,7 @@
     "dev:kill": "lsof -ti:3000 | xargs kill -9 2>/dev/null; pkill -f 'next-server' 2>/dev/null; true",
     "dev:fresh": "npm run dev:kill && next dev",
     "build": "next build",
+    "build:tauri": "cross-env TAURI_BUILD=true NEXT_PUBLIC_API_URL=https://learntotarkov.com next build",
     "start": "next start",
     "lint": "eslint",
     "format:check": "prettier --check .",
@@ -20,7 +21,10 @@
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
     "test:e2e": "playwright test",
-    "prepare": "husky"
+    "prepare": "husky",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -45,6 +49,10 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@sentry/nextjs": "^10.30.0",
+    "@tauri-apps/api": "^2.9.1",
+    "@tauri-apps/plugin-process": "^2.3.1",
+    "@tauri-apps/plugin-shell": "^2.3.3",
+    "@tauri-apps/plugin-updater": "^2.9.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/dagre": "^0.7.53",
     "@upstash/ratelimit": "^2.0.7",
@@ -81,6 +89,7 @@
   "devDependencies": {
     "@playwright/test": "^1.56.1",
     "@tailwindcss/postcss": "^4",
+    "@tauri-apps/cli": "^1.6.3",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
@@ -91,6 +100,7 @@
     "@vitejs/plugin-react": "^5.1.1",
     "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
+    "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.4",
     "husky": "^9.1.7",

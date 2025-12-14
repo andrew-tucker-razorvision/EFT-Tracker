@@ -1,9 +1,19 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
+// Check if building for Tauri (static export)
+const isTauriBuild = process.env.TAURI_BUILD === "true";
+
 const nextConfig: NextConfig = {
   /* config options here */
-  output: "standalone", // Enable standalone output for Docker deployment
+  output: isTauriBuild ? "export" : "standalone", // Static export for Tauri, standalone for web
+
+  // Disable image optimization for Tauri builds (not supported in static export)
+  images: isTauriBuild
+    ? {
+        unoptimized: true,
+      }
+    : undefined,
 
   // Configure server-side externals for Pino
   serverExternalPackages: ["pino", "pino-pretty"],
@@ -44,6 +54,28 @@ const nextConfig: NextConfig = {
               "font-src 'self' data:; " +
               "connect-src 'self' https://api.tarkov.dev; " +
               "frame-ancestors 'self';",
+          },
+        ],
+      },
+      // CORS headers for Tauri companion app
+      {
+        source: "/api/:path*",
+        headers: [
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "tauri://localhost",
+          },
+          {
+            key: "Access-Control-Allow-Credentials",
+            value: "true",
+          },
+          {
+            key: "Access-Control-Allow-Methods",
+            value: "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+          },
+          {
+            key: "Access-Control-Allow-Headers",
+            value: "Content-Type, Authorization",
           },
         ],
       },

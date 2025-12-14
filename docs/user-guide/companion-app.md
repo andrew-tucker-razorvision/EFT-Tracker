@@ -2,9 +2,13 @@
 
 The EFT Quest Tracker Companion App provides an in-game overlay to check your quest progress without alt-tabbing.
 
-## Status: Coming Soon
+## Status: In Development
 
-The Windows companion app is currently in development. Check back soon for the official release!
+The Windows companion app is currently in active development using Tauri framework. A detailed [implementation plan](../COMPANION_APP_IMPLEMENTATION.md) has been created with an estimated 8-10 hours of development work remaining.
+
+**Architecture:** Thin client that connects to learntotarkov.com API
+**Estimated Release:** TBD based on development progress
+**Platform:** Windows (initial release), Linux/macOS (future)
 
 ## What the Companion App Will Offer
 
