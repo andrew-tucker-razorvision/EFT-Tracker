@@ -15,11 +15,17 @@ export default defineConfig({
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
 
-  /* Limit workers to avoid overwhelming the dev server */
-  workers: process.env.CI ? 1 : 2,
+  /* Optimize workers for CI - use 4 workers for parallel execution */
+  workers: process.env.CI ? 4 : 2,
+
+  /* Timeout configuration */
+  timeout: process.env.CI ? 60000 : 90000, // 60s on CI, 90s locally (increased for ReactFlow loading)
+  expect: {
+    timeout: 5000,
+  },
 
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: "html",
+  reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "html",
 
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
@@ -28,6 +34,10 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
+
+    /* Optimize for CI - disable video and only capture screenshots on failure */
+    video: process.env.CI ? "off" : "retain-on-failure",
+    screenshot: "only-on-failure",
   },
 
   /* Configure projects for major browsers */
@@ -43,5 +53,6 @@ export default defineConfig({
     command: "npm run dev",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
+    timeout: 120000, // 2 minutes for server to start
   },
 });

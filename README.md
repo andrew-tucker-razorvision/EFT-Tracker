@@ -11,6 +11,16 @@ A web application to track your Escape from Tarkov quest progress across all tra
 - **User Accounts** - Sign up/login to save your progress across devices
 - **Filter & Search** - Find quests by name, trader, status, or level requirement
 
+## User Documentation
+
+New to EFT Quest Tracker? Check out our comprehensive guides:
+
+- **[Getting Started Guide](docs/user-guide/getting-started.md)** - Set up your account and start tracking quests
+- **[Quest Tracking Tutorial](docs/user-guide/quest-tracking.md)** - Master all features and keyboard shortcuts
+- **[Companion App Guide](docs/user-guide/companion-app.md)** - Learn about the desktop overlay (coming soon)
+- **[Troubleshooting](docs/user-guide/troubleshooting.md)** - Fix common issues
+- **[FAQ](docs/user-guide/faq.md)** - Answers to frequently asked questions
+
 ## Tech Stack
 
 - **Frontend**: Next.js 14 (App Router), TypeScript, Tailwind CSS, shadcn/ui
@@ -42,7 +52,8 @@ cp .env.template .env
 # Edit .env with your database URL and auth secrets:
 #   DATABASE_URL - PostgreSQL connection string
 #   AUTH_SECRET - Generate with: openssl rand -base64 32
-#   NEXTAUTH_URL - http://localhost:3000 for local dev
+#   NEXTAUTH_URL - Your dev server URL (e.g., http://localhost:3000)
+# For local overrides, create .env.local (not committed to git)
 
 # Run database migrations and seed data
 npx prisma migrate dev
@@ -52,7 +63,7 @@ npx prisma db seed
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the app.
+The dev server will start on an available port (typically 3000). Check the console output for the actual URL.
 
 ### Alternative: VS Code Dev Containers
 
@@ -206,6 +217,20 @@ This project uses a comprehensive CI/CD pipeline with GitHub Actions, including:
 - Security scanning (CodeQL, Dependabot)
 - Branch protection and quality gates
 - Conventional commit enforcement
+- E2E tests with Playwright on `develop` and `master` branches
+
+### Branch Workflow
+
+This project uses a `develop` branch workflow for safer iteration:
+
+```text
+feature/* → develop → master → production
+```
+
+- **Regular development**: Create feature branches from `develop` and PR back to `develop`
+- **Production releases**: PR from `develop` to `master` triggers production deployment
+- **Hotfixes**: Can be merged directly to `master` when needed
+- **E2E testing**: Runs automatically on both branches with appropriate test databases
 
 See [docs/CI_CD_SETUP.md](docs/CI_CD_SETUP.md) for complete setup guide and replication instructions.
 

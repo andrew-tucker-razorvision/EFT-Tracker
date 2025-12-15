@@ -3,6 +3,9 @@ import { cleanup } from "@testing-library/react";
 import { afterEach, beforeAll, afterAll, vi } from "vitest";
 import { server } from "./msw-server";
 
+// Skip environment validation in tests
+process.env.SKIP_ENV_VALIDATION = "1";
+
 // Establish API mocking before all tests
 beforeAll(() => {
   server.listen({ onUnhandledRequest: "warn" });

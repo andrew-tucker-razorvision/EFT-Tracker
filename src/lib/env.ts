@@ -35,6 +35,16 @@ const envSchema = z.object({
   // Optional: Search features
   BRAVE_API_KEY: z.string().optional(),
 
+  // Optional: Rate Limiting (Upstash Redis)
+  UPSTASH_REDIS_REST_URL: z
+    .string()
+    .url("UPSTASH_REDIS_REST_URL must be a valid URL")
+    .optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+
+  // Optional: CAPTCHA Protection (Cloudflare Turnstile)
+  TURNSTILE_SECRET_KEY: z.string().optional(),
+
   // Optional: Logging
   LOG_LEVEL: z
     .enum(["error", "warn", "info", "debug"])

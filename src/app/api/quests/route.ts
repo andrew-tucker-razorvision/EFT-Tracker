@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { Prisma } from "@prisma/client";
 import { logger } from "@/lib/logger";
+import { withRateLimit } from "@/lib/middleware/rate-limit-middleware";
+import { RATE_LIMITS } from "@/lib/rate-limit";
 
 type QuestWithRelations = Prisma.QuestGetPayload<{
   include: {
@@ -124,7 +126,7 @@ function isQuestEffectivelyLocked(
   return false;
 }
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const trader = searchParams.get("trader");
@@ -248,3 +250,6 @@ export async function GET(request: Request) {
     );
   }
 }
+
+// Apply rate limiting to GET endpoint
+export const GET = withRateLimit(handleGET, RATE_LIMITS.API_DATA_READ);

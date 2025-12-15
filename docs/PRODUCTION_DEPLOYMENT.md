@@ -140,6 +140,50 @@ docker-compose -f docker-compose.prod.yml up -d
 - `PORT` - Port to listen on (default: 3000)
 - `NODE_ENV` - Should be `production`
 - `NEXT_TELEMETRY_DISABLED` - Set to `1` to disable Next.js telemetry
+- `SENTRY_DSN` - Sentry error monitoring DSN
+- `LOG_LEVEL` - Logging verbosity (error, warn, info, debug)
+
+### Environment Validation
+
+All environment variables are validated at application startup using Zod (see [src/lib/env.ts](../src/lib/env.ts)).
+
+**Benefits:**
+
+- **Fail fast**: Application won't start with invalid configuration
+- **Type safety**: Full TypeScript support for all environment variables
+- **Clear errors**: Helpful error messages for missing or invalid values
+
+**Example validation error:**
+
+```json
+ZodError: [
+  {
+    "code": "too_small",
+    "minimum": 32,
+    "path": ["AUTH_SECRET"],
+    "message": "AUTH_SECRET must be at least 32 characters"
+  }
+]
+```
+
+**Usage in code:**
+
+```typescript
+// ❌ Don't use process.env directly (no validation, no types)
+const dbUrl = process.env.DATABASE_URL;
+
+// ✅ Use validated env (type-safe, validated at startup)
+import { env } from "@/lib/env";
+const dbUrl = env.DATABASE_URL;
+```
+
+**Skipping validation (testing only):**
+
+```bash
+SKIP_ENV_VALIDATION=1 npm test
+```
+
+See [.env.template](../.env.template) for complete list of environment variables with documentation.
 
 ### Secrets Management
 
@@ -702,7 +746,62 @@ Serve static assets from CDN:
 - `/public/*` - Images, fonts, static files
 - `/_next/static/*` - Next.js build artifacts
 
+## Pre-Deployment Procedures
+
+### Database Backup
+
+Before any production deployment, especially those involving schema changes or risky operations, create a manual backup:
+
+**When to Create Backup:**
+
+- Schema migrations (`prisma migrate deploy`)
+- Major code deployments
+- Bulk data operations
+- Configuration changes
+
+**Backup Procedure:**
+
+1. Navigate to [Neon Console](https://console.neon.tech) → Branches
+2. Click "Create Branch"
+3. Configure backup:
+   - **Name**: `backup-YYYYMMDD-HHMMSS` (e.g., `backup-20250113-143000`)
+   - **Source**: `main` (production branch)
+   - **Point in time**: "Now"
+4. Document backup in PR description or deployment notes
+5. Proceed with deployment
+
+**Example:**
+
+```bash
+# Document in deployment notes
+Backup created: backup-20250113-143000
+Reason: Pre-deployment backup for PR #238 (schema changes)
+Retention: Delete after 2025-01-20 (7 days)
+```
+
+For detailed backup and restoration procedures, see [DATABASE_BACKUPS.md](./DATABASE_BACKUPS.md).
+
+For safe database migration strategies and 2-phase deployment patterns, see [DATABASE_MIGRATIONS.md](./DATABASE_MIGRATIONS.md).
+
 ## Production Checklist
+
+### Pre-Deployment Checklist
+
+- [ ] All CI checks passing (tests, lint, security)
+- [ ] PR approved and merged
+- [ ] **Database backup created** (if schema changes or risky operations)
+- [ ] Staging environment tested
+- [ ] Rollback plan documented
+
+### Post-Deployment Checklist
+
+- [ ] Health checks passing
+- [ ] Key endpoints verified (home, API, auth)
+- [ ] Error rates normal in Sentry
+- [ ] No performance degradation
+- [ ] Monitor for 15-30 minutes
+
+### Production Environment Checklist
 
 - [ ] Environment variables configured
 - [ ] Database connection tested
@@ -717,6 +816,15 @@ Serve static assets from CDN:
 - [ ] Rollback plan documented
 
 ## Additional Resources
+
+### Project Documentation
+
+- [Database Backup Procedures](./DATABASE_BACKUPS.md)
+- [Database Migration Strategy](./DATABASE_MIGRATIONS.md)
+- [Incident Response and Disaster Recovery](./INCIDENT_RESPONSE.md)
+- [Production Runbooks](./RUNBOOKS.md)
+
+### External Resources
 
 - [Next.js Deployment Documentation](https://nextjs.org/docs/deployment)
 - [Docker Security Best Practices](https://docs.docker.com/engine/security/security/)

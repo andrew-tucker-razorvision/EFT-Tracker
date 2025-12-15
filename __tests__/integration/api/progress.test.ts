@@ -79,7 +79,8 @@ describe("/api/progress", () => {
     it("should return 401 when not authenticated", async () => {
       vi.mocked(auth).mockResolvedValue(null as any);
 
-      const response = await GET();
+      const request = new Request("http://localhost:3000/api/progress");
+      const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(401);
@@ -92,7 +93,8 @@ describe("/api/progress", () => {
         mockProgress as never
       );
 
-      const response = await GET();
+      const request = new Request("http://localhost:3000/api/progress");
+      const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -113,7 +115,8 @@ describe("/api/progress", () => {
       vi.mocked(auth).mockResolvedValue(mockSession as any);
       vi.mocked(prisma.questProgress.findMany).mockResolvedValue([]);
 
-      const response = await GET();
+      const request = new Request("http://localhost:3000/api/progress");
+      const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -126,7 +129,8 @@ describe("/api/progress", () => {
         new Error("Database error")
       );
 
-      const response = await GET();
+      const request = new Request("http://localhost:3000/api/progress");
+      const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(500);

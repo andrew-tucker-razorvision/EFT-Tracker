@@ -16,7 +16,7 @@ type QuestWithDependencies = Prisma.QuestGetPayload<{
 }>;
 
 const catchUpSchema = z.object({
-  targetQuests: z.array(z.string().min(1)).min(1).max(50),
+  targetQuests: z.array(z.string().min(1)).min(1).max(100),
 });
 
 /**
@@ -62,6 +62,7 @@ function getIncompletePrerequisites(
 /**
  * POST /api/progress/catch-up
  * Bulk sync progress by completing all prerequisites for selected target quests.
+ * Note: Transaction chunks limited to 50 quests with 30s timeout for reliability.
  */
 export async function POST(request: Request) {
   try {
@@ -131,62 +132,109 @@ export async function POST(request: Request) {
     const prerequisiteArray = Array.from(prerequisitesToComplete);
 
     if (prerequisiteArray.length > 0) {
-      // Use transaction for atomicity
-      await prisma.$transaction(async (tx) => {
-        for (const questId of prerequisiteArray) {
-          await tx.questProgress.upsert({
-            where: {
-              userId_questId: {
-                userId: session.user.id,
-                questId,
-              },
+      // Process in chunks to avoid transaction size limits
+      const CHUNK_SIZE = 50;
+      for (let i = 0; i < prerequisiteArray.length; i += CHUNK_SIZE) {
+        const chunk = prerequisiteArray.slice(i, i + CHUNK_SIZE);
+
+        try {
+          await prisma.$transaction(
+            async (tx) => {
+              for (const questId of chunk) {
+                await tx.questProgress.upsert({
+                  where: {
+                    userId_questId: {
+                      userId: session.user.id,
+                      questId,
+                    },
+                  },
+                  create: {
+                    userId: session.user.id,
+                    questId,
+                    status: "COMPLETED",
+                    syncSource: "WEB",
+                  },
+                  update: {
+                    status: "COMPLETED",
+                    syncSource: "WEB",
+                  },
+                });
+              }
             },
-            create: {
-              userId: session.user.id,
-              questId,
-              status: "COMPLETED",
-              syncSource: "WEB",
-            },
-            update: {
-              status: "COMPLETED",
-              syncSource: "WEB",
-            },
-          });
-          completedIds.push(questId);
+            {
+              timeout: 30000, // 30 seconds timeout for large batch operations
+            }
+          );
+          // Only add to completedIds after transaction succeeds
+          completedIds.push(...chunk);
+        } catch (error) {
+          logger.error(
+            { err: error, chunk: chunk.length, userId: session.user.id },
+            "Transaction failed for prerequisite chunk"
+          );
+          throw new Error(
+            `Failed to complete prerequisite quests (chunk ${i / CHUNK_SIZE + 1})`
+          );
         }
-      });
+      }
     }
 
     // Set target quests as AVAILABLE
     const availableIds: string[] = [];
 
-    await prisma.$transaction(async (tx) => {
-      for (const questId of targetQuests) {
-        const currentStatus = progressMap.get(questId);
-        // Only update if not already completed
-        if (currentStatus !== "COMPLETED") {
-          await tx.questProgress.upsert({
-            where: {
-              userId_questId: {
-                userId: session.user.id,
-                questId,
-              },
+    if (targetQuests.length > 0) {
+      // Process in chunks to avoid transaction size limits
+      const CHUNK_SIZE = 50;
+      for (let i = 0; i < targetQuests.length; i += CHUNK_SIZE) {
+        const chunk = targetQuests.slice(i, i + CHUNK_SIZE);
+        const chunkUpdates: string[] = [];
+
+        try {
+          await prisma.$transaction(
+            async (tx) => {
+              for (const questId of chunk) {
+                const currentStatus = progressMap.get(questId);
+                // Only update if not already completed
+                if (currentStatus !== "COMPLETED") {
+                  await tx.questProgress.upsert({
+                    where: {
+                      userId_questId: {
+                        userId: session.user.id,
+                        questId,
+                      },
+                    },
+                    create: {
+                      userId: session.user.id,
+                      questId,
+                      status: "AVAILABLE",
+                      syncSource: "WEB",
+                    },
+                    update: {
+                      status: "AVAILABLE",
+                      syncSource: "WEB",
+                    },
+                  });
+                  chunkUpdates.push(questId);
+                }
+              }
             },
-            create: {
-              userId: session.user.id,
-              questId,
-              status: "AVAILABLE",
-              syncSource: "WEB",
-            },
-            update: {
-              status: "AVAILABLE",
-              syncSource: "WEB",
-            },
-          });
-          availableIds.push(questId);
+            {
+              timeout: 30000, // 30 seconds timeout for large batch operations
+            }
+          );
+          // Only add to availableIds after transaction succeeds
+          availableIds.push(...chunkUpdates);
+        } catch (error) {
+          logger.error(
+            { err: error, chunk: chunk.length, userId: session.user.id },
+            "Transaction failed for target quest chunk"
+          );
+          throw new Error(
+            `Failed to mark target quests as available (chunk ${i / CHUNK_SIZE + 1})`
+          );
         }
       }
-    });
+    }
 
     return NextResponse.json({
       success: true,

@@ -4,6 +4,7 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import type { Prisma, QuestStatus } from "@prisma/client";
 import { logger } from "@/lib/logger";
+import { syncSchema } from "@/types/api-contracts";
 
 type QuestDependencyWithStatus = Prisma.QuestDependencyGetPayload<{
   select: { requiredId: true; requirementStatus: true };
@@ -15,22 +16,6 @@ const STATUS_MAP: Record<string, QuestStatus> = {
   FINISHED: "COMPLETED",
   FAILED: "AVAILABLE", // Failed quests reset to available (for restartable ones)
 };
-
-const syncEventSchema = z.object({
-  questId: z.string().min(1),
-  status: z.enum(["STARTED", "FINISHED", "FAILED"]),
-  timestamp: z.string().datetime(),
-});
-
-const syncSchema = z.object({
-  events: z.array(syncEventSchema).min(1).max(100),
-  deviceInfo: z
-    .object({
-      version: z.string().optional(),
-      os: z.string().optional(),
-    })
-    .optional(),
-});
 
 /**
  * Validate companion token from Authorization header.

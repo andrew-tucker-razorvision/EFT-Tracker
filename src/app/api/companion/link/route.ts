@@ -5,18 +5,18 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { logger } from "@/lib/logger";
-
-const linkSchema = z.object({
-  deviceName: z.string().min(1, "Device name is required").max(100),
-  gameMode: z.enum(["PVP", "PVE"]).default("PVP"),
-});
+import { withRateLimit } from "@/lib/middleware/rate-limit-middleware";
+import { RATE_LIMITS } from "@/lib/rate-limit";
+import { logSecurityEvent } from "@/lib/security-logger";
+import { getClientIp } from "@/lib/rate-limit";
+import { linkSchema } from "@/types/api-contracts";
 
 /**
  * POST /api/companion/link
  * Generate a new companion token for linking the desktop app.
  * Requires user authentication.
  */
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -51,6 +51,15 @@ export async function POST(request: Request) {
       },
     });
 
+    // Log token generation
+    await logSecurityEvent({
+      type: "TOKEN_GENERATED",
+      userId: session.user.id,
+      ipAddress: getClientIp(request),
+      userAgent: request.headers.get("user-agent") ?? undefined,
+      metadata: { deviceName, gameMode, tokenHint },
+    });
+
     // Return the raw token (only time it's visible)
     return NextResponse.json(
       {
@@ -83,7 +92,7 @@ export async function POST(request: Request) {
  * GET /api/companion/link
  * List all companion tokens for the authenticated user.
  */
-export async function GET() {
+async function handleGET() {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -117,3 +126,7 @@ export async function GET() {
     );
   }
 }
+
+// Apply rate limiting - lower limits for sensitive operations
+export const POST = withRateLimit(handlePOST, RATE_LIMITS.API_DATA_WRITE);
+export const GET = withRateLimit(handleGET, RATE_LIMITS.API_AUTHENTICATED);

@@ -6,9 +6,9 @@ name: CI
 
 on:
   push:
-    branches: [main, master, develop]
+    branches: [main, master]
   pull_request:
-    branches: [main, master, develop]
+    branches: [main, master]
 
 # Cancel in-progress runs when a new workflow with the same group name starts
 concurrency:
@@ -159,14 +159,18 @@ jobs:
           retention-days: 7
 
   # Job 5: E2E Tests (Playwright)
-  # DISABLED: Re-enable before production deployment
-  # To run locally: npx playwright test
+  # Currently disabled during active development (if: false)
+  # To run locally: NEXTAUTH_URL=http://localhost:3001 npx playwright test
+  # See docs/CI_CD_SETUP.md for re-enablement criteria
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: build
-    if: false # Disabled during active development to reduce CI costs
+    # Disabled due to CI timing issues (Dec 15, 2025)
+    # Tests pass 100% locally but timeout in CI - waitForQuestTree() page.reload() causes context closure
+    # TODO: See issue #267 for fix - extend timeouts or different wait strategy
+    if: false
 
     steps:
       - name: Checkout code
@@ -181,8 +185,24 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Setup test database
+        run: npx prisma db push
+        env:
+          DATABASE_URL: ${{ github.ref == 'refs/heads/master' && secrets.DATABASE_URL_STAGING || secrets.DATABASE_URL_DEVELOP }}
+
+      - name: Seed test data
+        run: npm run db:seed:test
+        env:
+          DATABASE_URL: ${{ github.ref == 'refs/heads/master' && secrets.DATABASE_URL_STAGING || secrets.DATABASE_URL_DEVELOP }}
+
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+        run: npx playwright install --with-deps chromium
+
+      - name: Clear Next.js cache
+        run: rm -rf .next
 
       - name: Download build artifacts
         if: hashFiles('dist/**') != ''
@@ -196,6 +216,9 @@ jobs:
         run: npm run test:e2e
         env:
           CI: true
+          DATABASE_URL: ${{ github.ref == 'refs/heads/master' && secrets.DATABASE_URL_STAGING || secrets.DATABASE_URL_DEVELOP }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          NEXTAUTH_URL: http://localhost:3000
 
       - name: Upload Playwright report
         if: always()

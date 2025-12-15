@@ -1,8 +1,15 @@
 import { PrismaClient, QuestStatus } from "@prisma/client";
+import { Pool } from "pg";
+import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import "dotenv/config";
 
-const prisma = new PrismaClient();
+// Use the same Prisma setup as the app (with pg adapter)
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 const TEST_USER_PREFIX = "test_";
 const TEST_USER_EMAIL = "qa@test.com";
@@ -141,4 +148,5 @@ seedTestData()
   })
   .finally(async () => {
     await prisma.$disconnect();
+    await pool.end();
   });

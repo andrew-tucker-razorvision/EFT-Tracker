@@ -76,11 +76,15 @@ describe("/api/traders", () => {
     vi.restoreAllMocks();
   });
 
+  // Helper to create mock Request
+  const createMockRequest = () =>
+    new Request("http://localhost:3000/api/traders");
+
   describe("GET", () => {
     it("should return all traders with quest counts", async () => {
       vi.mocked(prisma.trader.findMany).mockResolvedValue(mockTraders as never);
 
-      const response = await GET();
+      const response = await GET(createMockRequest());
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -90,7 +94,7 @@ describe("/api/traders", () => {
     it("should transform trader data to include questCount", async () => {
       vi.mocked(prisma.trader.findMany).mockResolvedValue(mockTraders as never);
 
-      const response = await GET();
+      const response = await GET(createMockRequest());
       const data = await response.json();
 
       // Check first trader has correct structure
@@ -111,7 +115,7 @@ describe("/api/traders", () => {
     it("should order traders by name ascending", async () => {
       vi.mocked(prisma.trader.findMany).mockResolvedValue(mockTraders as never);
 
-      await GET();
+      await GET(createMockRequest());
 
       expect(prisma.trader.findMany).toHaveBeenCalledWith({
         orderBy: { name: "asc" },
@@ -126,7 +130,7 @@ describe("/api/traders", () => {
     it("should handle empty traders list", async () => {
       vi.mocked(prisma.trader.findMany).mockResolvedValue([]);
 
-      const response = await GET();
+      const response = await GET(createMockRequest());
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -138,7 +142,7 @@ describe("/api/traders", () => {
         new Error("Database connection failed")
       );
 
-      const response = await GET();
+      const response = await GET(createMockRequest());
       const data = await response.json();
 
       expect(response.status).toBe(500);
@@ -148,7 +152,7 @@ describe("/api/traders", () => {
     it("should include all trader properties", async () => {
       vi.mocked(prisma.trader.findMany).mockResolvedValue(mockTraders as never);
 
-      const response = await GET();
+      const response = await GET(createMockRequest());
       const data = await response.json();
 
       // Verify all traders have required properties
@@ -174,7 +178,7 @@ describe("/api/traders", () => {
     it("should return correct quest counts for each trader", async () => {
       vi.mocked(prisma.trader.findMany).mockResolvedValue(mockTraders as never);
 
-      const response = await GET();
+      const response = await GET(createMockRequest());
       const data = await response.json();
 
       const questCounts: Record<string, number> = {};

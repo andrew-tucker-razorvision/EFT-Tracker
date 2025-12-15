@@ -54,3 +54,5 @@ SENTRY_CREDENTIALS.txt
 
 # Playwright MCP artifacts
 .playwright-mcp/
+.coolify-url
+k6.exe

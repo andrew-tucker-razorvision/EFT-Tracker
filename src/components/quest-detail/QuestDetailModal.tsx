@@ -140,6 +140,7 @@ function QuestDetailContent({
               return (
                 <li key={obj.id} className="flex items-center gap-3 text-sm">
                   {item.iconLink && (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={item.iconLink}
                       alt={item.shortName}
@@ -181,6 +182,7 @@ function QuestDetailContent({
                   className="flex items-center gap-3 text-sm"
                 >
                   {key.iconLink && (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={key.iconLink}
                       alt={key.shortName}
@@ -281,6 +283,7 @@ function QuestDetailContent({
                 {details!.finishRewards.items.map((reward, idx) => (
                   <li key={idx} className="flex items-center gap-3 text-sm">
                     {reward.item.iconLink && (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={reward.item.iconLink}
                         alt={reward.item.shortName}

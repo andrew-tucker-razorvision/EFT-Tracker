@@ -3,9 +3,11 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
+import { withRateLimit } from "@/lib/middleware/rate-limit-middleware";
+import { RATE_LIMITS } from "@/lib/rate-limit";
 
 // GET /api/user - Get current user settings
-export async function GET() {
+async function handleGET() {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -58,7 +60,7 @@ const updateUserSchema = z.object({
 });
 
 // PATCH /api/user - Update current user settings
-export async function PATCH(request: Request) {
+async function handlePATCH(request: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -108,3 +110,7 @@ export async function PATCH(request: Request) {
     );
   }
 }
+
+// Apply rate limiting - authenticated users only
+export const GET = withRateLimit(handleGET, RATE_LIMITS.API_AUTHENTICATED);
+export const PATCH = withRateLimit(handlePATCH, RATE_LIMITS.API_DATA_WRITE);

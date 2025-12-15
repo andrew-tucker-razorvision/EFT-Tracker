@@ -42,15 +42,30 @@ Then restart the dev server:
 npm run dev
 ```
 
-### Development Server Port
+### Local Environment Best Practices
 
-**IMPORTANT:** Always use port 3000 for the dev server. Never use alternative ports (3001, 3002, etc.) as this can cause confusion and authentication issues with NextAuth callbacks.
+**Environment Configuration:**
 
-If port 3000 is in use:
+1. **Use `.env.local` for local overrides** - Never commit this file
+   - Set `NEXTAUTH_URL` to match your dev server (e.g., `http://localhost:3000`)
+   - Use `DATABASE_URL_DEVELOP` for local development database
+   - Keep secrets and API keys here, not in `.env`
 
-1. Find the process: `netstat -ano | findstr :3000`
-2. Kill it: `cmd /c "taskkill /F /PID <PID>"`
-3. Then start the server on port 3000
+2. **Port flexibility** - The dev server will auto-assign an available port
+   - If 3000 is taken, Next.js will suggest 3001, 3002, etc.
+   - Update `NEXTAUTH_URL` in `.env.local` to match the actual port
+   - Example: `NEXTAUTH_URL=http://localhost:3001`
+
+3. **Clean restarts** - When switching branches or after pulling changes:
+
+   ```bash
+   rm -rf .next && npx prisma generate && npm run dev
+   ```
+
+4. **Database branches** - Use separate databases for different workflows:
+   - Local feature work: Personal dev database or local PostgreSQL
+   - Testing develop branch: `DATABASE_URL_DEVELOP` (Neon development branch)
+   - Never use production database locally
 
 ### Database Schema Changes
 
@@ -132,8 +147,8 @@ Don't rely on the user to catch visual issues - proactively identify and fix the
 
 **Testing workflow:**
 
-1. **Start dev server** - Ensure `npm run dev` is running on port 3000
-2. **Navigate to feature** - Use `browser_navigate` to go to the relevant page
+1. **Start dev server** - Ensure `npm run dev` is running (note the port in console output)
+2. **Navigate to feature** - Use `browser_navigate` with the actual dev server URL
 3. **Wait for load** - Use `browser_wait_for` if needed for async content
 4. **Test interactions** - Use `browser_snapshot` to see the accessibility tree, then:
    - `browser_click` to click buttons/links
@@ -201,6 +216,103 @@ npx playwright test homepage.spec.ts
 
 Example: `feature/add-user-dashboard`
 
+### Branch Workflow
+
+**Current Strategy: Direct to Master (Active Development Phase)**
+
+This project uses a simplified workflow during active development for faster iteration:
+
+```text
+feature/* → master → production (Coolify auto-deploy)
+```
+
+**Why this approach:**
+
+- Faster iteration during active development
+- Small team with tight coordination
+- Every merge is deployment-ready
+- Manual testing responsibility on developers
+
+**Development Flow:**
+
+1. **Create feature branch from master**
+
+   ```bash
+   git checkout master && git pull origin master
+   git checkout -b feature/your-feature-name
+   ```
+
+2. **Develop and test locally**
+   - Run tests: `npm test`
+   - Run E2E locally: `NEXTAUTH_URL=http://localhost:3001 npx playwright test`
+   - Ensure all checks pass
+
+3. **Push and create PR targeting master**
+
+   ```bash
+   git push -u origin feature/your-feature-name
+   gh pr create --base master
+   ```
+
+4. **CI runs (E2E tests currently disabled):**
+   - ✅ Lint: ESLint + Prettier
+   - ✅ Test: Vitest unit tests
+   - ✅ Typecheck: TypeScript
+   - ✅ Build: Next.js production build
+   - ⏸️ E2E: Playwright (disabled during active dev)
+
+5. **Manual review and testing**
+   - Code review by maintainer
+   - Manual testing of critical paths
+   - Verify no breaking changes
+
+6. **Merge triggers automatic deployment**
+   - GitHub webhook to Coolify
+   - Docker build (~2 min)
+   - Rolling update with healthcheck
+   - Production live (~3 min total)
+
+**E2E Test Status:**
+
+- ✅ **Re-enabled in CI** (Dec 15, 2025) after achieving 100% stability
+- Runs on every PR via `.github/workflows/ci.yml`
+- 2 critical path tests covering quest interactions and focus mode
+- ~16 second runtime with 2 workers in parallel
+- Uses robust modal dismissal to prevent flakiness
+- See: [\_\_tests\_\_/e2e/quest-workflow.spec.ts](__tests__/e2e/quest-workflow.spec.ts)
+
+**Key E2E Testing Insight:**
+The biggest source of E2E flakiness was the welcome modal not being dismissed properly, blocking ReactFlow from rendering. Always ensure modals are fully dismissed (wait for `hidden` state) before proceeding with tests.
+
+**Hotfixes:**
+
+- Same workflow (all changes go through PRs)
+- Use `hotfix/` prefix for critical fixes
+- Can expedite review but still require CI checks
+
+### Future: Develop Branch Workflow (Post-1.0)
+
+When the project matures, we may re-enable the develop branch workflow:
+
+```text
+feature/* → develop → master → production
+```
+
+**Triggers for transition:**
+
+- [ ] E2E tests stable and required
+- [ ] Team size > 3 developers
+- [ ] Multiple concurrent feature branches
+- [ ] Production SLA requirements
+- [ ] User base reaches critical mass
+
+**Previous workflow (disabled Dec 13, 2025):**
+
+- Develop branch for iteration with `DATABASE_URL_DEVELOP`
+- Master for production-ready code with `DATABASE_URL_STAGING`
+- E2E tests on both branches
+- See commit e338ec1 for context on why this was disabled
+
 ### Pull Request Workflow
 
 After creating a PR, automatically monitor CI status using the GitHub check-runs API:
@@ -218,6 +330,101 @@ curl -s "https://api.github.com/repos/andrew-tucker-razorvision/EFT-Tracker/comm
    - Link to the PR
    - If failed, which checks failed
 5. If checks pass and PR is ready, ask if user wants to merge
+
+## Deployment
+
+### Auto-Deployment from GitHub to Coolify
+
+**Setup completed:** The repository is configured for automatic deployment to production when code is merged to `master`.
+
+**How it works:**
+
+1. Code is merged to `master` branch (via PR after CI checks pass)
+2. GitHub sends a webhook to Coolify with HMAC-SHA256 signature
+3. Coolify validates the webhook signature for security
+4. Deployment is automatically queued and executed:
+   - Clones repository at the specific commit SHA
+   - Builds Docker image using multi-stage Dockerfile
+   - Runs healthcheck on new container
+   - Performs rolling update (zero downtime)
+   - Removes old container after new one is healthy
+
+**Webhook configuration:**
+
+- **URL:** `http://95.217.155.28:8000/webhooks/source/github/events/manual`
+- **Secret:** Stored in both GitHub webhook settings and Coolify configuration
+- **Events:** Push events only (triggers on merge to master)
+- **Content-Type:** application/json
+
+**Deployment timing:**
+
+- Docker build: ~2 minutes
+- Healthcheck wait: ~30 seconds
+- Total deployment time: ~3 minutes from merge to live
+
+**Monitoring deployments:**
+
+- View deployment logs in Coolify: `http://95.217.155.28:8000/`
+- Navigate to: Projects → EFT-Tracker → Deployments
+- Each deployment shows: commit SHA, trigger type (Webhook/Manual), status, logs
+
+**Manual deployment:**
+
+If needed, you can trigger a manual deployment from the Coolify dashboard using the "Redeploy" button.
+
+**Production URL:** `https://learntotarkov.com`
+
+## Model Selection (Cost Optimization)
+
+**Goal:** Reduce Claude API costs by 35% while maintaining code quality.
+
+### Quick Decision Framework
+
+Before starting any task:
+
+```
+□ Is it security/auth/database schema? → SONNET
+□ Is it >500 LOC or >3 files? → SONNET
+□ Is error message clear OR scope well-defined? → HAIKU
+□ Otherwise → Default to HAIKU, escalate if needed
+```
+
+### Use Haiku (Target: 75-80% of tasks)
+
+- Bug fixes with clear error messages
+- Unit test writing
+- Integration test writing
+- File operations (search, read, edit)
+- Documentation updates
+- Simple features (<300 LOC)
+- Git operations
+- Code review (<500 lines)
+- Single-file refactoring
+
+### Use Sonnet (Target: 20-25% of tasks)
+
+- Security-critical code (auth, rate limiting, validation)
+- Database schema changes
+- Complex features (>500 LOC)
+- Architectural decisions
+- E2E test debugging
+- Performance optimization
+- Ambiguous problem analysis
+
+### Quality Gates
+
+Before shipping any Haiku work:
+
+- ✅ All tests pass (unit, integration)
+- ✅ Lint/format checks clean
+- ✅ Type checking passes
+- ✅ No console errors in dev
+
+**Detailed guidelines:** See [.claude/HAIKU_GUIDE.md](.claude/HAIKU_GUIDE.md)
+
+**Tracking log:** See [.claude/HAIKU_LOG.md](.claude/HAIKU_LOG.md)
+
+---
 
 ## Code Quality Guidelines
 
@@ -244,6 +451,120 @@ curl -s "https://api.github.com/repos/andrew-tucker-razorvision/EFT-Tracker/comm
   ```
   NOT: `Closes #101, #102` (comma-separated won't auto-close)
 
+## Testing Philosophy
+
+### Test Pyramid
+
+This project follows a proper test pyramid with distinct boundaries:
+
+```
+        /\
+       /E2\     E2E (2%) - Critical user journeys only
+      /----\
+     / INT  \   Integration (49%) - Components with mocked APIs
+    /--------\
+   /   UNIT   \ Unit (49%) - Pure functions, calculations
+  /------------\
+```
+
+**Current Test Distribution:** 49% Unit : 49% Integration : 2% E2E (✅ Healthy!)
+
+### When to Use Each Test Type
+
+#### Unit Tests (\_\_tests\_\_/unit/)
+
+**Use for:** Pure functions, calculations, utilities, business logic
+
+**Examples:**
+
+- Transform parsing (`parseZoomFromTransform`)
+- Node positioning calculations (`calculateNodeHeight`)
+- Touch target size validation
+- Utility functions (rate limiting, string formatting)
+
+**Characteristics:**
+
+- Fast (<100ms per test)
+- No external dependencies
+- No browser, no API calls, no database
+- Test edge cases exhaustively
+
+**Run with:** `npm test -- __tests__/unit/`
+
+#### Integration Tests (\_\_tests\_\_/integration/)
+
+**Use for:** React components, API routes with mocked dependencies, multi-component interactions
+
+**Examples:**
+
+- `QuestTree` component with mocked ReactFlow
+- `QuestFilters` with mocked API calls
+- API routes with MSW handlers
+- Contract verification tests
+
+**Characteristics:**
+
+- Medium speed (<500ms per test)
+- Mock external dependencies (APIs, databases)
+- Test component behavior, not implementation
+- Use MSW for API mocking
+- Use React Testing Library for component tests
+
+**Run with:** `npm test -- __tests__/integration/`
+
+#### E2E Tests (\_\_tests\_\_/e2e/)
+
+**Use for:** ONLY critical user journeys that MUST work for app to be usable
+
+**Examples:**
+
+- ✅ Login → complete quest → verify progress saved
+- ✅ Double-click quest → enter focus mode → ESC exits
+- ❌ Filter by trader (use integration test instead)
+- ❌ Verify quest count (use unit/integration test)
+
+**Critical Rules:**
+
+- Maximum 3-5 E2E tests total
+- Each test must represent a complete user journey
+- Keep tests under 150 lines each
+- Use helper functions for common operations
+- **ALWAYS dismiss modals properly** - wait for `hidden` state
+
+**Run with:** `npx playwright test`
+
+#### Smoke Tests (\_\_tests\_\_/smoke/)
+
+**Use for:** Post-deployment validation in production
+
+**Examples:**
+
+- Critical API endpoints return 200
+- Homepage loads without errors
+- Authentication flow accessible
+- No console errors on page load
+
+**Characteristics:**
+
+- Very fast (<2 min total)
+- Run against production URL
+- Triggered by deployment webhook
+- Creates GitHub issue on failure
+
+**Run with:** `npx playwright test --config=__tests__/smoke/smoke.config.ts`
+
+### API Contract Testing
+
+Use TypeScript + Zod for compile-time and runtime type safety:
+
+1. Define schemas in [src/types/api-contracts.ts](src/types/api-contracts.ts)
+2. Import schemas in both API routes and MSW handlers
+3. Create contract verification tests in `__tests__/integration/api/contracts/`
+4. TypeScript catches type mismatches at compile time
+5. Zod validates request/response shapes at runtime
+
+**No need for heavy contract testing tools** (Pact, Dredd) - TypeScript type-sharing is sufficient for monolithic apps.
+
 ### Pre-Commit Checklist
 
 Before creating a commit or PR:
@@ -254,3 +575,4 @@ Before creating a commit or PR:
 4. Check PR size - consider splitting if >500 lines
 5. Write meaningful commit message with context
 6. Include test coverage for new functionality
+7. **New features:** Add appropriate test coverage at the right level (prefer unit/integration over E2E)

@@ -25,98 +25,98 @@ describe("rateLimit", () => {
     vi.useRealTimers();
   });
 
-  it("should allow requests under the limit", () => {
+  it("should allow requests under the limit", async () => {
     const config: RateLimitConfig = { limit: 3, window: 60000 };
     const identifier = "test-user-1";
 
-    const result1 = rateLimit(identifier, config);
+    const result1 = await rateLimit(identifier, config);
     expect(result1.success).toBe(true);
     expect(result1.remaining).toBe(2);
 
-    const result2 = rateLimit(identifier, config);
+    const result2 = await rateLimit(identifier, config);
     expect(result2.success).toBe(true);
     expect(result2.remaining).toBe(1);
 
-    const result3 = rateLimit(identifier, config);
+    const result3 = await rateLimit(identifier, config);
     expect(result3.success).toBe(true);
     expect(result3.remaining).toBe(0);
   });
 
-  it("should block requests over the limit", () => {
+  it("should block requests over the limit", async () => {
     const config: RateLimitConfig = { limit: 2, window: 60000 };
     const identifier = "test-user-2";
 
-    rateLimit(identifier, config);
-    rateLimit(identifier, config);
+    await rateLimit(identifier, config);
+    await rateLimit(identifier, config);
 
-    const result = rateLimit(identifier, config);
+    const result = await rateLimit(identifier, config);
     expect(result.success).toBe(false);
     expect(result.remaining).toBe(0);
   });
 
-  it("should reset after time window expires", () => {
+  it("should reset after time window expires", async () => {
     const config: RateLimitConfig = { limit: 2, window: 60000 };
     const identifier = "test-user-3";
 
     // Use up the limit
-    rateLimit(identifier, config);
-    const result1 = rateLimit(identifier, config);
+    await rateLimit(identifier, config);
+    const result1 = await rateLimit(identifier, config);
     expect(result1.success).toBe(true);
     expect(result1.remaining).toBe(0);
 
     // Next request should be blocked
-    const result2 = rateLimit(identifier, config);
+    const result2 = await rateLimit(identifier, config);
     expect(result2.success).toBe(false);
 
     // Advance time past the window
     vi.advanceTimersByTime(60001);
 
     // Should be allowed again
-    const result3 = rateLimit(identifier, config);
+    const result3 = await rateLimit(identifier, config);
     expect(result3.success).toBe(true);
     expect(result3.remaining).toBe(1);
   });
 
-  it("should track different identifiers separately", () => {
+  it("should track different identifiers separately", async () => {
     const config: RateLimitConfig = { limit: 1, window: 60000 };
 
-    const result1 = rateLimit("user-a", config);
-    const result2 = rateLimit("user-b", config);
+    const result1 = await rateLimit("user-a", config);
+    const result2 = await rateLimit("user-b", config);
 
     expect(result1.success).toBe(true);
     expect(result2.success).toBe(true);
   });
 
-  it("should return correct reset timestamp", () => {
+  it("should return correct reset timestamp", async () => {
     const config: RateLimitConfig = { limit: 1, window: 60000 };
     const identifier = "test-user-4";
     const startTime = Date.now();
 
-    const result = rateLimit(identifier, config);
+    const result = await rateLimit(identifier, config);
 
     expect(result.reset).toBeGreaterThanOrEqual(startTime + config.window);
     expect(result.reset).toBeLessThanOrEqual(startTime + config.window + 100);
   });
 
-  it("should return correct limit in response", () => {
+  it("should return correct limit in response", async () => {
     const config: RateLimitConfig = { limit: 5, window: 60000 };
     const identifier = "test-user-5";
 
-    const result = rateLimit(identifier, config);
+    const result = await rateLimit(identifier, config);
 
     expect(result.limit).toBe(5);
   });
 
-  it("should handle immediate consecutive requests", () => {
+  it("should handle immediate consecutive requests", async () => {
     const config: RateLimitConfig = { limit: 3, window: 60000 };
     const identifier = "test-user-6";
 
-    const results = [
+    const results = await Promise.all([
       rateLimit(identifier, config),
       rateLimit(identifier, config),
       rateLimit(identifier, config),
       rateLimit(identifier, config),
-    ];
+    ]);
 
     expect(results[0].success).toBe(true);
     expect(results[1].success).toBe(true);
@@ -156,7 +156,7 @@ describe("getClientIp", () => {
     expect(getClientIp(request)).toBe("104.16.123.45");
   });
 
-  it("should prioritize x-forwarded-for over other headers", () => {
+  it("should prioritize cf-connecting-ip over other headers", () => {
     const request = new Request("http://localhost:3000", {
       headers: {
         "x-forwarded-for": "203.0.113.1",
@@ -165,7 +165,7 @@ describe("getClientIp", () => {
       },
     });
 
-    expect(getClientIp(request)).toBe("203.0.113.1");
+    expect(getClientIp(request)).toBe("104.16.123.45");
   });
 
   it("should trim whitespace from IP addresses", () => {
