@@ -10,6 +10,46 @@ A web application to track your Escape from Tarkov quest progress across all tra
 - **Wiki Integration** - Direct links to the Tarkov Wiki for quest details, objectives, and rewards
 - **User Accounts** - Sign up/login to save your progress across devices
 - **Filter & Search** - Find quests by name, trader, status, or level requirement
+- **Companion Desktop App** - Native Windows desktop app with system tray integration (see below)
+
+## Companion Desktop App
+
+The EFT Quest Tracker includes a native Windows desktop companion app built with Tauri.
+
+### Desktop App Features
+
+- **System Tray Integration** - Runs in the background, accessible from system tray
+- **Sync with Web App** - Quest progress syncs automatically between web and desktop
+- **Native Performance** - Built with Rust and Tauri for lightweight, fast experience
+- **Auto-Updates** - Automatically checks for and installs new versions
+
+### Quick Setup
+
+1. **Download the installer** from the [latest release](https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases/latest)
+2. **Run the MSI installer** (or NSIS setup.exe)
+3. **Launch the app** from Start Menu or Desktop
+4. **Link your account**:
+   - Sign in to <https://learntotarkov.com>
+   - Navigate to Settings → Companion App
+   - Click "Generate New Token"
+   - Copy the token and paste it into the desktop app
+5. **Start tracking** - Your quest progress will sync automatically
+
+### Documentation
+
+- **[Companion App Setup Guide](docs/user-guide/companion-app.md)** - Detailed setup instructions
+- **[Phase 5 Testing Guide](docs/TAURI_PHASE5_GUIDE.md)** - For developers testing builds
+- **[API Documentation](docs/API.md)** - Companion token authentication details
+
+### Technical Details
+
+- **Framework**: Tauri 2.x (Rust + WebView2)
+- **Bundle Size**: ~15MB (MSI installer)
+- **Platform**: Windows 10/11 x64
+- **Authentication**: Token-based (not session cookies)
+- **Storage**: localStorage (MVP), migrating to Tauri secure store
+
+---
 
 ## User Documentation
 
@@ -17,7 +57,7 @@ New to EFT Quest Tracker? Check out our comprehensive guides:
 
 - **[Getting Started Guide](docs/user-guide/getting-started.md)** - Set up your account and start tracking quests
 - **[Quest Tracking Tutorial](docs/user-guide/quest-tracking.md)** - Master all features and keyboard shortcuts
-- **[Companion App Guide](docs/user-guide/companion-app.md)** - Learn about the desktop overlay (coming soon)
+- **[Companion App Guide](docs/user-guide/companion-app.md)** - Desktop app setup and usage
 - **[Troubleshooting](docs/user-guide/troubleshooting.md)** - Fix common issues
 - **[FAQ](docs/user-guide/faq.md)** - Answers to frequently asked questions
 

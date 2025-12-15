@@ -145,10 +145,50 @@ src-tauri/target/release/bundle/
 - [ ] Quit from tray menu exits the app
 - [ ] App displays the quest tracker UI
 - [ ] Network requests go to https://learntotarkov.com
+- [ ] Companion token authentication works (see Step 5.5 below)
 
 ### Check for errors:
 
 Look for console errors or network failures. The app should function identically to the web version.
+
+### Step 5.5: Link Your Account with Companion Token
+
+The Tauri companion app uses token-based authentication instead of session cookies (which don't work across origins). You'll need to generate a companion token from the web app.
+
+#### Generate a Companion Token
+
+1. **Open the web app** at <https://learntotarkov.com> and sign in
+2. **Navigate to Settings** → **Companion App** tab
+3. **Click "Generate New Token"**
+4. **Enter a device name** (e.g., "My Desktop PC") and select game mode (PVP/PVE)
+5. **Copy the token immediately** - it will only be shown once
+   - Token format: `cmp_[32 hex characters]`
+   - Example: `cmp_a1b2c3d4e5f6789012345678901234ab`
+
+#### Link the Tauri App
+
+1. **Open the Tauri companion app** (installed in Step 5)
+2. **You'll see a "Link Account" screen** with a token input field
+3. **Paste the token** you copied from the web app
+4. **Click "Link Account"**
+5. **Verify it works**:
+   - App should show your username and quest statistics
+   - Quest progress should sync between web and desktop app
+   - Token is stored locally (localStorage for MVP, secure store post-MVP)
+
+#### Troubleshooting Token Issues
+
+- **"Invalid token" error**: Token may be expired or already revoked. Generate a new one.
+- **"Device limit reached"**: You can have up to 5 active tokens. Revoke unused tokens in web settings.
+- **Token won't validate**: Ensure you copied the entire token including the `cmp_` prefix.
+- **Network errors**: Check that the production API (<https://learntotarkov.com>) is accessible.
+
+#### Managing Tokens
+
+- **List active tokens**: Settings → Companion App shows all linked devices
+- **Revoke token**: Click "Revoke" next to any device to unlink it
+- **Last used**: Tokens show when they were last used to sync data
+- **Token security**: Tokens are hashed with bcrypt and never shown again after generation
 
 ## Step 6: Create First Release
 
