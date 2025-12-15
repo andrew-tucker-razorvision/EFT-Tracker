@@ -547,7 +547,7 @@ function App() {
       {/* Footer */}
       <footer className="bg-tarkov-surface border-t border-tarkov-border p-2">
         <div className="flex items-center justify-between text-xs text-tarkov-muted">
-          <span>EFT Tracker Companion v0.1.1</span>
+          <span>EFT Tracker Companion v0.1.2</span>
           <button
             onClick={() =>
               setSetting("notificationSound", !settings.notificationSound)
