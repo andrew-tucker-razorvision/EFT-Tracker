@@ -10,15 +10,17 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SessionProvider } from "next-auth/react";
-import {
-  mockSession,
-  mockQuestsWithProgress,
-} from "../../../test/fixtures/quests";
+import { mockQuestsWithProgress } from "../../../test/fixtures/quests";
 import { mockTraders } from "../../../test/fixtures/traders";
 import { QuestFilters } from "@/components/quest-tree/QuestFilters";
 import type { QuestFilters as Filters } from "@/types";
 
 describe("QuestFilters Integration Tests", () => {
+  // Mock session for SessionProvider
+  const mockSession = {
+    user: { id: "test-user", name: "Test User", email: "test@example.com" },
+    expires: new Date(Date.now() + 86400000).toISOString(),
+  };
   const defaultFilters: Filters = {
     search: "",
     traderId: null,
@@ -29,6 +31,7 @@ describe("QuestFilters Integration Tests", () => {
     playerLevel: 1,
     questsPerTree: 5,
     bypassLevelRequirement: false,
+    hideReputationQuests: false,
   };
 
   const defaultProps = {

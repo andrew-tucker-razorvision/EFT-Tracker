@@ -298,26 +298,28 @@ describe("Companion API Contracts", () => {
     it("types are correctly inferred from schemas", () => {
       // This is primarily a compile-time check
       // If these assignments work, types are correctly defined
-      type LinkRequest = Parameters<typeof linkSchema.parse>[0];
-      const linkRequest: LinkRequest = {
+      const linkRequest = {
         deviceName: "test",
-        gameMode: "PVP",
+        gameMode: "PVP" as const,
       };
 
-      type SyncRequest = Parameters<typeof syncSchema.parse>[0];
-      const syncRequest: SyncRequest = {
+      const syncRequest = {
         events: [
           {
             questId: "test",
-            status: "STARTED",
+            status: "STARTED" as const,
             timestamp: new Date().toISOString(),
           },
         ],
       };
 
+      // Verify types are correctly inferred by parsing
+      const parsedLink = linkSchema.parse(linkRequest);
+      const parsedSync = syncSchema.parse(syncRequest);
+
       // If we reach here, type inference works correctly
-      expect(linkRequest.deviceName).toBe("test");
-      expect(syncRequest.events).toHaveLength(1);
+      expect(parsedLink.deviceName).toBe("test");
+      expect(parsedSync.events).toHaveLength(1);
     });
   });
 });
