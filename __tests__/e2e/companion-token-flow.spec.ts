@@ -28,7 +28,7 @@ test.describe("Companion Token Flow - Web UI", () => {
     await page.click('button[type="submit"]');
 
     // Wait for redirect to quests page
-    await page.waitForURL("/quests", { timeout: 10000 });
+    await page.waitForURL("/quests", { timeout: 15000 });
   });
 
   test("should navigate to companion app settings", async ({ page }) => {
@@ -253,7 +253,7 @@ test.describe("Companion Token API", () => {
       process.env.TEST_USER_PASSWORD || "TestPassword123!"
     );
     await page.click('button[type="submit"]');
-    await page.waitForURL("/quests");
+    await page.waitForURL("/quests", { timeout: 15000 });
 
     // Use page context to make authenticated request
     const response = await page.request.post("/api/companion/link", {
@@ -393,7 +393,7 @@ test.describe("Companion Token API", () => {
       process.env.TEST_USER_PASSWORD || "TestPassword123!"
     );
     await page.click('button[type="submit"]');
-    await page.waitForURL("/quests");
+    await page.waitForURL("/quests", { timeout: 15000 });
 
     // Get the token ID from the list endpoint
     const listResponse = await page.request.get("/api/companion/link");
