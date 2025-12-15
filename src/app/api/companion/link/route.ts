@@ -9,11 +9,7 @@ import { withRateLimit } from "@/lib/middleware/rate-limit-middleware";
 import { RATE_LIMITS } from "@/lib/rate-limit";
 import { logSecurityEvent } from "@/lib/security-logger";
 import { getClientIp } from "@/lib/rate-limit";
-
-const linkSchema = z.object({
-  deviceName: z.string().min(1, "Device name is required").max(100),
-  gameMode: z.enum(["PVP", "PVE"]).default("PVP"),
-});
+import { linkSchema } from "@/types/api-contracts";
 
 /**
  * POST /api/companion/link

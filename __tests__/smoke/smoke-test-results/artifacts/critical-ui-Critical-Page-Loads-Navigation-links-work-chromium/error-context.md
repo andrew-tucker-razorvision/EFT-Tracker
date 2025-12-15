@@ -1,0 +1,67 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+    - banner [ref=e2]:
+        - generic [ref=e3]:
+            - generic [ref=e4]:
+                - link "EFT Quest Tracker" [ref=e5] [cursor=pointer]:
+                    - /url: /
+                - navigation [ref=e6]:
+                    - link "Quests" [ref=e7] [cursor=pointer]:
+                        - /url: /quests
+            - generic [ref=e9]:
+                - link "Sign In" [ref=e10] [cursor=pointer]:
+                    - /url: /login
+                - link "Sign Up" [ref=e11] [cursor=pointer]:
+                    - /url: /register
+    - main [ref=e12]:
+        - generic [ref=e13]:
+            - generic [ref=e15]:
+                - heading "Track Your Tarkov Quest Progress" [level=1] [ref=e16]
+                - paragraph [ref=e17]: Interactive quest tree visualization with dependency tracking, progress saving, and Kappa container optimization for Escape from Tarkov.
+                - generic [ref=e18]:
+                    - link "Browse Quests" [ref=e19] [cursor=pointer]:
+                        - /url: /quests
+                    - link "Create Account" [ref=e20] [cursor=pointer]:
+                        - /url: /register
+                - paragraph [ref=e21]: No account required to browse quests
+            - generic [ref=e23]:
+                - heading "Features" [level=2] [ref=e24]
+                - generic [ref=e25]:
+                    - generic [ref=e26]:
+                        - img [ref=e27]
+                        - heading "Quest Dependencies" [level=3] [ref=e31]
+                        - paragraph [ref=e32]: Visual tree showing quest prerequisites and unlock paths across all traders.
+                    - generic [ref=e33]:
+                        - img [ref=e34]
+                        - heading "Progress Tracking" [level=3] [ref=e37]
+                        - paragraph [ref=e38]: Track your quest status with automatic unlocking when prerequisites are completed.
+                    - generic [ref=e39]:
+                        - img [ref=e40]
+                        - heading "All Traders" [level=3] [ref=e45]
+                        - paragraph [ref=e46]: Complete quest data for Prapor, Therapist, Skier, Peacekeeper, Mechanic, Ragman, Jaeger, and Fence.
+                    - generic [ref=e47]:
+                        - img [ref=e48]
+                        - heading "Map Filtering" [level=3] [ref=e50]
+                        - paragraph [ref=e51]: Filter quests by map location to plan efficient raid routes.
+                    - generic [ref=e52]:
+                        - img [ref=e53]
+                        - heading "Kappa Tracking" [level=3] [ref=e55]
+                        - paragraph [ref=e56]: Highlight quests required for the Kappa container to optimize your progression.
+                    - generic [ref=e57]:
+                        - img [ref=e58]
+                        - heading "Guest Mode" [level=3] [ref=e60]
+                        - paragraph [ref=e61]: Browse all quests without an account. Sign up to save your progress.
+            - generic [ref=e63]:
+                - heading "Ready to Track Your Progress?" [level=2] [ref=e64]
+                - paragraph [ref=e65]: Create a free account to save your quest progress across sessions and devices.
+                - generic [ref=e66]:
+                    - link "Sign Up Free" [ref=e67] [cursor=pointer]:
+                        - /url: /register
+                    - link "Already have an account?" [ref=e68] [cursor=pointer]:
+                        - /url: /login
+            - paragraph [ref=e71]: Quest data sourced from the Tarkov community. Not affiliated with Battlestate Games.
+    - region "Notifications alt+T"
+    - alert [ref=e72]
+```
