@@ -188,7 +188,12 @@ jobs:
         env:
           DATABASE_URL: ${{ github.ref == 'refs/heads/master' && secrets.DATABASE_URL_STAGING || secrets.DATABASE_URL_DEVELOP }}
 
-      - name: Seed test data
+      - name: Seed quest data
+        run: npm run db:seed
+        env:
+          DATABASE_URL: ${{ github.ref == 'refs/heads/master' && secrets.DATABASE_URL_STAGING || secrets.DATABASE_URL_DEVELOP }}
+
+      - name: Seed test user
         run: npm run db:seed:test
         env:
           DATABASE_URL: ${{ github.ref == 'refs/heads/master' && secrets.DATABASE_URL_STAGING || secrets.DATABASE_URL_DEVELOP }}

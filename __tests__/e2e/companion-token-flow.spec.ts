@@ -239,18 +239,6 @@ test.describe("Companion Token Flow - Web UI", () => {
 test.describe("Companion Token API", () => {
   let companionToken: string;
 
-  test.beforeAll(async ({ request }) => {
-    // Login and get session cookie
-    const loginResponse = await request.post("/api/auth/callback/credentials", {
-      data: {
-        email: process.env.TEST_USER_EMAIL || "test@example.com",
-        password: process.env.TEST_USER_PASSWORD || "TestPassword123!",
-      },
-    });
-
-    expect(loginResponse.ok()).toBeTruthy();
-  });
-
   test("POST /api/companion/link - should generate valid token", async ({
     page,
   }) => {

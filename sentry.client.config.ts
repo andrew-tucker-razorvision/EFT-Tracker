@@ -14,8 +14,8 @@ Sentry.init({
   // Get your DSN from: https://sentry.io/settings/projects/[project]/keys/
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 
-  // Capture exceptions from all environments
-  enabled: true,
+  // Only enable when DSN is provided (disabled in test environments)
+  enabled: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
 
   // Set environment (development, staging, production)
   environment: process.env.NODE_ENV || "development",
