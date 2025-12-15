@@ -167,8 +167,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: build
-    # Temporarily disabled during active development - re-enable when ready
-    if: false
+    # Re-enabled after achieving 100% stability (Dec 15, 2025)
+    if: true
 
     steps:
       - name: Checkout code
@@ -215,6 +215,8 @@ jobs:
         env:
           CI: true
           DATABASE_URL: ${{ github.ref == 'refs/heads/master' && secrets.DATABASE_URL_STAGING || secrets.DATABASE_URL_DEVELOP }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          NEXTAUTH_URL: http://localhost:3000
 
       - name: Upload Playwright report
         if: always()

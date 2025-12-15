@@ -12,7 +12,7 @@ model User {
   password               String
   name                   String?
   playerLevel            Int?
-  questsPerTree          Int?             @default(5)  // null = show all
+  questsPerTree          Int?             @default(5) // null = show all
   bypassLevelRequirement Boolean          @default(false)
   createdAt              DateTime         @default(now())
   updatedAt              DateTime         @updatedAt
@@ -35,7 +35,7 @@ model Quest {
   levelRequired Int               @default(1)
   kappaRequired Boolean           @default(false)
   questType     QuestType         @default(STANDARD)
-  factionName   String?           // "Any", "BEAR", "USEC" from API
+  factionName   String? // "Any", "BEAR", "USEC" from API
   traderId      String
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
@@ -87,7 +87,7 @@ enum QuestStatus {
 }
 
 enum SyncSource {
-  WEB       // Updated via web interface
+  WEB // Updated via web interface
   COMPANION // Updated via desktop companion app
 }
 
@@ -97,20 +97,20 @@ enum GameMode {
 }
 
 enum QuestType {
-  STANDARD       // Regular trader quests
-  PVP_ZONE       // PVP Zone quests (Arena)
-  REPUTATION     // Fence reputation repair quests
-  LIGHTKEEPER    // Lightkeeper questline
-  FACTION_BEAR   // BEAR-only quests
-  FACTION_USEC   // USEC-only quests
-  STORY          // Main story quests (1.0)
-  PRESTIGE       // Prestige quests (New Beginning) - require The Collector
+  STANDARD // Regular trader quests
+  PVP_ZONE // PVP Zone quests (Arena)
+  REPUTATION // Fence reputation repair quests
+  LIGHTKEEPER // Lightkeeper questline
+  FACTION_BEAR // BEAR-only quests
+  FACTION_USEC // USEC-only quests
+  STORY // Main story quests (1.0)
+  PRESTIGE // Prestige quests (New Beginning) - require The Collector
 }
 
 model CompanionToken {
   id         String    @id @default(cuid())
-  token      String    @unique  // Hashed token (bcrypt)
-  tokenHint  String              // Last 4 chars of original token for display
+  token      String    @unique // Hashed token (bcrypt)
+  tokenHint  String // Last 4 chars of original token for display
   userId     String
   deviceName String
   gameMode   GameMode  @default(PVP)
@@ -118,22 +118,22 @@ model CompanionToken {
   createdAt  DateTime  @default(now())
   revokedAt  DateTime?
 
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([token])
 }
 
 model SecurityEvent {
-  id        String              @id @default(cuid())
+  id        String            @id @default(cuid())
   type      SecurityEventType
   userId    String?
   ipAddress String
   userAgent String?
-  metadata  Json?               // Additional context (emailHash, reason, etc.)
-  createdAt DateTime            @default(now())
+  metadata  Json? // Additional context (emailHash, reason, etc.)
+  createdAt DateTime          @default(now())
 
-  user      User?               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([ipAddress])

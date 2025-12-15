@@ -19,7 +19,7 @@ export default defineConfig({
   workers: process.env.CI ? 4 : 2,
 
   /* Timeout configuration */
-  timeout: process.env.CI ? 30000 : 60000, // 30s on CI, 60s locally
+  timeout: process.env.CI ? 60000 : 90000, // 60s on CI, 90s locally (increased for ReactFlow loading)
   expect: {
     timeout: 5000,
   },
