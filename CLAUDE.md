@@ -276,7 +276,7 @@ feature/* → master → production (Coolify auto-deploy)
 
 - ✅ **Re-enabled in CI** (Dec 15, 2025) after achieving 100% stability
 - Runs on every PR via `.github/workflows/ci.yml`
-- 2 critical path tests covering quest interactions and focus mode
+- 3 critical path tests covering quest interactions and focus mode
 - ~16 second runtime with 2 workers in parallel
 - Uses robust modal dismissal to prevent flakiness
 - See: [\_\_tests\_\_/e2e/quest-workflow.spec.ts](__tests__/e2e/quest-workflow.spec.ts)
