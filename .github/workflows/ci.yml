@@ -159,8 +159,9 @@ jobs:
           retention-days: 7
 
   # Job 5: E2E Tests (Playwright)
-  # Runs on develop and master branches with appropriate databases
-  # To run locally: npx playwright test
+  # Currently disabled during active development (if: false)
+  # To run locally: NEXTAUTH_URL=http://localhost:3001 npx playwright test
+  # See docs/CI_CD_SETUP.md for re-enablement criteria
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest

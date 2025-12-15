@@ -216,62 +216,99 @@ npx playwright test homepage.spec.ts
 
 Example: `feature/add-user-dashboard`
 
-### Develop Branch Workflow
+### Branch Workflow
 
-This project uses a `develop` branch workflow for safer iteration before production deployment:
+**Current Strategy: Direct to Master (Active Development Phase)**
 
-**Branch Structure:**
+This project uses a simplified workflow during active development for faster iteration:
 
 ```text
-feature/* → develop → master → production (Coolify)
+feature/* → master → production (Coolify auto-deploy)
 ```
 
-**When to use develop vs master:**
+**Why this approach:**
 
-- **Use develop for:**
-  - New features and experiments
-  - Larger changes that need testing
-  - Changes you want to iterate on before production
-  - Regular development work
+- Faster iteration during active development
+- Small team with tight coordination
+- Every merge is deployment-ready
+- Manual testing responsibility on developers
 
-- **Use master directly (hotfix) for:**
-  - Critical bug fixes
-  - Tiny documentation tweaks
-  - Changes that need immediate production deployment
+**Development Flow:**
 
-**Standard workflow:**
+1. **Create feature branch from master**
 
-```bash
-# Create feature branch from develop
-git checkout develop
-git pull origin develop
-git checkout -b feature/my-feature
+   ```bash
+   git checkout master && git pull origin master
+   git checkout -b feature/your-feature-name
+   ```
 
-# Make changes, commit, push
-git add .
-git commit -m "feat: description"
-git push -u origin feature/my-feature
+2. **Develop and test locally**
+   - Run tests: `npm test`
+   - Run E2E locally: `NEXTAUTH_URL=http://localhost:3001 npx playwright test`
+   - Ensure all checks pass
 
-# Create PR targeting develop (not master)
-gh pr create --base develop --title "feat: description" --body "..."
+3. **Push and create PR targeting master**
 
-# After merge to develop, E2E tests run with development database
-# When ready for production, create PR from develop → master
-git checkout develop
-git pull origin develop
-gh pr create --base master --head develop --title "Release: description"
+   ```bash
+   git push -u origin feature/your-feature-name
+   gh pr create --base master
+   ```
+
+4. **CI runs (E2E tests currently disabled):**
+   - ✅ Lint: ESLint + Prettier
+   - ✅ Test: Vitest unit tests
+   - ✅ Typecheck: TypeScript
+   - ✅ Build: Next.js production build
+   - ⏸️ E2E: Playwright (disabled during active dev)
+
+5. **Manual review and testing**
+   - Code review by maintainer
+   - Manual testing of critical paths
+   - Verify no breaking changes
+
+6. **Merge triggers automatic deployment**
+   - GitHub webhook to Coolify
+   - Docker build (~2 min)
+   - Rolling update with healthcheck
+   - Production live (~3 min total)
+
+**E2E Test Status:**
+
+- Currently disabled with `if: false` in `.github/workflows/ci.yml`
+- Can run locally: `npx playwright test`
+- Will be re-enabled when:
+  - Tests are stable and fast (<5 min)
+  - Team size grows or production incidents increase
+  - Feature velocity slows (fewer breaking changes)
+
+**Hotfixes:**
+
+- Same workflow (all changes go through PRs)
+- Use `hotfix/` prefix for critical fixes
+- Can expedite review but still require CI checks
+
+### Future: Develop Branch Workflow (Post-1.0)
+
+When the project matures, we may re-enable the develop branch workflow:
+
+```text
+feature/* → develop → master → production
 ```
 
-**Database branches:**
+**Triggers for transition:**
 
-- `develop` branch uses `DATABASE_URL_DEVELOP` (Neon development branch)
-- `master` branch uses `DATABASE_URL_STAGING` (Neon staging branch)
+- [ ] E2E tests stable and required
+- [ ] Team size > 3 developers
+- [ ] Multiple concurrent feature branches
+- [ ] Production SLA requirements
+- [ ] User base reaches critical mass
 
-**E2E tests:**
+**Previous workflow (disabled Dec 13, 2025):**
 
-- Run automatically on both `develop` and `master` branches
-- Use appropriate database for each branch
-- ~3-5 minutes to complete with 4 parallel workers
+- Develop branch for iteration with `DATABASE_URL_DEVELOP`
+- Master for production-ready code with `DATABASE_URL_STAGING`
+- E2E tests on both branches
+- See commit e338ec1 for context on why this was disabled
 
 ### Pull Request Workflow
 

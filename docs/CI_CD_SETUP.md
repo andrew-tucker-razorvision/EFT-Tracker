@@ -92,6 +92,57 @@ permissions:
 
 ---
 
+## E2E Test Status (Active Development Phase)
+
+### Current State
+
+E2E tests are **temporarily disabled** in CI (`.github/workflows/ci.yml` line 170):
+
+```yaml
+e2e:
+  if: false # Disabled during active development
+```
+
+### Rationale
+
+- Faster CI feedback during rapid iteration
+- Tests are not yet stable (flaky timeouts)
+- Local testing preferred during active dev
+- Small team can coordinate deployment safety
+
+### Running E2E Tests Locally
+
+```bash
+# Start dev server
+npm run dev
+# Note the port (usually 3001)
+
+# Run tests in another terminal
+NEXTAUTH_URL=http://localhost:3001 npx playwright test
+
+# Run with UI for debugging
+NEXTAUTH_URL=http://localhost:3001 npx playwright test --ui
+```
+
+### Re-enablement Plan
+
+E2E tests will be re-enabled when:
+
+1. Login timeout issues resolved (increase from 10s to 15s) ✅
+2. Quest tree viewport loading stabilized
+3. All tests pass consistently (3 consecutive runs)
+4. Test suite completes in <5 minutes
+5. Team agrees it's the right time
+
+**To re-enable:**
+
+```yaml
+e2e:
+  if: true # or remove the if condition entirely
+```
+
+---
+
 ## Repository Settings
 
 ### Branch Protection Rules
