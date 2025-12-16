@@ -1,34 +1,67 @@
 #!/bin/sh
 
-# Automatic full validation before pushing to GitHub
-# This catches ALL issues (formatting, linting, types, tests, build) before submission
-# Prevents costly CI failures and reduces push/fix cycles
+# Smart pre-push validation
+# Strategy:
+# 1. Always run quick Coolify deployment check (~10 seconds)
+# 2. Optionally run full validation if TypeScript files changed (user can skip)
+# This balances catching issues early without making every push slow
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🔍 Running pre-push validation..."
+echo "🔍 Pre-push checks..."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Run the comprehensive validation script
-if ! npm run validate; then
+# Always check Coolify build configuration (fast - ~10 seconds)
+echo "1️⃣  Checking Coolify build configuration..."
+if ! bash scripts/test-coolify-build.sh --plan > /dev/null 2>&1; then
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "❌ Validation failed - push blocked"
+    echo "❌ Coolify deployment check failed"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    echo "Fix the errors above and try pushing again."
-    echo ""
-    echo "To bypass (NOT recommended):"
-    echo "  git push --no-verify"
+    echo "Run manually to see details:"
+    echo "  bash scripts/test-coolify-build.sh --plan"
     echo ""
     exit 1
+fi
+echo "✅ Coolify deployment plan validated"
+echo ""
+
+# Optional: Run full validation if TypeScript files changed
+echo "2️⃣  Checking for TypeScript changes..."
+if git diff --cached --name-only | grep -qE '\.(ts|tsx)$'; then
+    echo "TypeScript files changed - running full validation..."
+    echo ""
+    echo "This will take 2-3 minutes. You can skip with Ctrl+C and push with:"
+    echo "  git push --no-verify"
+    echo ""
+
+    timeout 300 npm run validate
+    VALIDATE_EXIT=$?
+
+    if [ $VALIDATE_EXIT -eq 124 ]; then
+        echo ""
+        echo "⏱️  Full validation timeout (5 minutes)"
+        echo "Push blocked. You can:"
+        echo "  1. Wait and try again"
+        echo "  2. Push with: git push --no-verify"
+        echo ""
+        exit 1
+    elif [ $VALIDATE_EXIT -ne 0 ]; then
+        echo ""
+        echo "❌ Full validation failed - fix errors and try again"
+        exit 1
+    fi
+else
+    echo "No TypeScript changes - skipping full validation"
+    echo "(Full validation will run on GitHub CI)"
 fi
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "✅ All validations passed - push proceeding"
+echo "✅ Pre-push checks passed"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "Your code is validated and will pass CI ✓"
+echo "Push proceeding - code will pass Coolify deployment ✓"
 echo ""
