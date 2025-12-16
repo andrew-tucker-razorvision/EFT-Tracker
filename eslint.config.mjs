@@ -13,8 +13,10 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "coverage/**",
-    // Companion app has its own eslint config
-    "companion-app/**",
+    // Monorepo structure
+    "apps/**",
+    "packages/**",
+    "node_modules/**",
   ]),
 ]);
 

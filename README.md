@@ -33,9 +33,9 @@ New to EFT Quest Tracker? Check out our comprehensive guides:
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20+
 - PostgreSQL database (local or hosted via [Neon](https://neon.tech), [Supabase](https://supabase.com), etc.)
-- npm or pnpm
+- **pnpm** (v10+) - [Installation guide](https://pnpm.io/installation)
 
 ### Local Development (Recommended)
 
@@ -44,26 +44,30 @@ New to EFT Quest Tracker? Check out our comprehensive guides:
 git clone https://github.com/andrew-tucker-razorvision/EFT-Tracker.git
 cd EFT-Tracker
 
-# Install dependencies
-npm install
+# Install pnpm (if not already installed)
+npm install -g pnpm
+
+# Install dependencies (monorepo workspaces)
+pnpm install
 
 # Set up environment variables
-cp .env.template .env
-# Edit .env with your database URL and auth secrets:
+cp .env.template .env.local
+# Edit .env.local with your database URL and auth secrets:
 #   DATABASE_URL - PostgreSQL connection string
 #   AUTH_SECRET - Generate with: openssl rand -base64 32
 #   NEXTAUTH_URL - Your dev server URL (e.g., http://localhost:3000)
-# For local overrides, create .env.local (not committed to git)
 
-# Run database migrations and seed data
-npx prisma migrate dev
-npx prisma db seed
+# Run database migrations and seed data (web app)
+pnpm --filter @eft-tracker/web run db:push
+pnpm --filter @eft-tracker/web run db:seed
 
 # Start development server
-npm run dev
+pnpm dev
 ```
 
 The dev server will start on an available port (typically 3000). Check the console output for the actual URL.
+
+For detailed information about the monorepo structure, see [MONOREPO.md](MONOREPO.md).
 
 ### Alternative: VS Code Dev Containers
 
@@ -130,23 +134,66 @@ Automated security scanning runs on every PR and weekly via GitHub Actions:
 
 ## Project Structure
 
+This is a **pnpm monorepo** with the following structure:
+
 ```
 EFT-Tracker/
-├── src/
-│   ├── app/              # Next.js App Router pages
-│   ├── components/       # React components
-│   ├── lib/              # Utilities and helpers
-│   └── types/            # TypeScript types
-├── prisma/
-│   └── schema.prisma     # Database schema
-├── public/               # Static assets
-├── __tests__/            # Test files
-│   ├── unit/             # Unit tests (hooks, utilities)
-│   ├── components/       # Component tests
-│   ├── integration/      # API integration tests
-│   └── e2e/              # End-to-end tests
-└── docs/                 # Documentation
+├── apps/
+│   ├── web/                      # Next.js web application
+│   │   ├── src/
+│   │   │   ├── app/             # Next.js App Router pages & API routes
+│   │   │   ├── components/      # React components
+│   │   │   ├── lib/             # Utilities and helpers
+│   │   │   └── types/           # TypeScript types (re-exports from @eft-tracker/types)
+│   │   ├── prisma/
+│   │   │   └── schema.prisma    # Database schema
+│   │   ├── public/              # Static assets
+│   │   └── package.json
+│   │
+│   └── companion/                # Tauri v2 desktop app
+│       ├── src/                 # React components
+│       ├── src-tauri/           # Rust backend
+│       ├── tests/               # E2E tests
+│       └── package.json
+│
+├── packages/
+│   ├── types/                    # @eft-tracker/types - Shared TypeScript types
+│   │   ├── src/
+│   │   │   ├── quest.ts         # Quest domain types
+│   │   │   ├── api.ts           # API contract types
+│   │   │   └── index.ts
+│   │   └── package.json
+│   │
+│   ├── utils/                    # @eft-tracker/utils - Shared utilities
+│   │   ├── src/
+│   │   │   ├── formatters.ts    # Date/string formatting
+│   │   │   ├── validators.ts    # Validation schemas
+│   │   │   ├── constants.ts     # Domain constants
+│   │   │   └── index.ts
+│   │   └── package.json
+│   │
+│   └── tsconfig/                 # @eft-tracker/tsconfig - Shared TypeScript configs
+│       ├── base.json
+│       ├── nextjs.json
+│       ├── react.json
+│       └── package.json
+│
+├── __tests__/                    # Root test directory
+│   ├── unit/                     # Unit tests (hooks, utilities)
+│   ├── integration/              # Component & API integration tests
+│   ├── fixtures/                 # Test fixtures
+│   ├── mocks/                    # MSW handlers
+│   └── setup/                    # Test setup files
+│
+├── .github/workflows/            # GitHub Actions CI/CD
+├── docs/                         # Documentation
+├── pnpm-workspace.yaml           # Monorepo configuration
+├── pnpm-lock.yaml                # Dependency lock file
+├── MONOREPO.md                   # Monorepo developer guide
+└── package.json                  # Root workspace configuration
 ```
+
+See [MONOREPO.md](MONOREPO.md) for detailed information about the monorepo structure and workspace commands.
 
 ## Testing
 
@@ -155,19 +202,24 @@ The project uses **Vitest** for testing with **React Testing Library** for compo
 ### Running Tests
 
 ```bash
-# Run all tests
-npm test
+# Run all tests (monorepo)
+pnpm test
 
 # Run tests in watch mode
-npm test -- --watch
+pnpm test:watch
 
 # Run tests with coverage
-npm test -- --coverage
+pnpm test -- --coverage
 
 # Run specific test type
-npm test -- --testPathPattern="__tests__/unit"
-npm test -- --testPathPattern="__tests__/components"
-npm test -- --testPathPattern="__tests__/integration"
+pnpm test -- __tests__/unit/
+pnpm test -- __tests__/integration/
+
+# Run web app tests only
+pnpm --filter @eft-tracker/web run test
+
+# Run companion app tests only
+pnpm --filter @eft-tracker/companion run test
 ```
 
 ### Test Structure
@@ -213,24 +265,45 @@ Quest data sourced from the [Escape from Tarkov Wiki](https://escapefromtarkov.f
 
 This project uses a comprehensive CI/CD pipeline with GitHub Actions, including:
 
-- Automated testing and linting on every PR
-- Security scanning (CodeQL, Dependabot)
+- Automated testing and linting on every PR (using pnpm workspaces)
+- Security scanning (pnpm audit, secret scanning with TruffleHog)
 - Branch protection and quality gates
 - Conventional commit enforcement
-- E2E tests with Playwright on `develop` and `master` branches
+- E2E tests with Playwright on `master` branch
+- Per-workspace lint and type-check jobs
+
+### Monorepo-Aware Pipeline
+
+The CI/CD pipeline is configured to handle the pnpm monorepo structure:
+
+```bash
+# Each app gets separate lint and type-check jobs
+pnpm --filter @eft-tracker/web run lint
+pnpm --filter @eft-tracker/companion run lint
+
+# Tests run across all apps
+pnpm run test
+
+# Builds are per-app
+pnpm --filter @eft-tracker/web run build
+
+# Security audits the entire dependency tree
+pnpm audit --prod --audit-level=high
+```
 
 ### Branch Workflow
 
-This project uses a `develop` branch workflow for safer iteration:
+This project uses a simplified `master` workflow for active development:
 
 ```text
-feature/* → develop → master → production
+feature/* → master → production
 ```
 
-- **Regular development**: Create feature branches from `develop` and PR back to `develop`
-- **Production releases**: PR from `develop` to `master` triggers production deployment
-- **Hotfixes**: Can be merged directly to `master` when needed
-- **E2E testing**: Runs automatically on both branches with appropriate test databases
+- **Development**: Create feature branches from `master` and PR back to `master`
+- **CI checks**: All PRs run lint, type-check, tests, build, and security audits
+- **Production deployment**: Merging to `master` triggers automatic deployment to Coolify
+- **E2E testing**: Runs locally before PR; CI runs include optional E2E validation
+- **Hotfixes**: Use `hotfix/` prefix, same workflow as features
 
 See [docs/CI_CD_SETUP.md](docs/CI_CD_SETUP.md) for complete setup guide and replication instructions.
 

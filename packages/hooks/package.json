@@ -1,0 +1,17 @@
+{
+  "name": "@eft-tracker/hooks",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@eft-tracker/utils": "workspace:*",
+    "react": "^19.0.0"
+  }
+}

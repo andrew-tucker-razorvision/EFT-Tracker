@@ -9,7 +9,12 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(__dirname, "./apps/web/src"),
+      "@eft-tracker/types": path.resolve(__dirname, "./packages/types/src"),
+      "@eft-tracker/utils": path.resolve(__dirname, "./packages/utils/src"),
+      "@eft-tracker/theme": path.resolve(__dirname, "./packages/theme/src"),
+      "@eft-tracker/ui": path.resolve(__dirname, "./packages/ui/src"),
+      "@eft-tracker/hooks": path.resolve(__dirname, "./packages/hooks/src"),
     },
   },
   test: {
@@ -24,12 +29,12 @@ export default defineConfig({
     ],
     coverage: {
       provider: "v8",
-      include: ["src/**/*.{ts,tsx}"],
+      include: ["apps/web/src/**/*.{ts,tsx}"],
       exclude: [
-        "src/types/**",
-        "src/components/ui/**",
+        "apps/web/src/types/**",
+        "apps/web/src/components/ui/**",
         "**/*.d.ts",
-        "src/app/api/**",
+        "apps/web/src/app/api/**",
       ],
       reporter: ["text", "html", "json"],
     },
