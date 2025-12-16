@@ -10,8 +10,28 @@ echo "🔍 Running pre-push validation..."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Run the comprehensive validation script
-if ! npm run validate; then
+# Run the comprehensive validation script with extended timeout
+# The build can take 2-3 minutes, so we give it 5 minutes max
+timeout 300 npm run validate
+VALIDATE_EXIT=$?
+
+if [ $VALIDATE_EXIT -eq 124 ]; then
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "⏱️  Validation timeout (5 minutes)"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "The build validation took too long. This might indicate:"
+    echo "  • Slow system performance"
+    echo "  • Large rebuild needed"
+    echo ""
+    echo "You can try:"
+    echo "  1. Push with: git push --no-verify"
+    echo "  2. Then run CI checks on GitHub"
+    echo "  3. Or run: npm run validate manually to see what's slow"
+    echo ""
+    exit 1
+elif [ $VALIDATE_EXIT -ne 0 ]; then
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "❌ Validation failed - push blocked"
