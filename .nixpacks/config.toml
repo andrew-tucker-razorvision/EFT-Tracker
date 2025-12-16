@@ -1,15 +1,11 @@
 [build]
+# Full build pipeline for pnpm monorepo
 cmd = """
-set -e
-echo "Installing dependencies..."
-pnpm install --frozen-lockfile
-
-echo "Generating Prisma client..."
-pnpm --filter @eft-tracker/web run prisma:generate
-
-echo "Building Next.js app..."
+pnpm install --frozen-lockfile && \
+pnpm --filter @eft-tracker/web run prisma:generate && \
 pnpm --filter @eft-tracker/web run build
 """
 
 [start]
+# Run the Next.js standalone server
 cmd = "node apps/web/.next/standalone/server.js"
