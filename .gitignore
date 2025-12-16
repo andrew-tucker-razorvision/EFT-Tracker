@@ -56,3 +56,10 @@ SENTRY_CREDENTIALS.txt
 .playwright-mcp/
 .coolify-url
 k6.exe
+
+# Monorepo workspace node_modules (should be in root node_modules only)
+packages/*/node_modules/
+apps/*/node_modules/
+
+# Coolify build artifacts
+.coolify-build/
