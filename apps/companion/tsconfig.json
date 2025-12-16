@@ -1,0 +1,18 @@
+{
+  "extends": "../../packages/tsconfig/react.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@eft-tracker/types": ["../../packages/types/src"],
+      "@eft-tracker/types/*": ["../../packages/types/src/*"],
+      "@eft-tracker/utils": ["../../packages/utils/src"],
+      "@eft-tracker/utils/*": ["../../packages/utils/src/*"]
+    },
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src", "tests"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

@@ -1,0 +1,153 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                     String           @id @default(cuid())
+  email                  String           @unique
+  password               String
+  name                   String?
+  playerLevel            Int?
+  questsPerTree          Int?             @default(5) // null = show all
+  bypassLevelRequirement Boolean          @default(false)
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+  questProgress          QuestProgress[]
+  companionTokens        CompanionToken[]
+  securityEvents         SecurityEvent[]
+}
+
+model Trader {
+  id     String  @id
+  name   String
+  color  String
+  quests Quest[]
+}
+
+model Quest {
+  id            String            @id
+  title         String
+  wikiLink      String?
+  levelRequired Int               @default(1)
+  kappaRequired Boolean           @default(false)
+  questType     QuestType         @default(STANDARD)
+  factionName   String? // "Any", "BEAR", "USEC" from API
+  traderId      String
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  objectives    Objective[]
+  trader        Trader            @relation(fields: [traderId], references: [id])
+  dependsOn     QuestDependency[] @relation("DependentQuest")
+  dependedOnBy  QuestDependency[] @relation("RequiredQuest")
+  progress      QuestProgress[]
+}
+
+model QuestDependency {
+  id                String   @id @default(cuid())
+  dependentId       String
+  requiredId        String
+  // Status types from tarkov.dev: ["complete"], ["active", "complete"], ["active"], ["complete", "failed"], ["failed"]
+  requirementStatus String[] @default(["complete"])
+  dependentQuest    Quest    @relation("DependentQuest", fields: [dependentId], references: [id], onDelete: Cascade)
+  requiredQuest     Quest    @relation("RequiredQuest", fields: [requiredId], references: [id], onDelete: Cascade)
+
+  @@unique([dependentId, requiredId])
+}
+
+model Objective {
+  id          String  @id @default(cuid())
+  description String
+  map         String?
+  questId     String
+  quest       Quest   @relation(fields: [questId], references: [id], onDelete: Cascade)
+}
+
+model QuestProgress {
+  id         String      @id @default(cuid())
+  status     QuestStatus @default(LOCKED)
+  userId     String
+  questId    String
+  syncSource SyncSource  @default(WEB)
+  updatedAt  DateTime    @updatedAt
+  quest      Quest       @relation(fields: [questId], references: [id], onDelete: Cascade)
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questId])
+}
+
+enum QuestStatus {
+  LOCKED
+  AVAILABLE
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum SyncSource {
+  WEB // Updated via web interface
+  COMPANION // Updated via desktop companion app
+}
+
+enum GameMode {
+  PVP
+  PVE
+}
+
+enum QuestType {
+  STANDARD // Regular trader quests
+  PVP_ZONE // PVP Zone quests (Arena)
+  REPUTATION // Fence reputation repair quests
+  LIGHTKEEPER // Lightkeeper questline
+  FACTION_BEAR // BEAR-only quests
+  FACTION_USEC // USEC-only quests
+  STORY // Main story quests (1.0)
+  PRESTIGE // Prestige quests (New Beginning) - require The Collector
+}
+
+model CompanionToken {
+  id         String    @id @default(cuid())
+  token      String    @unique // Hashed token (bcrypt)
+  tokenHint  String // Last 4 chars of original token for display
+  userId     String
+  deviceName String
+  gameMode   GameMode  @default(PVP)
+  lastSeen   DateTime  @default(now())
+  createdAt  DateTime  @default(now())
+  revokedAt  DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+model SecurityEvent {
+  id        String            @id @default(cuid())
+  type      SecurityEventType
+  userId    String?
+  ipAddress String
+  userAgent String?
+  metadata  Json? // Additional context (emailHash, reason, etc.)
+  createdAt DateTime          @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([ipAddress])
+  @@index([type])
+  @@index([createdAt])
+}
+
+enum SecurityEventType {
+  LOGIN_SUCCESS
+  LOGIN_FAILED
+  ACCOUNT_CREATED
+  TOKEN_GENERATED
+  TOKEN_REVOKED
+  PASSWORD_RESET_REQUESTED
+  RATE_LIMIT_EXCEEDED
+  CAPTCHA_FAILED
+}
