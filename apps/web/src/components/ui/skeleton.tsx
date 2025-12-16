@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 
-// @ts-expect-error - React 18/19 type compatibility issue in monorepo
 function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div

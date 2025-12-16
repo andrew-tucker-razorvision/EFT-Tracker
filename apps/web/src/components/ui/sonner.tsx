@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
 
-// @ts-expect-error - React 18/19 type compatibility issue in monorepo
 const Toaster = ({ ...props }: ToasterProps) => {
   // EFT theme is dark-only
   return (

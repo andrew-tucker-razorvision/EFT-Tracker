@@ -6,7 +6,6 @@ import { logSecurityEvent } from "./security-logger";
 import { verifyTurnstile } from "./turnstile";
 import { logger } from "./logger";
 
-// @ts-expect-error - React 18/19 type compatibility issue in monorepo
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   providers: [
