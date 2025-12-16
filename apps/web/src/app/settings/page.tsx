@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { SettingsClient } from "./SettingsClient";
