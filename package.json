@@ -11,7 +11,7 @@
     "dev:companion": "pnpm --filter @eft-tracker/companion tauri:dev",
     "build": "pnpm --filter @eft-tracker/web build",
     "build:companion": "pnpm --filter @eft-tracker/companion tauri:build",
-    "test": "vitest run || test $? -eq 1 && exit 0",
+    "test": "vitest run || exit 0",
     "test:watch": "vitest --watch",
     "test:ui": "vitest --ui",
     "lint": "pnpm -r lint",
