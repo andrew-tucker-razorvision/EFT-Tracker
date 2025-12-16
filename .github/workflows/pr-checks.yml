@@ -127,7 +127,7 @@ jobs:
         id: todos
         run: |
           # Search for TODO and FIXME comments
-          TODOS=$(grep -r -n "TODO\|FIXME" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" . || true)
+          TODOS=$(grep -r -n "TODO\|FIXME" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" --exclude-dir=node_modules . || true)
 
           if [ -n "$TODOS" ]; then
             echo "⚠️ Found TODO/FIXME comments:"
