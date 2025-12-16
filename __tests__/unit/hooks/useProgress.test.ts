@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor, act } from "@testing-library/react";
 import { useProgress } from "@/hooks/useProgress";
-import { server } from "../../../test/setup/msw-server";
+import { server } from "../../setup/msw-server";
 import { http, HttpResponse } from "msw";
 import { useSession } from "next-auth/react";
 

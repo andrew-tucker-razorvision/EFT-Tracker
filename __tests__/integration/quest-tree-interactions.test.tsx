@@ -25,8 +25,8 @@ import {
   createQuestChain,
   MIXED_STATUS_IDS,
   CHAIN_IDS,
-} from "../../test/fixtures/quest-tree-helpers";
-import { mockTraders } from "../../test/fixtures/traders";
+} from "../fixtures/quest-tree-helpers";
+import { mockTraders } from "../fixtures/traders";
 import type { QuestNodeData, QuestStatus, QuestWithProgress } from "@/types";
 
 // ============================================================================

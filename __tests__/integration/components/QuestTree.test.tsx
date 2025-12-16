@@ -12,8 +12,8 @@ import {
   mockQuestsWithProgress,
   createQuestWithProgress,
   QUEST_IDS,
-} from "../../../test/fixtures/quests";
-import { mockTraders } from "../../../test/fixtures/traders";
+} from "../../fixtures/quests";
+import { mockTraders } from "../../fixtures/traders";
 
 // Mock session for SessionProvider
 const mockSession = {

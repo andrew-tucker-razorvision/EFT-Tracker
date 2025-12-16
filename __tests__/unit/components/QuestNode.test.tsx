@@ -6,10 +6,7 @@ import {
   QUEST_NODE_WIDTH,
   QUEST_NODE_HEIGHT,
 } from "@/components/quest-tree/QuestNode";
-import {
-  createQuestWithProgress,
-  mockQuests,
-} from "../../../test/fixtures/quests";
+import { createQuestWithProgress, mockQuests } from "../../fixtures/quests";
 import type { QuestNodeData, QuestStatus, QuestWithProgress } from "@/types";
 
 // Wrapper to provide React Flow context
