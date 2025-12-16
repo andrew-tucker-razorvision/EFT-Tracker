@@ -159,10 +159,60 @@ Shared TypeScript configs for consistency:
     "paths": {
       "@/*": ["./src/*"],
       "@eft-tracker/types": ["../../packages/types/src"],
-      "@eft-tracker/utils": ["../../packages/utils/src"]
+      "@eft-tracker/utils": ["../../packages/utils/src"],
+      "@eft-tracker/theme": ["../../packages/theme/src"],
+      "@eft-tracker/ui": ["../../packages/ui/src"],
+      "@eft-tracker/hooks": ["../../packages/hooks/src"]
     }
   }
 }
+```
+
+### packages/theme
+
+**@eft-tracker/theme** - Design system tokens and Tailwind config
+
+Centralized design tokens for consistent styling:
+
+- Color palettes (primary, gray, status colors)
+- Spacing, typography, breakpoints
+- Border radius, shadows, z-index scales
+- Animation durations and easing functions
+- Tailwind CSS configuration
+
+```typescript
+import { colors, spacing } from '@eft-tracker/theme';
+import config from '@eft-tracker/theme/tailwind';
+```
+
+### packages/ui
+
+**@eft-tracker/ui** - Shared React components
+
+Building blocks for consistent UIs:
+
+- `Button` - Primary, secondary, ghost, danger variants
+- `Card` - Container with header, title, content, footer
+- `Badge` - Status badges and labels
+
+All components use Tailwind CSS and follow the theme design system.
+
+```typescript
+import { Button, Card, Badge } from '@eft-tracker/ui';
+```
+
+### packages/hooks
+
+**@eft-tracker/hooks** - Custom React hooks
+
+Common patterns and utilities:
+
+- `useDebounce` - Debounce value changes
+- `useLocalStorage` - Sync state with localStorage
+- `useAsync` - Manage async operations with loading/error states
+
+```typescript
+import { useDebounce, useLocalStorage, useAsync } from '@eft-tracker/hooks';
 ```
 
 ## Common Workflows
@@ -330,14 +380,14 @@ pnpm build
 
 ## Future Enhancements
 
-Potential improvements to the monorepo:
+Completed and planned improvements to the monorepo:
 
-- [ ] UI component library (`packages/ui/`)
-- [ ] Shared React hooks (`packages/hooks/`)
-- [ ] Common theme/styling (`packages/theme/`)
-- [ ] Testing utilities (`packages/test-utils/`)
-- [ ] API client (`packages/api-client/`)
-- [ ] E2E shared test helpers (`packages/e2e-utils/`)
+- [x] Common theme/styling (`packages/theme/`) - Design system tokens and Tailwind config
+- [x] UI component library (`packages/ui/`) - Button, Card, Badge components
+- [x] Shared React hooks (`packages/hooks/`) - useDebounce, useLocalStorage, useAsync
+- [ ] Testing utilities (`packages/test-utils/`) - Test setup helpers, fixtures, factories
+- [ ] API client (`packages/api-client/`) - Type-safe API client with proper typing
+- [ ] E2E shared test helpers (`packages/e2e-utils/`) - Playwright helpers and page objects
 
 ## Resources
 

@@ -12,6 +12,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./apps/web/src"),
       "@eft-tracker/types": path.resolve(__dirname, "./packages/types/src"),
       "@eft-tracker/utils": path.resolve(__dirname, "./packages/utils/src"),
+      "@eft-tracker/theme": path.resolve(__dirname, "./packages/theme/src"),
+      "@eft-tracker/ui": path.resolve(__dirname, "./packages/ui/src"),
+      "@eft-tracker/hooks": path.resolve(__dirname, "./packages/hooks/src"),
     },
   },
   test: {
