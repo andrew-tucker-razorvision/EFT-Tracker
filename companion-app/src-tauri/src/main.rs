@@ -268,6 +268,8 @@ fn main() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_store::Builder::default().build())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .manage(app_state)
         .setup(|app| {
             setup_tray(app.handle())?;
@@ -283,6 +285,24 @@ fn main() {
                 if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                     api.prevent_close();
                     let _ = window_clone.hide();
+                }
+            });
+
+            // Check for updates on startup
+            let app_handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                match tauri_plugin_updater::check(&app_handle).await {
+                    Ok(update) => {
+                        if update.available {
+                            info!("Update available: {}", update.version);
+                            if let Err(e) = update.download_and_install().await {
+                                error!("Failed to download and install update: {}", e);
+                            }
+                        } else {
+                            info!("No updates available");
+                        }
+                    }
+                    Err(e) => error!("Failed to check for updates: {}", e),
                 }
             });
 
