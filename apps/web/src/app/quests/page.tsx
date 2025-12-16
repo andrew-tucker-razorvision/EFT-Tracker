@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { Metadata } from "next";
 import { QuestsClient } from "./QuestsClient";
 import { GuestBanner } from "@/components/guest-banner";

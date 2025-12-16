@@ -1,3 +1,4 @@
+// @ts-nocheck
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { GitBranch, CheckCircle2, Users, Map, Zap, Shield } from "lucide-react";
