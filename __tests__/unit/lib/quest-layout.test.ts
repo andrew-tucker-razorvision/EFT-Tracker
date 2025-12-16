@@ -11,7 +11,7 @@ import {
   mockQuestsWithProgress,
   createQuestWithProgress,
   QUEST_IDS,
-} from "../../../test/fixtures/quests";
+} from "../../fixtures/quests";
 import type { QuestWithProgress } from "@/types";
 
 describe("quest-layout", () => {

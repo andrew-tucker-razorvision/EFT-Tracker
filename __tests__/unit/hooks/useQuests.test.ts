@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { renderHook, waitFor, act } from "@testing-library/react";
 import { useQuests, useQuestProgress } from "@/hooks/useQuests";
-import { server } from "../../../test/setup/msw-server";
+import { server } from "../../setup/msw-server";
 import { http, HttpResponse } from "msw";
-import { mockQuestsWithProgress } from "../../../test/fixtures/quests";
-import { mockTraders } from "../../../test/fixtures/traders";
+import { mockQuestsWithProgress } from "../../fixtures/quests";
+import { mockTraders } from "../../fixtures/traders";
 
 // Helper to set up default handlers
 const setupDefaultHandlers = () => {

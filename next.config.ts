@@ -1,19 +1,9 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
-// Check if building for Tauri (static export)
-const isTauriBuild = process.env.TAURI_BUILD === "true";
-
 const nextConfig: NextConfig = {
   /* config options here */
-  output: isTauriBuild ? "export" : "standalone", // Static export for Tauri, standalone for web
-
-  // Disable image optimization for Tauri builds (not supported in static export)
-  images: isTauriBuild
-    ? {
-        unoptimized: true,
-      }
-    : undefined,
+  output: "standalone", // Standalone for Coolify deployment
 
   // Configure server-side externals for Pino
   serverExternalPackages: ["pino", "pino-pretty"],

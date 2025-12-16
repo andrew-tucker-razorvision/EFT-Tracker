@@ -10,8 +10,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SessionProvider } from "next-auth/react";
-import { mockQuestsWithProgress } from "../../../test/fixtures/quests";
-import { mockTraders } from "../../../test/fixtures/traders";
+import { mockQuestsWithProgress } from "../../fixtures/quests";
+import { mockTraders } from "../../fixtures/traders";
 import { QuestFilters } from "@/components/quest-tree/QuestFilters";
 import type { QuestFilters as Filters, ViewMode } from "@/types";
 
