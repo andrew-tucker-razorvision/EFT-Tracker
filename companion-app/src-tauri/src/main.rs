@@ -291,10 +291,12 @@ fn main() {
             // Check for updates on startup
             let app_handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
-                match tauri_plugin_updater::check(&app_handle).await {
+                use tauri_plugin_updater::UpdaterExt;
+
+                match app_handle.updater().check().await {
                     Ok(update) => {
-                        if update.available {
-                            info!("Update available: {}", update.version);
+                        if update.is_update_available() {
+                            info!("Update available: {}", update.latest_version());
                             if let Err(e) = update.download_and_install().await {
                                 error!("Failed to download and install update: {}", e);
                             }
