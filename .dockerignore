@@ -1,0 +1,55 @@
+# Git and version control
+.git
+.gitignore
+.gitattributes
+
+# Node modules (managed by pnpm in container)
+node_modules
+packages/*/node_modules
+apps/*/node_modules
+
+# Build outputs
+.next
+dist
+build
+
+# Development files
+.env.local
+.env.*.local
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE and editor
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.gitea
+
+# Testing
+.nyc_output
+coverage
+test-results
+playwright-report
+
+# Temporary files
+*.tmp
+*.temp
+.cache
+.coolify-build
+.playwright-mcp
+
+# Documentation (not needed in production)
+README.md
+CHANGELOG.md
+docs/
+.claude
