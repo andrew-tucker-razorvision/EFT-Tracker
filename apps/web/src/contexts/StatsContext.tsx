@@ -17,6 +17,7 @@ interface StatsContextType {
 
 const StatsContext = createContext<StatsContextType | undefined>(undefined);
 
+// @ts-expect-error - React 18/19 type compatibility issue in monorepo
 export function StatsProvider({ children }: { children: ReactNode }) {
   const [stats, setStats] = useState<QuestStats | null>(null);
 

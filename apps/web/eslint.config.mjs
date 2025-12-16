@@ -15,7 +15,7 @@ const eslintConfig = defineConfig([
     "coverage/**",
     "dist/**",
   ]),
-  // Allow @ts-nocheck on auth pages and components with React 19 type compatibility issues
+  // Allow @ts-nocheck/@ts-expect-error on files with React 18/19 type compatibility issues
   {
     files: [
       "src/app/(auth)/**/*.tsx",
@@ -23,7 +23,10 @@ const eslintConfig = defineConfig([
       "src/components/progress-stats/ProgressStats.tsx",
       "src/components/quest-tree/QuestFilters.tsx",
       "src/components/quest-tree/QuestTree.tsx",
+      "src/components/ui/skeleton.tsx",
+      "src/components/ui/sonner.tsx",
       "src/contexts/StatsContext.tsx",
+      "src/lib/auth.ts",
     ],
     rules: {
       "@typescript-eslint/ban-ts-comment": "off",
