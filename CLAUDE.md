@@ -123,12 +123,14 @@ git push origin branch-name
 #### What Each Hook Validates
 
 **Pre-Commit (automatic, ~10-30s):**
+
 ```
 ✓ Prettier formatting
 ✓ ESLint linting
 ```
 
 **Pre-Push (automatic, ~2-3 min):**
+
 ```
 ✓ Prettier formatting check
 ✓ ESLint (web + companion)
@@ -159,6 +161,7 @@ npm run validate
   4. Re-run `npm run validate`
 
 **Common TypeScript patterns:**
+
 - Interface change → update all consumers
 - New required field → add to all places using that type
 - Changed parameter type → update all call sites
@@ -172,6 +175,7 @@ npm run validate
 - Production: Node 22.12.0 ✓
 
 If you get "Node version too old" from validation, upgrade Node:
+
 ```bash
 # Using nvm:
 nvm install 22.12.0
@@ -181,6 +185,7 @@ nvm use 22.12.0
 #### Handling Special Scenarios
 
 **Scenario: Prisma Schema Changed**
+
 ```bash
 # 1. Modify schema.prisma
 # 2. Run validation (it will detect missing Prisma generate)
@@ -189,6 +194,7 @@ nvm use 22.12.0
 ```
 
 **Scenario: TypeScript Error but Unsure How to Fix**
+
 ```bash
 # The error message is your guide
 # Example error:
@@ -205,6 +211,7 @@ nvm use 22.12.0
 **Scenario: Still Getting CI Failure After Local Validation**
 
 This means we found a gap in our validation. Please:
+
 1. Note what CI caught that we didn't
 2. Create a GitHub issue to track it
 3. Update the validation script if needed
@@ -231,6 +238,7 @@ git push --no-verify    # Skips pre-push hook (doesn't exist yet)
 ```
 
 ⚠️ **WARNING:** Bypassing validation almost always leads to CI failures. Don't do this.
+
 ## Tech Stack
 
 - Next.js 16 with Turbopack
@@ -537,7 +545,7 @@ The application includes HTTP API endpoints for programmatic deployment monitori
 **Quick Reference:**
 
 ```typescript
-import { getCoolifyAPIClient } from '@eft-tracker/utils';
+import { getCoolifyAPIClient } from "@eft-tracker/utils";
 
 const client = getCoolifyAPIClient();
 
@@ -545,7 +553,7 @@ const client = getCoolifyAPIClient();
 const connected = await client.testConnection();
 
 // Get deployment status
-const deployment = await client.getDeployment('deployment-uuid');
+const deployment = await client.getDeployment("deployment-uuid");
 console.log(deployment.status); // 'queued' | 'in_progress' | 'finished' | 'failed' | 'cancelled'
 
 // List all deployments
@@ -566,6 +574,165 @@ const deployments = await client.listDeployments();
 
 - Client: `packages/utils/src/coolify-api.ts`
 - Routes: `apps/web/src/app/api/deployment/{logs,status}/route.ts`
+
+### Local Coolify Deployment Testing
+
+**Goal:** Catch deployment issues locally before pushing to GitHub, rather than discovering them in Coolify.
+
+**Problem:** Coolify uses Nixpacks to generate Docker builds. Build configuration errors only appear when Coolify tries to deploy, creating a slow feedback loop:
+
+- Make changes
+- Push to GitHub
+- Wait for CI (2-3 min)
+- Wait for Coolify build (2-3 min)
+- Discover error
+- Repeat
+
+**Solution:** Test the build locally using the same Nixpacks build process Coolify uses.
+
+#### Quick Start: Test Before Pushing
+
+```bash
+# 1. Install Nixpacks CLI (one-time setup)
+cargo install --git https://github.com/railwayapp/nixpacks nixpacks
+
+# 2. Test the build plan (fast - 10 seconds)
+bash scripts/test-coolify-build.sh --plan
+
+# 3. If plan passes, test full Docker build (slow - 2-3 minutes)
+bash scripts/test-coolify-build.sh
+
+# 4. If both pass, push to GitHub with confidence
+git push origin feature-branch
+```
+
+#### Understanding the Tools
+
+**`scripts/test-coolify-build.sh`** - Main testing script
+
+Tests the exact build process Coolify uses:
+
+```bash
+# Quick plan check (recommended before every push)
+bash scripts/test-coolify-build.sh --plan
+
+# Full Docker build test (run before major PRs)
+bash scripts/test-coolify-build.sh
+
+# Force rebuild without Docker cache
+bash scripts/test-coolify-build.sh --no-cache
+```
+
+**What it checks:**
+
+- ✓ Nixpacks can parse `nixpacks.toml`
+- ✓ Build plan includes only necessary system packages
+- ✓ No unnecessary Chromium/test dependencies in production build
+- ✓ Production dependencies audit
+- ✓ Docker image builds successfully
+- ✓ Container starts without errors
+
+**`scripts/check-prod-deps.sh`** - Production dependency audit
+
+Ensures test tools aren't accidentally deployed:
+
+```bash
+# Quick audit
+bash scripts/check-prod-deps.sh
+
+# Strict mode (fails if any test packages found)
+bash scripts/check-prod-deps.sh --strict
+```
+
+#### Common Issues and Fixes
+
+**Issue: Chromium/Playwright packages in Nixpacks plan**
+
+Root cause: Nixpacks detects `@vitest/browser-playwright` in `pnpm-lock.yaml` as a peer dependency of vitest.
+
+**Fix (already applied):** Added to `nixpacks.toml`:
+
+```toml
+[phases.setup]
+aptPkgs = []
+```
+
+This overrides Nixpacks' automatic detection, preventing unnecessary system packages from being installed.
+
+**Issue: Build fails with missing OpenSSL**
+
+Ensure `nixpacks.toml` includes:
+
+```toml
+[phases.setup]
+nixPkgs = ["openssl"]
+```
+
+**Issue: Docker not running**
+
+Start Docker Desktop before running the full build test. The `--plan` mode doesn't require Docker.
+
+#### Pre-Push Workflow (Recommended)
+
+Before pushing to GitHub:
+
+```bash
+# 1. Run the full validation (catches most issues)
+npm run validate
+
+# 2. If validation passes, run quick Coolify plan check
+bash scripts/test-coolify-build.sh --plan
+
+# 3. If plan check passes, push with confidence
+git push origin branch-name
+```
+
+#### When to Use Full Docker Test
+
+Run the full Docker build test (`bash scripts/test-coolify-build.sh` without `--plan`):
+
+- Before major feature PRs
+- After significant `nixpacks.toml` changes
+- When testing infrastructure changes
+- Before merging to master (if you have time)
+
+**Note:** Full builds take 2-3 minutes. Use `--plan` for quick feedback during iteration.
+
+#### Files Involved
+
+- `nixpacks.toml` - Coolify build configuration (run `nixpacks plan .` to preview)
+- `.nixpacksignore` - Excludes test files from Nixpacks scanning
+- `scripts/test-coolify-build.sh` - Local build simulator
+- `scripts/check-prod-deps.sh` - Dependency auditor
+- `.coolify-build/` - Temporary directory for generated Dockerfile and plans (git-ignored)
+
+#### Troubleshooting
+
+**Command not found: `nixpacks`**
+
+Install via Rust:
+
+```bash
+cargo install --git https://github.com/railwayapp/nixpacks nixpacks
+```
+
+Verify installation:
+
+```bash
+nixpacks --version
+```
+
+**Docker build fails with permission errors**
+
+Ensure Docker Desktop is running and your user can access the Docker daemon.
+
+**Still getting build failures in Coolify?**
+
+If the local test passes but Coolify deployment fails:
+
+1. Check Coolify logs: `http://95.217.155.28:8000/` → Projects → EFT-Tracker → Deployments
+2. Common causes: Network issues, third-party service failures, runtime dependencies
+3. Create a GitHub issue with the Coolify error logs
 
 ## Model Selection (Cost Optimization)
 

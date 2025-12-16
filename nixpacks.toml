@@ -1,6 +1,16 @@
 [variables]
 # Force Node.js 22.12 to match Prisma requirements
 NIXPACKS_NODE_VERSION = "22.12.0"
+# Disable automatic detection of Chromium/Playwright system packages
+# These are only needed for testing, not production
+NIXPACKS_NO_CHROMEDRIVER = "1"
+PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1"
+NODE_ENV = "production"
+
+[phases.setup]
+# Override default APT packages to exclude Chromium and test dependencies
+# Nixpacks auto-detects these from pnpm-lock.yaml but they're only for E2E tests
+aptPkgs = []
 
 [phases.install]
 cmds = ["pnpm install --frozen-lockfile"]
