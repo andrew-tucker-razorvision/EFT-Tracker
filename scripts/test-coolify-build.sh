@@ -4,7 +4,8 @@
 #
 # Usage:
 #   bash scripts/test-coolify-build.sh          # Full test (build Docker image)
-#   bash scripts/test-coolify-build.sh --plan   # Quick test (just check plan)
+#   bash scripts/test-coolify-build.sh --plan   # Validate Nixpacks plan
+#   bash scripts/test-coolify-build.sh --quick  # Quick validation (Tier 1 checks)
 #   bash scripts/test-coolify-build.sh --no-cache # Force rebuild without Docker cache
 
 set -e
@@ -27,11 +28,16 @@ NC='\033[0m' # No Color
 
 # Parse arguments
 PLAN_ONLY=false
+QUICK_MODE=false
 NO_CACHE=""
 while [[ $# -gt 0 ]]; do
   case $1 in
     --plan)
       PLAN_ONLY=true
+      shift
+      ;;
+    --quick)
+      QUICK_MODE=true
       shift
       ;;
     --no-cache)
@@ -40,7 +46,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     *)
       echo "Unknown option: $1"
-      echo "Usage: $0 [--plan] [--no-cache]"
+      echo "Usage: $0 [--quick] [--plan] [--no-cache]"
       exit 1
       ;;
   esac
@@ -114,6 +120,58 @@ if [ "$PLAN_ONLY" = true ]; then
   echo -e "${GREEN}✓ Plan verification passed${NC}"
   echo ""
   echo "Plan details saved to: $BUILD_DIR/plan.json"
+  exit 0
+fi
+
+# Quick mode - extended validation without Docker build
+if [ "$QUICK_MODE" = true ]; then
+  echo -e "${YELLOW}Step 3: Validating environment variables...${NC}"
+
+  # Check for required environment variables in next.config.ts and .env.template
+  REQUIRED_VARS=("DATABASE_URL" "AUTH_SECRET" "NEXTAUTH_URL")
+  MISSING_VARS=()
+
+  for var in "${REQUIRED_VARS[@]}"; do
+    if ! grep -q "^# *$var" "$PROJECT_ROOT/.env.template" && ! grep -q "^$var=" "$PROJECT_ROOT/.env.template"; then
+      MISSING_VARS+=("$var")
+    fi
+  done
+
+  if [ ${#MISSING_VARS[@]} -gt 0 ]; then
+    echo -e "${YELLOW}⚠ Missing environment variable references: ${MISSING_VARS[*]}${NC}"
+  else
+    echo -e "${GREEN}✓ Required environment variables documented${NC}"
+  fi
+  echo ""
+
+  # Check for leftover Sentry packages (should be gone)
+  if grep -q "@sentry" "$PROJECT_ROOT/pnpm-lock.yaml"; then
+    echo -e "${RED}✗ Sentry packages found in lock file (should be removed)${NC}"
+    exit 1
+  fi
+  echo -e "${GREEN}✓ No Sentry packages in dependencies${NC}"
+
+  # Check build output structure
+  echo -e "${YELLOW}Step 4: Validating Next.js build structure...${NC}"
+  if [ ! -d "$PROJECT_ROOT/apps/web/.next/standalone" ]; then
+    echo -e "${RED}✗ Next.js standalone output not found${NC}"
+    echo "   Run: cd apps/web && npm run build"
+    exit 1
+  fi
+
+  if [ ! -f "$PROJECT_ROOT/apps/web/.next/standalone/server.js" ]; then
+    echo -e "${RED}✗ Standalone server.js not found${NC}"
+    exit 1
+  fi
+  echo -e "${GREEN}✓ Next.js standalone build is valid${NC}"
+  echo ""
+
+  echo -e "${GREEN}═══════════════════════════════════════════════════════════════════${NC}"
+  echo -e "${GREEN}  ✓ Quick validation passed (Tier 1 checks)${NC}"
+  echo -e "${GREEN}═══════════════════════════════════════════════════════════════════${NC}"
+  echo ""
+  echo "Next step: Run full Docker build with: bash scripts/test-coolify-build.sh"
+  echo ""
   exit 0
 fi
 
