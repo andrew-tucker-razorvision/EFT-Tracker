@@ -72,7 +72,7 @@ ENV HOSTNAME=0.0.0.0
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+# Note: Prisma client is already included in standalone output, no need to copy separately
 
 # Switch to non-root user
 USER nextjs
