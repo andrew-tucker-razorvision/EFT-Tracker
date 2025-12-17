@@ -11,13 +11,13 @@ The Tauri auto-updater requires cryptographic keys to sign releases and verify u
 Run this command **once** to generate public/private key pair:
 
 ```bash
-cd src-tauri
+cd apps/companion/src-tauri
 cargo tauri signer generate -w ~/.tauri/eft-tracker.key
 ```
 
 This will output:
 
-- **Public key**: Copy this to `src-tauri/tauri.conf.json` → `tauri.updater.pubkey`
+- **Public key**: Copy this to `apps/companion/src-tauri/tauri.conf.json` → `tauri.updater.pubkey`
 - **Private key**: Saved to `~/.tauri/eft-tracker.key` (keep this secret!)
 
 **⚠️ IMPORTANT:**
@@ -28,7 +28,7 @@ This will output:
 
 ### 2. Update Tauri Configuration
 
-Edit `src-tauri/tauri.conf.json`:
+Edit `apps/companion/src-tauri/tauri.conf.json`:
 
 ```json
 {
@@ -89,24 +89,28 @@ To verify everything is configured correctly:
 ### Running Locally
 
 ```bash
-# Terminal 1: Start Next.js dev server
-npm run dev
+# From repository root
+pnpm dev:companion
 
-# Terminal 2: Start Tauri app (connects to localhost:3000)
-npm run tauri:dev
+# Or be explicit
+pnpm --filter @eft-tracker/companion tauri:dev
 ```
+
+This starts the dev server on `http://localhost:1420` with the Tauri app window connected.
 
 ### Building for Production
 
 ```bash
-# Build static export + Tauri app
-npm run tauri:build
+pnpm build:companion
+
+# Or:
+pnpm --filter @eft-tracker/companion tauri:build
 ```
 
 Output files:
 
-- `src-tauri/target/release/bundle/msi/EFT-Quest-Tracker_*.msi`
-- `src-tauri/target/release/bundle/nsis/EFT-Quest-Tracker_*-setup.exe`
+- `apps/companion/src-tauri/target/release/bundle/msi/EFT-Quest-Tracker_*.msi`
+- `apps/companion/src-tauri/target/release/bundle/nsis/EFT-Quest-Tracker_*-setup.exe`
 
 ## Creating a Release
 
@@ -114,11 +118,17 @@ Output files:
 
 Update the version in these files:
 
-- `package.json`
-- `src-tauri/tauri.conf.json`
-- `src-tauri/Cargo.toml`
+- `apps/companion/package.json`
+- `apps/companion/src-tauri/tauri.conf.json`
+- `apps/companion/src-tauri/Cargo.toml`
 
 Example: `0.1.0` → `0.2.0`
+
+**Or use the automated script:**
+
+```bash
+./scripts/release-tauri.sh 0.2.0 "Release description"
+```
 
 ### 2. Commit and Tag
 
@@ -183,7 +193,7 @@ rustup update stable
 
 **Fix**:
 
-1. Check `src-tauri/tauri.conf.json`:
+1. Check `apps/companion/src-tauri/tauri.conf.json`:
 
    ```json
    {
