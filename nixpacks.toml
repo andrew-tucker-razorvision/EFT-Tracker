@@ -27,6 +27,7 @@ cmds = ["pnpm install --frozen-lockfile"]
 
 [phases.build]
 cmds = [
+  "export SKIP_ENV_VALIDATION=1",
   "pnpm --filter @eft-tracker/web run prisma:generate",
   "pnpm --filter @eft-tracker/web run build"
 ]
