@@ -182,6 +182,34 @@ nvm install 22.12.0
 nvm use 22.12.0
 ```
 
+#### Windows Development
+
+##### Known Limitation: Symlink Permissions
+
+On Windows, the production build (`npm run build` with standalone output) may fail with EPERM (permission denied) errors when trying to create symlinks in `node_modules`. This is a Windows limitation, not a code issue.
+
+**What happens:**
+
+- Development server: Works fine (no standalone output)
+- Production build on Windows: May fail with EPERM errors
+- CI build on Linux: Always succeeds (Linux handles symlinks fine)
+- Pre-push validation: Detects Windows and skips local build check, relies on CI validation
+
+**Workarounds:**
+
+1. **Recommended: Enable Developer Mode (Permanent fix)**
+   - Open Windows Settings → "Privacy & Security" → "For developers"
+   - Enable "Developer Mode"
+   - Restart terminal/IDE
+   - Try build again
+
+2. **Alternative: Push without local validation**
+   - Pre-push hook automatically handles Windows detection
+   - CI will validate everything on Linux
+   - Your changes are safe to push
+
+**No action needed:** The validation script and CI are configured to handle Windows. Just push normally - GitHub CI will validate everything on Linux.
+
 #### Handling Special Scenarios
 
 **Scenario: Prisma Schema Changed**
