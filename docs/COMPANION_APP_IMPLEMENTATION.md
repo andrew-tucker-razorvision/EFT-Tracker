@@ -488,7 +488,7 @@ jobs:
 
 #### 4.3 Update Check Implementation
 
-**File:** `companion-app/src/lib/updater.ts` (Silent Auto-Updater)
+**File:** `apps/companion/src/lib/updater.ts` (Silent Auto-Updater)
 
 The companion app uses a SILENT auto-updater that downloads and installs updates automatically:
 

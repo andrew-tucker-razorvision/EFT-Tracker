@@ -5,7 +5,7 @@ This checklist verifies the complete auto-update workflow is working correctly.
 ## Pre-Release Setup
 
 - [ ] Public key extracted from `TAURI_PRIVATE_KEY` secret
-- [ ] Public key added to `companion-app/src-tauri/tauri.conf.json`
+- [ ] Public key added to `apps/companion/src-tauri/tauri.conf.json`
 - [ ] Failed tag deleted: `git tag -d tauri-v0.1.0 && git push origin :refs/tags/tauri-v0.1.0`
 
 ## Release v0.1.0 Build

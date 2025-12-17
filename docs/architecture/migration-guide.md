@@ -20,7 +20,7 @@ eft-tracker/
 ├── package.json
 ├── tsconfig.json
 ├── next.config.ts
-├── companion-app/       # Desktop app (separate package manager)
+├── companion-app/       # Desktop app (deprecated - use apps/companion/)
 ├── src-tauri/          # Old Tauri v1 (unused)
 └── Dockerfile          # Docker config (removed)
 ```
