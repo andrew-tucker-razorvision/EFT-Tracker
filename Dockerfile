@@ -35,13 +35,12 @@ WORKDIR /app
 RUN apk add --no-cache libc6-compat && \
     npm install -g pnpm
 
-# Copy EVERYTHING from deps (preserves exact structure with symlinks)
-COPY --from=deps /app ./
+# Copy node_modules from deps (preserves pnpm workspace symlinks)
+COPY --from=deps /app/node_modules ./node_modules
 
-# Copy source code directories on top (complete directory structures)
-# Docker merges, preserving the symlinked node_modules
-COPY apps ./apps
-COPY packages ./packages
+# Copy everything else from host (node_modules excluded by .dockerignore)
+# This adds source code without overwriting the symlinked node_modules
+COPY . .
 
 # Generate Prisma Client
 RUN pnpm --filter @eft-tracker/web run prisma:generate
