@@ -1,226 +1,253 @@
-# Quick Start Guide
+# Quick Start Guide - EFT-Tracker
 
-Get your project up and running with this template in **10 minutes**.
+Get the EFT Quest Tracker running locally in **5 minutes**.
 
-## Step 1: Create from Template (1 minute)
+## Prerequisites (Already Installed?)
 
-1. Click the **"Use this template"** button at the top of this repository
-2. Name your new repository
-3. Choose public or private
-4. Click **"Create repository"**
+- **Node.js 22.12.0+** - [Download](https://nodejs.org/)
+- **pnpm 9+** - Install with: `npm install -g pnpm`
+- **Git** - [Download](https://git-scm.com/)
+- **PostgreSQL** - Local or [Neon](https://neon.tech/) (free tier available)
 
-## Step 2: Clone and Setup (2 minutes)
-
-```bash
-# Clone your new repository
-git clone https://github.com/your-username/your-new-repo.git
-cd your-new-repo
-
-# Install pre-commit hooks (optional but recommended)
-npm install -D pre-commit      # Node.js projects
-# OR
-pip install pre-commit         # Python projects
-
-# Install git hooks
-npx pre-commit install
-```
-
-## Step 3: Create GitHub Labels (2 minutes)
+## Step 1: Clone Repository (1 minute)
 
 ```bash
-# Mac/Linux/Git Bash
-bash scripts/setup-labels.sh
-
-# Windows
-scripts\setup-labels.bat
+git clone https://github.com/andrew-tucker-razorvision/EFT-Tracker.git
+cd EFT-Tracker
 ```
 
-This creates:
-
-- ✅ Priority labels (high, medium, low)
-- ✅ Type labels (feature, bug, docs, refactor, test)
-- ✅ Status labels (blocked, in-progress, needs-review, ready)
-- ✅ Effort labels (small, medium, large)
-- ✅ Phase labels (1, 2, 3)
-
-## Step 4: Optional Enhancements
-
-### MCP Servers (Highly Recommended)
-
-Configure 16 MCP servers for enhanced Claude Code capabilities:
-
-1. Start Claude Code in your repository:
-
-   ```bash
-   claude
-   ```
-
-2. Approve MCP servers when prompted (type `yes`)
-
-3. Configure environment variables for optional servers:
-
-   ```bash
-   # Slack (optional)
-   export SLACK_BOT_TOKEN="xoxb-..."
-   export SLACK_TEAM_ID="T12345678"
-
-   # GitHub (optional)
-   export GITHUB_PERSONAL_ACCESS_TOKEN="ghp_..."
-
-   # PostgreSQL (optional)
-   export POSTGRES_CONNECTION_STRING="postgresql://user:pass@localhost:5432/db"
-
-   # Brave Search (optional - 2K free queries/month)
-   export BRAVE_API_KEY="your-key"
-   ```
-
-**See [MCP_SETUP.md](docs/integrations/MCP_SETUP.md) for complete guide.**
-
-### Testing Template (For Django/Docker Projects)
-
-If using Django with Docker:
-
-1. Copy files from `testing-template-packet/` to your project
-2. Follow `testing-template-packet/START-HERE.md`
-3. Customize container name and test paths
-4. Use `/test` slash command for auto-discovery testing
-
-**Time savings: 1-2 hours → 15 minutes**
-
-## Step 5: Customize for Your Project (5 minutes)
-
-1. **Update README.md:**
-   - Project name and description
-   - Installation instructions
-   - Tech stack
-   - Remove template-specific content
-
-2. **Configure for your stack:**
-   - Update [CODING_STANDARDS.md](docs/guides/CODING_STANDARDS.md) with your tech
-   - Modify [BRANCH_STRATEGY.md](docs/guides/BRANCH_STRATEGY.md) if needed
-   - Customize issue templates in `.github/ISSUE_TEMPLATE/`
-
-3. **Review and customize:**
-   - `.pre-commit-config.yaml` - Add/remove hooks
-   - `.github/workflows/` - Adjust CI/CD pipelines
-   - `.claude/commands/` - Customize slash commands
-
-## Daily Workflow
-
-### Common Commands
+## Step 2: Install Dependencies (1 minute)
 
 ```bash
-# Check project status
-gh issue list
-
-# Create new issue
-gh issue create
-
-# Open project board
-gh project view [NUMBER] --owner [OWNER] --web
-
-# Check for PRs
-gh pr list
-
-# Run tests (with Docker MCP)
-# In Claude Code:
-/test
-
-# Security review (with slash command)
-# In Claude Code:
-/review-security
+# Install all workspace packages (web app, companion app, shared utilities)
+pnpm install
 ```
 
-### Git Workflow
+## Step 3: Set Up Environment (1 minute)
 
 ```bash
-# Create feature branch
-git checkout -b feature/your-feature
+# Copy environment template
+cp .env.template .env.local
 
-# Make changes and commit
-git add .
-git commit -m "feat: add your feature"
-
-# Push and create PR
-git push -u origin feature/your-feature
-gh pr create
+# Edit with your values (database URL, auth secret, etc.)
+code .env.local  # or nano, vim, your editor
 ```
 
-## Quick Reference
+**Required variables:**
 
-### File Locations
+| Variable       | Value                               |
+| -------------- | ----------------------------------- |
+| `DATABASE_URL` | PostgreSQL connection string        |
+| `AUTH_SECRET`  | Generate: `openssl rand -base64 32` |
+| `NEXTAUTH_URL` | `http://localhost:3000`             |
 
-| What             | Where                      |
-| ---------------- | -------------------------- |
-| Documentation    | `docs/`                    |
-| Scripts          | `scripts/`                 |
-| Templates        | `templates/`               |
-| Testing setup    | `testing-template-packet/` |
-| MCP config       | `.mcp.json`                |
-| Slash commands   | `.claude/commands/`        |
-| GitHub workflows | `.github/workflows/`       |
-| Issue templates  | `.github/ISSUE_TEMPLATE/`  |
+**Example:**
 
-### Key Documentation
+```bash
+DATABASE_URL="postgresql://user:pass@localhost:5432/eft_tracker"
+AUTH_SECRET="your-generated-secret-here"
+NEXTAUTH_URL="http://localhost:3000"
+```
 
-- **[POST_TEMPLATE_CHECKLIST.md](docs/getting-started/POST_TEMPLATE_CHECKLIST.md)** - Complete setup checklist
-- **[TEMPLATE_USAGE.md](docs/getting-started/TEMPLATE_USAGE.md)** - Detailed usage guide
-- **[MCP_SETUP.md](docs/integrations/MCP_SETUP.md)** - MCP server configuration
-- **[CODING_STANDARDS.md](docs/guides/CODING_STANDARDS.md)** - Code quality guide
-- **[PROJECT_MANAGEMENT_GUIDE.md](.github/PROJECT_MANAGEMENT_GUIDE.md)** - PM workflows
+## Step 4: Initialize Database (1 minute)
 
-### MCP Servers (16 Total)
+```bash
+# Generate Prisma client
+pnpm db:generate
 
-**Browser Automation:** Playwright, Puppeteer
-**Database:** PostgreSQL, SQLite
-**Containers:** Docker
-**Web Research:** Brave Search, Context7
-**Files:** Filesystem, Everything
-**Collaboration:** Slack, GitHub, Git
-**Intelligence:** Memory, Sequential Thinking
-**Monitoring:** Sentry
-**Knowledge:** AWS KB
+# Push schema to database (creates tables)
+pnpm db:push
+
+# (Optional) Seed sample quest data
+pnpm --filter @eft-tracker/web run db:seed
+```
+
+## Step 5: Start Development (1 minute)
+
+```bash
+# Terminal 1: Web App
+pnpm dev
+# Opens on http://localhost:3000 (or next available port)
+
+# Terminal 2 (Optional): Desktop Companion App
+pnpm dev:companion
+```
+
+## Done
+
+The app is running. Visit [http://localhost:3000](http://localhost:3000) and:
+
+1. Create an account
+2. Start tracking quests
+3. View quest dependencies
+4. Complete quests and track progress
+
+## Common Commands
+
+```bash
+# Development
+pnpm dev                 # Run web app
+pnpm dev:companion      # Run desktop app
+
+# Building
+pnpm build              # Build web app for production
+pnpm build:companion    # Build desktop app
+
+# Testing
+pnpm test               # Run all tests
+pnpm test:watch        # Run tests with auto-reload
+pnpm test:ui           # Run tests with UI
+
+# Quality Checks
+pnpm type-check        # TypeScript validation
+pnpm lint              # ESLint + Prettier
+pnpm lint --fix        # Auto-fix lint issues
+
+# Database
+pnpm db:generate       # Generate Prisma types
+pnpm db:push           # Apply schema changes
+pnpm db:studio         # Open Prisma Studio GUI
+```
+
+## Project Structure
+
+```
+eft-tracker-monorepo/
+├── apps/
+│   ├── web/            # Next.js web app (main quest tracker)
+│   └── companion/      # Tauri v2 desktop overlay app
+├── packages/
+│   ├── types/          # Shared types (@eft-tracker/types)
+│   ├── utils/          # Shared utilities (@eft-tracker/utils)
+│   ├── tsconfig/       # Shared TypeScript configs
+│   ├── theme/          # Design system tokens
+│   ├── ui/            # Shared UI components
+│   └── hooks/         # Shared React hooks
+└── docs/              # Documentation
+```
 
 ## Troubleshooting
 
-### "gh: command not found"
-
-Install GitHub CLI: https://cli.github.com/
-
-### Pre-commit hooks not running
+### "pnpm: command not found"
 
 ```bash
-# Reinstall hooks
-npx pre-commit install
-
-# Test hooks
-npx pre-commit run --all-files
+npm install -g pnpm
 ```
 
-### MCP servers not available
-
-1. Ensure Claude Code is running in the project directory
-2. Approve servers when prompted
-3. Check `claude mcp list` to verify configuration
-
-### Docker MCP can't connect
+### "Module not found: @eft-tracker/types"
 
 ```bash
-# Verify Docker is running
-docker ps
-
-# Restart Docker Desktop if needed
+pnpm install  # Rebuild workspace links
 ```
 
-## What's Next?
+### Database connection error
 
-1. **Review the checklist:** [POST_TEMPLATE_CHECKLIST.md](docs/getting-started/POST_TEMPLATE_CHECKLIST.md)
-2. **Set up project board:** [PROJECT_VIEWS_GUIDE.md](.github/PROJECT_VIEWS_GUIDE.md)
-3. **Configure MCP servers:** [MCP_SETUP.md](docs/integrations/MCP_SETUP.md)
-4. **Start coding:** You're ready to build!
+```bash
+# Verify DATABASE_URL in .env.local
+# Format: postgresql://user:password@host:port/dbname
+
+# Test connection
+psql your-database-url-here
+```
+
+### Port 3000 already in use
+
+The dev server will automatically use the next available port (3001, 3002, etc.). Check the console output for the actual URL.
+
+### "Prisma Client not generated"
+
+```bash
+pnpm db:generate
+```
+
+### Build fails with TypeScript errors
+
+```bash
+pnpm type-check    # See detailed errors
+pnpm lint --fix    # Auto-fix linting
+pnpm build         # Try again
+```
+
+## Environment Setup Options
+
+### Local PostgreSQL
+
+```bash
+# macOS with Homebrew
+brew install postgresql
+brew services start postgresql
+
+# Windows (installer): https://www.postgresql.org/download/windows/
+# Linux: sudo apt-get install postgresql
+
+# Connection string:
+postgresql://localhost:5432/eft_tracker
+```
+
+### Neon (Recommended - Free)
+
+1. Go to [https://neon.tech](https://neon.tech)
+2. Create free account
+3. Create project
+4. Copy connection string to `DATABASE_URL` in `.env.local`
+5. Done! ✨
+
+## Database GUI
+
+View and edit data visually:
+
+```bash
+pnpm db:studio
+# Opens http://localhost:5555
+```
+
+## Documentation
+
+- **[MONOREPO.md](MONOREPO.md)** - Full workspace guide
+- **[docs/architecture/monorepo.md](docs/architecture/monorepo.md)** - Architecture details
+- **[docs/architecture/migration-guide.md](docs/architecture/migration-guide.md)** - Migration notes
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - How to contribute
+- **[README.md](README.md)** - Main documentation
+
+## Common Issues & Solutions
+
+| Issue                     | Solution                                         |
+| ------------------------- | ------------------------------------------------ |
+| Database connection fails | Check `DATABASE_URL` format in `.env.local`      |
+| Port already in use       | Dev server uses next available (3001, 3002, ...) |
+| Module not found errors   | Run `pnpm install` to rebuild links              |
+| TypeScript errors         | Run `pnpm type-check` to see details             |
+| Tests fail                | Run `pnpm test -- --clearCache`                  |
+
+## Git Workflow
+
+```bash
+# Create feature branch
+git checkout -b feature/your-feature-name
+
+# Make changes and test
+pnpm test
+pnpm type-check
+pnpm lint
+
+# Commit and push
+git add .
+git commit -m "feat: description of changes"
+git push -u origin feature/your-feature-name
+
+# Create pull request
+gh pr create --base master
+```
+
+## Next Steps
+
+1. ✅ **Get running** - Follow steps 1-5 above
+2. 📖 **Read docs** - Check [MONOREPO.md](MONOREPO.md)
+3. 🧪 **Run tests** - `pnpm test` to verify everything works
+4. 🔧 **Start coding** - Create a feature branch and contribute!
 
 ---
 
-**Total Setup Time:** ~10 minutes (or 65 minutes for complete customization)
+**Total Setup Time:** 5 minutes ⚡
 
-**Need Help?** Check the [README.md](README.md) or open an issue.
+**Need help?** See [CONTRIBUTING.md](CONTRIBUTING.md) or open an issue on [GitHub](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues)
