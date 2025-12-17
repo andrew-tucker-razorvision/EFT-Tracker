@@ -74,7 +74,12 @@ describe("ToastContainer", () => {
   it("auto-dismisses toast after duration", async () => {
     vi.useFakeTimers();
     const toasts: ToastMessage[] = [
-      { id: "auto-dismiss", type: "info", message: "Auto dismiss", duration: 1000 },
+      {
+        id: "auto-dismiss",
+        type: "info",
+        message: "Auto dismiss",
+        duration: 1000,
+      },
     ];
     render(<ToastContainer toasts={toasts} onDismiss={mockOnDismiss} />);
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { LinkAccount } from "./LinkAccount";
 import * as tauriLib from "../lib/tauri";
@@ -37,7 +37,9 @@ describe("LinkAccount", () => {
     const linkButton = screen.getByRole("button", { name: /link account/i });
     await user.click(linkButton);
 
-    expect(await screen.findByText(/please enter a companion token/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/please enter a companion token/i)
+    ).toBeInTheDocument();
   });
 
   it("shows error when token does not start with cmp_", async () => {
@@ -77,7 +79,10 @@ describe("LinkAccount", () => {
     const user = userEvent.setup();
     const mockValidateToken = vi.mocked(tauriLib.validateToken);
     mockValidateToken.mockImplementation(
-      () => new Promise((resolve) => setTimeout(() => resolve({ valid: true }), 100))
+      () =>
+        new Promise((resolve) =>
+          setTimeout(() => resolve({ valid: true }), 100)
+        )
     );
 
     render(<LinkAccount onComplete={mockOnComplete} onBack={mockOnBack} />);
@@ -89,7 +94,9 @@ describe("LinkAccount", () => {
     await user.click(linkButton);
 
     // Should show loading state
-    expect(screen.getByRole("button", { name: /validating/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /validating/i })
+    ).toBeInTheDocument();
   });
 
   it("calls onComplete when token is valid", async () => {
@@ -107,7 +114,10 @@ describe("LinkAccount", () => {
     await user.click(linkButton);
 
     await waitFor(() => {
-      expect(mockOnComplete).toHaveBeenCalledWith("cmp_valid_token_abc123", validationResult);
+      expect(mockOnComplete).toHaveBeenCalledWith(
+        "cmp_valid_token_abc123",
+        validationResult
+      );
     });
   });
 
@@ -162,7 +172,9 @@ describe("LinkAccount", () => {
     const user = userEvent.setup();
     render(<LinkAccount onComplete={mockOnComplete} onBack={mockOnBack} />);
 
-    const input = screen.getByPlaceholderText(/enter companion token/i) as HTMLInputElement;
+    const input = screen.getByPlaceholderText(
+      /enter companion token/i
+    ) as HTMLInputElement;
     const toggleButton = screen.getByRole("button", { name: /show/i });
 
     // Initially hidden
@@ -203,7 +215,9 @@ describe("LinkAccount", () => {
     const linkButton = screen.getByRole("button", { name: /link account/i });
     await user.click(linkButton);
 
-    expect(await screen.findByText(/please enter a companion token/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/please enter a companion token/i)
+    ).toBeInTheDocument();
 
     const input = screen.getByPlaceholderText(/enter companion token/i);
     await user.type(input, "c");
