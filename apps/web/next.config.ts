@@ -1,10 +1,15 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
   /* config options here */
   // Disable standalone output for development builds (causes symlink issues on Windows)
   // Re-enable for production deployments
   output: process.env.NODE_ENV === "production" ? "standalone" : undefined,
+
+  // Required for monorepo standalone builds - preserves apps/web/ structure
+  // Without this, Next.js generates a flat structure and server.js can't find static files
+  outputFileTracingRoot: path.join(__dirname, "../../"),
 
   // Fail fast on TypeScript errors - catch all issues before deployment
   typescript: {
