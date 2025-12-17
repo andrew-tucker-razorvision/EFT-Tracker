@@ -1,12 +1,17 @@
 /**
- * Unit Tests - Tauri v2 Auto-Updater Frontend Utility
+ * Unit Tests - Tauri v2 Auto-Updater (Companion App - Silent Mode)
  *
- * Tests the checkForUpdates function that can be called from the frontend
- * to manually check for and install updates.
+ * Tests the checkForUpdates function used in the COMPANION DESKTOP APP.
+ * This is a SILENT auto-updater that downloads and installs updates
+ * automatically without any user interaction or prompts.
  *
- * Note: Since this function is a thin wrapper around Tauri plugins that will
- * be executed in the Rust environment, we test its structure and error handling
- * rather than full integration.
+ * IMPORTANT: This is different from the WEB APP updater which has user prompts.
+ * For the INTERACTIVE updater (web app with confirmation dialogs), see:
+ * __tests__/unit/lib/updater/check-updates.test.ts
+ *
+ * Implementation: companion-app/src/lib/updater.ts
+ * Since this function is a thin wrapper around Tauri plugins that will
+ * be executed in the Rust environment, we test its structure and error handling.
  */
 import { describe, it, expect } from "vitest";
 
