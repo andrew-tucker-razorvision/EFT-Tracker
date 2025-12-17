@@ -9,7 +9,7 @@
  * For the INTERACTIVE updater (web app with confirmation dialogs), see:
  * __tests__/unit/lib/updater/check-updates.test.ts
  *
- * Implementation: companion-app/src/lib/updater.ts
+ * Implementation: apps/companion/src/lib/updater.ts
  * Since this function is a thin wrapper around Tauri plugins that will
  * be executed in the Rust environment, we test its structure and error handling.
  */
@@ -19,7 +19,7 @@ describe("Tauri v2 Auto-Updater Frontend Utility", () => {
   it("checkForUpdates function exists and is importable", async () => {
     // Import the function
     const { checkForUpdates } = await import(
-      "../../../companion-app/src/lib/updater"
+      "../../../apps/companion/src/lib/updater"
     );
 
     // Verify it's a function
@@ -28,7 +28,7 @@ describe("Tauri v2 Auto-Updater Frontend Utility", () => {
 
   it("checkForUpdates has proper error handling structure", async () => {
     const { checkForUpdates } = await import(
-      "../../../companion-app/src/lib/updater"
+      "../../../apps/companion/src/lib/updater"
     );
 
     // The function should be callable without throwing
@@ -39,7 +39,7 @@ describe("Tauri v2 Auto-Updater Frontend Utility", () => {
 
   it("updater module exports checkForUpdates", async () => {
     const updaterModule = await import(
-      "../../../companion-app/src/lib/updater"
+      "../../../apps/companion/src/lib/updater"
     );
 
     expect(updaterModule).toHaveProperty("checkForUpdates");
@@ -48,7 +48,7 @@ describe("Tauri v2 Auto-Updater Frontend Utility", () => {
 
   it("checkForUpdates is an async function", async () => {
     const { checkForUpdates } = await import(
-      "../../../companion-app/src/lib/updater"
+      "../../../apps/companion/src/lib/updater"
     );
 
     // Check if it returns a Promise
