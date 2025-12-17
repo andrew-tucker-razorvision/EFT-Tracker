@@ -1,8 +1,17 @@
 /**
- * Unit Tests - Tauri Auto-Updater
+ * Unit Tests - Tauri v2 Auto-Updater (Web App - Interactive Mode)
  *
+ * Tests the checkForUpdates function used in the WEB APP.
+ * This is an INTERACTIVE auto-updater that prompts the user for confirmation
+ * before downloading and installing updates.
+ *
+ * IMPORTANT: This is different from the COMPANION APP updater which is silent.
+ * For the SILENT updater (companion app without prompts), see:
+ * __tests__/unit/companion-app/updater.test.ts
+ *
+ * Implementation: apps/web/src/lib/updater/check-updates.ts
  * Tests the update checking functionality including:
- * - Successful update detection
+ * - Successful update detection and user confirmation
  * - No update available scenario
  * - Error handling during update check
  * - User interaction flows (accept/decline)

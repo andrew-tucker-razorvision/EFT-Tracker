@@ -25,7 +25,6 @@ export default defineConfig({
     setupFiles: ["./__tests__/setup/vitest.setup.ts"],
     include: ["__tests__/**/*.{test,spec}.{ts,tsx}"],
     exclude: [
-      "__tests__/**/*",
       "node_modules/**/*",
     ],
     coverage: {

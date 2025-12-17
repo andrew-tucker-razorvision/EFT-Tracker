@@ -488,23 +488,52 @@ jobs:
 
 #### 4.3 Update Check Implementation
 
-**File:** `src/lib/updater/check-updates.ts`
+**File:** `companion-app/src/lib/updater.ts` (Silent Auto-Updater)
+
+The companion app uses a SILENT auto-updater that downloads and installs updates automatically:
 
 ```typescript
-import { checkUpdate, installUpdate } from "@tauri-apps/api/updater";
-import { relaunch } from "@tauri-apps/api/process";
+import { check } from "@tauri-apps/plugin-updater";
+import { relaunch } from "@tauri-apps/plugin-process";
+
+/**
+ * Check for updates and install if available
+ * This function runs silently without user interaction
+ */
+export async function checkForUpdates(): Promise<void> {
+  try {
+    const update = await check();
+    if (update?.available) {
+      console.log(`Update available: ${update.version}`);
+      await update.downloadAndInstall();
+      await relaunch();
+    }
+  } catch (error) {
+    console.error("Failed to check for updates:", error);
+    // Don't throw - allow app to continue even if update check fails
+  }
+}
+```
+
+**Alternative:** `apps/web/src/lib/updater/check-updates.ts` (Interactive Updater with Prompts)
+
+For reference, the web app uses an INTERACTIVE auto-updater that prompts users:
+
+```typescript
+import { check } from "@tauri-apps/plugin-updater";
+import { relaunch } from "@tauri-apps/plugin-process";
 
 export async function checkForUpdates() {
   try {
-    const { shouldUpdate, manifest } = await checkUpdate();
+    const update = await check();
 
-    if (shouldUpdate) {
+    if (update?.available) {
       const shouldInstall = window.confirm(
-        `Update available: ${manifest?.version}\n\nInstall now?`
+        `Update available: ${update.version}\n\nInstall now?`
       );
 
       if (shouldInstall) {
-        await installUpdate();
+        await update.downloadAndInstall();
         await relaunch();
       }
     }
