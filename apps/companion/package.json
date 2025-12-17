@@ -1,6 +1,6 @@
 {
   "name": "@eft-tracker/companion",
-  "version": "0.1.5",
+  "version": "0.1.99-test",
   "private": true,
   "description": "EFT Tracker Companion - Automatically sync your Escape from Tarkov quest progress",
   "author": "EFT-Tracker",
