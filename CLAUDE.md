@@ -952,3 +952,107 @@ Before creating a commit or PR:
 5. Write meaningful commit message with context
 6. Include test coverage for new functionality
 7. **New features:** Add appropriate test coverage at the right level (prefer unit/integration over E2E)
+
+---
+
+## Coolify Deployment Credentials & Access
+
+**IMPORTANT:** All Coolify authentication information is stored securely in `~/.claude/.env` (not in version control).
+
+### Accessing Credentials
+
+When working on deployment issues, Claude should:
+
+1. **Read from secured location**: `~/.claude/.env` (Windows: `C:\Users\tucke\.claude\.env`)
+2. **Never hardcode or paste** credentials into responses or files that might be committed
+3. **Use SSH access** when direct API access is limited
+
+### Credential Locations
+
+**Global credential file** (secure storage):
+
+- File: `~/.claude/.env`
+- Contains: Coolify API token, SSH credentials, database URLs
+- Access: Read-only, never modified by scripts
+
+**Project files that reference credentials**:
+
+- `.env` - Commit-safe references (no real credentials)
+- `.env.local` - Local development only (git-ignored)
+- `CLAUDE.md` - This documentation (no credentials)
+
+### Coolify Access Methods
+
+#### Method 1: API Access (Fast, Limited)
+
+```bash
+COOLIFY_API_TOKEN=2|kbk10mB9CeokQREZYXQWpP9mDbQQiyNJ7agzUc3vc4370c4a
+COOLIFY_URL=http://95.217.155.28:8000
+```
+
+**Use for**: Deployment status, basic queries
+**Limitation**: Log endpoint returns 404
+
+#### Method 2: SSH Access (Complete, Recommended)
+
+```bash
+COOLIFY_SSH_HOST=95.217.155.28
+COOLIFY_SSH_USER=root
+COOLIFY_SSH_PORT=22
+```
+
+**Use for**: Docker logs, container inspection, real-time monitoring
+**Advantages**: Full filesystem access, can run any command
+
+**Common commands**:
+
+```bash
+# List containers with EFT-Tracker
+docker ps -a --filter "name=eft-tracker"
+
+# Get container logs
+docker logs <container-id>
+
+# Inspect running container
+docker inspect <container-id>
+
+# Check disk usage
+df -h /var/lib/docker
+```
+
+#### Method 3: Web UI (Visual, Manual)
+
+```
+URL: http://95.217.155.28:8000
+Email: tuckerandrew21@gmail.com
+```
+
+**Use for**: Deployment triggers, environment variable configuration, manual monitoring
+
+### Security Notes
+
+- SSH key: Stored in `~/.ssh/coolify_ed25519` (ED25519 format)
+- API token: Marked as read-only in Coolify settings
+- Password: Only for Web UI, API uses token
+- Database URL: Connection pooler endpoint with SSL required
+
+### Troubleshooting Access
+
+**SSH Connection Issues:**
+
+```bash
+# Test connection with verbose output
+ssh -v -i ~/.ssh/coolify_ed25519 root@95.217.155.28
+
+# If key not found, check file exists and has correct permissions
+ls -la ~/.ssh/coolify_ed25519
+chmod 600 ~/.ssh/coolify_ed25519
+```
+
+**API Token Issues:**
+
+```bash
+# Verify token is still valid in Coolify dashboard
+# Token location: Settings → Application
+# If expired: Generate new token and update ~/.claude/.env
+```

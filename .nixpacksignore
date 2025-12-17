@@ -10,9 +10,8 @@ vitest.config.ts
 msw/
 .playwright-mcp/
 
-# Node modules cache
+# Node modules cache (but NOT .next/ - we need the production build output!)
 node_modules/
-.next/
 
 # Development files
 .git/
