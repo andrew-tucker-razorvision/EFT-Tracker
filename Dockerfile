@@ -35,11 +35,8 @@ WORKDIR /app
 RUN apk add --no-cache libc6-compat && \
     npm install -g pnpm
 
-# Copy dependencies from deps stage
-COPY --from=deps /app/node_modules ./node_modules
-
-# Copy application code
-COPY . .
+# Copy entire deps stage output (preserves pnpm workspace structure)
+COPY --from=deps /app .
 
 # Generate Prisma Client for web app
 RUN pnpm --filter @eft-tracker/web run prisma:generate
