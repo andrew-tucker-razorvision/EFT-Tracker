@@ -1,8 +1,8 @@
 # Production Dockerfile for EFT-Tracker (pnpm Monorepo)
 # Multi-stage build for optimized image size and security
 
-# Stage 1: Dependencies
-FROM node:22.12.0-alpine AS deps
+# Stage 1: Builder (merged deps + build)
+FROM node:22.12.0-alpine AS builder
 WORKDIR /app
 
 # Install dependencies for native modules and pnpm
@@ -10,37 +10,25 @@ WORKDIR /app
 RUN apk add --no-cache libc6-compat && \
     npm install -g pnpm
 
-# Copy pnpm configuration and workspace definition
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+# Copy pnpm configuration
+COPY pnpm-lock.yaml pnpm-workspace.yaml ./
 
-# Copy all package.json files to establish workspace structure
+# Copy package.json files for workspace (root + all packages)
+COPY package.json ./
 COPY packages/*/package.json ./packages/
 COPY apps/*/package.json ./apps/
 
-# Copy Prisma schemas (needed for postinstall scripts)
+# Copy Prisma schemas (needed for postinstall)
 COPY prisma ./prisma/
 COPY apps/web/prisma ./apps/web/prisma/
 
-# Install all dependencies
-# This creates node_modules with proper pnpm workspace symlinks
+# Copy source code (BEFORE install so workspace is complete)
+COPY apps ./apps
+COPY packages ./packages
+
+# Install all dependencies with complete workspace structure
 RUN pnpm install --frozen-lockfile && \
     pnpm store prune
-
-# Stage 2: Builder
-FROM node:22.12.0-alpine AS builder
-WORKDIR /app
-
-# Install pnpm
-# hadolint ignore=DL3018
-RUN apk add --no-cache libc6-compat && \
-    npm install -g pnpm
-
-# Copy node_modules from deps (preserves pnpm workspace symlinks)
-COPY --from=deps /app/node_modules ./node_modules
-
-# Copy everything else from host (node_modules excluded by .dockerignore)
-# This adds source code without overwriting the symlinked node_modules
-COPY . .
 
 # Generate Prisma Client
 RUN pnpm --filter @eft-tracker/web run prisma:generate
