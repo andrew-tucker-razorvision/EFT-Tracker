@@ -107,7 +107,6 @@ describe("SettingsPanel", () => {
 
   it("toggles autostart setting", async () => {
     const user = userEvent.setup();
-    const mockEnable = vi.mocked(autostartPlugin.enable);
     const mockDisable = vi.mocked(autostartPlugin.disable);
 
     render(
