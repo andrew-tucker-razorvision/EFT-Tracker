@@ -9,6 +9,10 @@ NIXPACKS_PNPM_VERSION = "10.0.0"
 NIXPACKS_NO_CHROMEDRIVER = "1"
 PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1"
 NODE_ENV = "production"
+# Skip env validation during build phase - env.ts has bypass logic that uses this flag
+# At build time, environment variables aren't available, so we skip Zod validation
+# At runtime, real env vars from Coolify are present and used normally
+SKIP_ENV_VALIDATION = "1"
 
 [phases.setup]
 # Override default APT packages to exclude Chromium and test dependencies
