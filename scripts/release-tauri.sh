@@ -15,9 +15,9 @@ fi
 
 echo "🚀 Creating Tauri release v${VERSION}"
 
-# Validate companion-app directory exists
-if [ ! -d "companion-app/src-tauri" ]; then
-  echo "❌ Error: companion-app/src-tauri directory not found"
+# Validate apps/companion directory exists
+if [ ! -d "apps/companion/src-tauri" ]; then
+  echo "❌ Error: apps/companion/src-tauri directory not found"
   echo "Please run this script from the root of the EFT-Tracker repository"
   exit 1
 fi
@@ -25,15 +25,15 @@ fi
 # Step 1: Update version numbers
 echo "📝 Updating version numbers..."
 # Update only the package version in Cargo.toml (first occurrence after [package])
-sed -i "/^\[package\]/,/^\[/ s/^version = \"[^\"]*\"/version = \"${VERSION}\"/" companion-app/src-tauri/Cargo.toml
+sed -i "/^\[package\]/,/^\[/ s/^version = \"[^\"]*\"/version = \"${VERSION}\"/" apps/companion/src-tauri/Cargo.toml
 # Update tauri.conf.json
-sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"${VERSION}\"/" companion-app/src-tauri/tauri.conf.json
+sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"${VERSION}\"/" apps/companion/src-tauri/tauri.conf.json
 # Update package.json
-sed -i "0,/\"version\": \"[^\"]*\"/ s/\"version\": \"[^\"]*\"/\"version\": \"${VERSION}\"/" companion-app/package.json
+sed -i "0,/\"version\": \"[^\"]*\"/ s/\"version\": \"[^\"]*\"/\"version\": \"${VERSION}\"/" apps/companion/package.json
 
 # Step 2: Commit changes
 echo "💾 Committing changes..."
-git add companion-app/src-tauri/Cargo.toml companion-app/src-tauri/tauri.conf.json companion-app/package.json
+git add apps/companion/src-tauri/Cargo.toml apps/companion/src-tauri/tauri.conf.json apps/companion/package.json
 git commit -m "chore: Release v${VERSION}" || echo "No changes to commit"
 
 # Step 3: Create and push tag
