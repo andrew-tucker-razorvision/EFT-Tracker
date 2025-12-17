@@ -1,8 +1,8 @@
 # Production Dockerfile for EFT-Tracker (pnpm Monorepo)
 # Multi-stage build for optimized image size and security
 
-# Stage 1: Dependencies
-FROM node:22.12.0-alpine AS deps
+# Stage 1: Builder (merged deps + build)
+FROM node:22.12.0-alpine AS builder
 WORKDIR /app
 
 # Install dependencies for native modules and pnpm
@@ -10,38 +10,32 @@ WORKDIR /app
 RUN apk add --no-cache libc6-compat && \
     npm install -g pnpm
 
-# Copy pnpm configuration and workspace definition
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+# Copy pnpm configuration
+COPY pnpm-lock.yaml pnpm-workspace.yaml ./
 
-# Copy all package.json files to establish workspace structure
-COPY packages/*/package.json ./packages/
-COPY apps/*/package.json ./apps/
+# Copy package.json files for workspace (root + all packages)
+# IMPORTANT: Use explicit paths, not globs - Docker COPY globs don't preserve directory structure
+COPY package.json ./
+COPY packages/hooks/package.json ./packages/hooks/
+COPY packages/theme/package.json ./packages/theme/
+COPY packages/tsconfig/package.json ./packages/tsconfig/
+COPY packages/types/package.json ./packages/types/
+COPY packages/ui/package.json ./packages/ui/
+COPY packages/utils/package.json ./packages/utils/
+COPY apps/companion/package.json ./apps/companion/
+COPY apps/web/package.json ./apps/web/
 
-# Copy Prisma schemas (needed for postinstall scripts)
+# Copy Prisma schemas (needed for postinstall)
 COPY prisma ./prisma/
 COPY apps/web/prisma ./apps/web/prisma/
 
-# Install all dependencies
-# This creates node_modules with proper pnpm workspace symlinks
-RUN pnpm install --frozen-lockfile && \
-    pnpm store prune
-
-# Stage 2: Builder
-FROM node:22.12.0-alpine AS builder
-WORKDIR /app
-
-# Install pnpm
-# hadolint ignore=DL3018
-RUN apk add --no-cache libc6-compat && \
-    npm install -g pnpm
-
-# Copy EVERYTHING from deps (preserves exact structure with symlinks)
-COPY --from=deps /app ./
-
-# Copy source code directories on top (complete directory structures)
-# Docker merges, preserving the symlinked node_modules
+# Copy source code (BEFORE install so workspace is complete)
 COPY apps ./apps
 COPY packages ./packages
+
+# Install all dependencies with complete workspace structure
+RUN pnpm install --frozen-lockfile && \
+    pnpm store prune
 
 # Generate Prisma Client
 RUN pnpm --filter @eft-tracker/web run prisma:generate
