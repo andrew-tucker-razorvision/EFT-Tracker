@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Cloud, CloudOff, Check, Loader2, Clock } from "lucide-react";
+import { Cloud, CloudOff, Check, Loader2, Clock, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SyncStatusIndicatorProps {
   lastSynced: Date | null;
   isOnline: boolean;
   isSaving: boolean;
+  saveError?: Error | null;
+  onRetry?: () => void;
   pendingOfflineCount?: number;
 }
 
@@ -35,6 +37,8 @@ export function SyncStatusIndicator({
   lastSynced,
   isOnline,
   isSaving,
+  saveError,
+  onRetry,
   pendingOfflineCount = 0,
 }: SyncStatusIndicatorProps) {
   const [relativeTime, setRelativeTime] = useState<string>("");
@@ -52,6 +56,24 @@ export function SyncStatusIndicator({
 
     return () => clearInterval(interval);
   }, [lastSynced]);
+
+  if (saveError) {
+    return (
+      <div className="flex items-center gap-1.5 text-xs text-red-500">
+        <XCircle className="w-3.5 h-3.5" />
+        <span>Failed to save</span>
+        {onRetry && (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="ml-1 underline hover:no-underline focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+          >
+            Retry
+          </button>
+        )}
+      </div>
+    );
+  }
 
   if (!isOnline) {
     return (
