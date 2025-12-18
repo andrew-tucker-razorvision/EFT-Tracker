@@ -937,25 +937,41 @@ This project follows a proper test pyramid with distinct boundaries:
 
 **Run with:** `npx playwright test`
 
-#### Smoke Tests (\_\_tests\_\_/smoke/)
+#### Smoke Tests (`__tests__/smoke/`)
 
 **Use for:** Post-deployment validation in production
 
 **Examples:**
 
-- Critical API endpoints return 200
-- Homepage loads without errors
-- Authentication flow accessible
-- No console errors on page load
+- Homepage loads successfully
+- Health check endpoint returns "healthy"
+- Quests API returns data
+- Authentication page accessible
+- Static assets load correctly
 
 **Characteristics:**
 
 - Very fast (<2 min total)
+- Read-only operations (no data mutations)
 - Run against production URL
-- Triggered by deployment webhook
 - Creates GitHub issue on failure
+- Non-blocking (failures don't affect deployed code)
 
-**Run with:** `npx playwright test --config=__tests__/smoke/smoke.config.ts`
+**Run with:**
+
+```bash
+# Locally against production
+SMOKE_TEST_URL=https://learntotarkov.com \
+  npx playwright test --config=__tests__/smoke/smoke.config.ts
+
+# Via GitHub Actions (recommended after deployment)
+gh workflow run smoke-tests.yml
+
+# Check results
+gh run list --workflow=smoke-tests.yml --limit 1
+```
+
+**When to run:** After every deployment to master (see [docs/DEPLOYMENT_VERIFICATION.md](docs/DEPLOYMENT_VERIFICATION.md))
 
 ### API Contract Testing
 
