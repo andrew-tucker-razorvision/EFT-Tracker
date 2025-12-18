@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useUserPrefs } from "@/hooks/useUserPrefs";
+import { useDebouncedPrefs } from "@/hooks/useDebouncedPrefs";
 import { SlidersHorizontal, Filter } from "lucide-react";
 import { ViewToggle } from "@/components/quest-views";
 import { ProgressStats } from "@/components/progress-stats";
@@ -230,6 +231,9 @@ export function QuestFilters({
   // Fetch user preferences (replaces manual fetch effect)
   const { data: userPrefs } = useUserPrefs();
 
+  // Debounced preferences update (consolidates three separate debounced saves)
+  const { update: updatePrefs, isPending: isSavingPrefs, isError: prefsError, retry: retryPrefs } = useDebouncedPrefs();
+
   // Stable ref for onApplyFilters to avoid infinite loops
   const onApplyFiltersRef = useRef(onApplyFilters);
   useEffect(() => {
@@ -262,107 +266,22 @@ export function QuestFilters({
     }
   }, [userPrefs, onFilterChange, onApplyFilters]);
 
-  // Auto-save player level when it changes (debounced, only for logged-in users)
-  const savePlayerLevel = useCallback(
-    async (level: number | null) => {
-      if (!session?.user) return;
-      if (level === lastSavedLevel.current) return;
-
-      try {
-        const res = await fetch("/api/user", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ playerLevel: level }),
-        });
-        if (res.ok) {
-          lastSavedLevel.current = level;
-        }
-      } catch (err) {
-        console.error("Failed to save player level:", err);
-      }
-    },
-    [session?.user]
-  );
-
+  // Consolidate all three preference saves into one effect with debounced updates
   useEffect(() => {
     if (sessionStatus !== "authenticated") return;
-    if (!prefsFullyLoaded.current) return; // Wait until prefs are fully loaded
+    if (!initialPrefsLoaded.current) return;
 
-    const timer = setTimeout(() => {
-      savePlayerLevel(filters.playerLevel);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [filters.playerLevel, sessionStatus, savePlayerLevel]);
-
-  // Auto-save questsPerTree when it changes
-  const saveQuestsPerTree = useCallback(
-    async (count: number | null) => {
-      if (!session?.user) return;
-      if (count === lastSavedQuestsPerTree.current) return;
-
-      try {
-        const res = await fetch("/api/user", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ questsPerTree: count }),
-        });
-        if (res.ok) {
-          lastSavedQuestsPerTree.current = count;
-        }
-      } catch (err) {
-        console.error("Failed to save quests per tree:", err);
-      }
-    },
-    [session?.user]
-  );
-
-  useEffect(() => {
-    if (sessionStatus !== "authenticated") return;
-    if (!prefsFullyLoaded.current) return; // Wait until prefs are fully loaded
-
-    const timer = setTimeout(() => {
-      saveQuestsPerTree(filters.questsPerTree);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [filters.questsPerTree, sessionStatus, saveQuestsPerTree]);
-
-  // Auto-save bypassLevelRequirement when it changes
-  const saveBypassLevelRequirement = useCallback(
-    async (bypass: boolean) => {
-      if (!session?.user) return;
-      if (bypass === lastSavedBypassLevel.current) return;
-
-      try {
-        const res = await fetch("/api/user", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ bypassLevelRequirement: bypass }),
-        });
-        if (res.ok) {
-          lastSavedBypassLevel.current = bypass;
-        }
-      } catch (err) {
-        console.error("Failed to save bypass level requirement:", err);
-      }
-    },
-    [session?.user]
-  );
-
-  useEffect(() => {
-    if (sessionStatus !== "authenticated") return;
-    if (!prefsFullyLoaded.current) return; // Wait until prefs are fully loaded
-
-    const timer = setTimeout(() => {
-      saveBypassLevelRequirement(filters.bypassLevelRequirement);
-    }, 1000);
-
-    return () => clearTimeout(timer);
+    updatePrefs({
+      playerLevel: filters.playerLevel,
+      questsPerTree: filters.questsPerTree,
+      bypassLevelRequirement: filters.bypassLevelRequirement,
+    });
   }, [
+    filters.playerLevel,
+    filters.questsPerTree,
     filters.bypassLevelRequirement,
     sessionStatus,
-    saveBypassLevelRequirement,
+    updatePrefs,
   ]);
 
   // Debounce search input and auto-apply
