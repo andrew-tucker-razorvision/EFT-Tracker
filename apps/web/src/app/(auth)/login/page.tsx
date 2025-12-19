@@ -63,8 +63,9 @@ export default function LoginPage() {
         router.push("/quests");
         router.refresh();
       }
-    } catch {
-      setError("Something went wrong");
+    } catch (err) {
+      console.error("Sign-in error:", err);
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
