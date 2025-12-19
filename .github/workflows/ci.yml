@@ -228,7 +228,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./apps/companion
-        run: npm ci
+        run: npm install
 
       - name: Build frontend
         working-directory: ./apps/companion
