@@ -215,8 +215,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22.12.0"
-          cache: "npm"
-          cache-dependency-path: "apps/companion/package-lock.json"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
@@ -227,12 +230,11 @@ jobs:
           workspaces: "apps/companion/src-tauri -> target"
 
       - name: Install dependencies
-        working-directory: ./apps/companion
-        run: npm install
+        run: pnpm install --filter @eft-tracker/companion...
 
       - name: Build frontend
         working-directory: ./apps/companion
-        run: npm run build
+        run: pnpm run build
 
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
