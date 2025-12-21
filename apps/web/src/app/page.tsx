@@ -176,7 +176,11 @@ export default function Home() {
               <div className="flex flex-col gap-2 mb-6">
                 {[
                   { task: "Kill 5 Scavs", trader: "Prapor", kappa: false },
-                  { task: "Mark the fuel tank", trader: "Prapor", kappa: false },
+                  {
+                    task: "Mark the fuel tank",
+                    trader: "Prapor",
+                    kappa: false,
+                  },
                   { task: "Find 2x Salewa", trader: "Therapist", kappa: true },
                   { task: "Extract via ZB-1011", trader: "Any", kappa: false },
                 ].map((item, i) => (
@@ -202,7 +206,11 @@ export default function Home() {
                 ))}
               </div>
 
-              <Button variant="tactical" className="w-full justify-center" asChild>
+              <Button
+                variant="tactical"
+                className="w-full justify-center"
+                asChild
+              >
                 <Link href="/quests">Plan This Raid →</Link>
               </Button>
             </div>
@@ -307,7 +315,8 @@ export default function Home() {
               className="bg-[var(--bg-panel)] border border-[var(--tactical-border)] p-8 transition-all hover:border-[var(--tactical-border-hover)] hover:-translate-y-0.5"
             >
               <div className="font-[family-name:var(--font-rajdhani)] text-xs font-bold text-[var(--text-dim)] uppercase tracking-wider mb-4">
-                {feature.number} {"// "}{feature.label}
+                {feature.number} {"// "}
+                {feature.label}
               </div>
               <div className="text-2xl mb-4 opacity-80">{feature.icon}</div>
               <h3 className="font-[family-name:var(--font-rajdhani)] text-lg font-bold uppercase mb-2">
@@ -588,9 +597,17 @@ function QuestTreePreview() {
           },
           {
             quests: [
-              { name: "The Extortionist", trader: "Skier", status: "available" },
+              {
+                name: "The Extortionist",
+                trader: "Skier",
+                status: "available",
+              },
               { name: "Stirrup", trader: "Skier", status: "locked" },
-              { name: "What's on the Flash?", trader: "Skier", status: "locked" },
+              {
+                name: "What's on the Flash?",
+                trader: "Skier",
+                status: "locked",
+              },
             ],
           },
         ].map((chain, chainIndex) => (
