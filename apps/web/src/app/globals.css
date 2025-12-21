@@ -6,6 +6,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-rajdhani);
+  --font-body: var(--font-inter);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -45,8 +47,44 @@
   --radius: 0.625rem;
 
   /* EFT Dark Theme - Tarkov Wiki inspired for maximum readability */
-  --background: #141414; /* True dark background */
-  --foreground: #e8e6d4; /* Bright cream/gold text */
+  /* Following Safe Rules: near-black (not pure), saturated neutrals, 8px spacing */
+  --background: #0a0a0a; /* Near-black (not pure #000) */
+  --foreground: #e8e6d4; /* Warm near-white */
+
+  /* Tactical theme - background layers (each ~4-8% lighter) */
+  --bg-dark: #0a0a0a;
+  --bg-panel: #111111;
+  --bg-card: #161616;
+  --bg-elevated: #1a1a1a;
+
+  /* Text hierarchy - saturated with warm gold tint */
+  --text-bright: #e8e6d4;
+  --text-secondary: #9a9a8a;
+  --text-dim: #6a6a5a;
+
+  /* Accent colors */
+  --accent-gold: #c4aa6a;
+  --accent-gold-dim: rgba(196, 170, 106, 0.25);
+  --accent-gold-glow: rgba(196, 170, 106, 0.08);
+
+  /* Status colors - distinct brightness levels */
+  --success: #4ade80;
+  --available: #4db8ff;
+  --kappa: #ffcc00;
+
+  /* Borders - 0.2 opacity for better contrast */
+  --tactical-border: rgba(196, 170, 106, 0.2);
+  --tactical-border-hover: rgba(196, 170, 106, 0.4);
+  --grid-line: rgba(196, 170, 106, 0.03);
+
+  /* Spacing scale - 8px base */
+  --space-1: 0.5rem;   /* 8px */
+  --space-2: 1rem;     /* 16px */
+  --space-3: 1.5rem;   /* 24px */
+  --space-4: 2rem;     /* 32px */
+  --space-6: 3rem;     /* 48px */
+  --space-8: 4rem;     /* 64px */
+  --space-12: 6rem;    /* 96px */
 
   --card: #1a1a1a; /* Slightly lighter than background */
   --card-foreground: #e8e6d4; /* Bright cream/gold */
