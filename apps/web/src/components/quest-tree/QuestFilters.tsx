@@ -60,7 +60,6 @@ const COLUMNS_OPTIONS: { value: number | null; label: string }[] = [
   { value: null, label: "All columns" },
 ];
 
-
 interface QuestFiltersProps {
   traders: Trader[];
   quests: QuestWithProgress[];

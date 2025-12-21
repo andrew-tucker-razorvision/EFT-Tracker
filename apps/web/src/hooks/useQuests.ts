@@ -131,7 +131,9 @@ export function useQuests(): UseQuestsReturn {
       // Quest type filtering (empty array = all types)
       // Compare case-insensitively since Prisma returns UPPERCASE, but filters use lowercase
       if (appliedFilters.questTypes.length > 0) {
-        const filterTypes = appliedFilters.questTypes.map((t) => t.toUpperCase());
+        const filterTypes = appliedFilters.questTypes.map((t) =>
+          t.toUpperCase()
+        );
         filteredQuests = filteredQuests.filter((q: QuestWithProgress) =>
           filterTypes.includes(q.questType?.toUpperCase() || "")
         );

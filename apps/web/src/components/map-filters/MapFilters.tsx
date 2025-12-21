@@ -225,7 +225,9 @@ export function MapFilters({
               value={filters.playerLevel ?? ""}
               onChange={(e) => {
                 const val = parseInt(e.target.value);
-                const level = isNaN(val) ? null : Math.min(79, Math.max(1, val));
+                const level = isNaN(val)
+                  ? null
+                  : Math.min(79, Math.max(1, val));
                 handleLevelChange(level);
               }}
               className="h-9 w-16 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
