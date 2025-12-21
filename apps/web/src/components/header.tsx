@@ -23,6 +23,29 @@ import {
 } from "@/components/ui/sheet";
 import { useStats } from "@/contexts/StatsContext";
 
+// Crosshair logo SVG component - tactical scope reticle style
+function CrosshairLogo({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      className={className}
+    >
+      {/* Outer circle */}
+      <circle cx="12" cy="12" r="10" />
+      {/* Center dot */}
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+      {/* Crosshair lines - with gap in center */}
+      <line x1="12" y1="2" x2="12" y2="7" />
+      <line x1="12" y1="17" x2="12" y2="22" />
+      <line x1="2" y1="12" x2="7" y2="12" />
+      <line x1="17" y1="12" x2="22" y2="12" />
+    </svg>
+  );
+}
+
 function QuestStats() {
   const { stats } = useStats();
 
@@ -75,20 +98,26 @@ export function Header() {
   }, []);
 
   return (
-    <header className="border-b bg-background">
+    <header className="border-b border-[var(--tactical-border)] bg-[var(--bg-panel)]">
       <div className="w-full px-4 h-14 md:h-16 flex items-center">
         {/* Left: Logo + Navigation */}
         <div className="flex items-center gap-6">
-          <Link href="/" className="font-bold text-lg md:text-xl flex-shrink-0">
-            <span className="hidden sm:inline">EFT Quest Tracker</span>
-            <span className="sm:hidden">EFT</span>
+          <Link
+            href="/"
+            className="flex items-center gap-2 flex-shrink-0 group"
+          >
+            <CrosshairLogo className="w-6 h-6 md:w-7 md:h-7 text-[var(--accent-gold)] transition-transform group-hover:rotate-90" />
+            <span className="font-[family-name:var(--font-rajdhani)] font-bold text-lg md:text-xl tracking-wide text-[var(--text-bright)]">
+              <span className="hidden sm:inline">LEARN TO TARKOV</span>
+              <span className="sm:hidden">L2T</span>
+            </span>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
             <Link
               href="/quests"
-              className="text-sm font-medium hover:text-primary transition-colors"
+              className="text-sm font-[family-name:var(--font-rajdhani)] font-semibold uppercase tracking-wide text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors"
             >
-              Quests
+              Quest Tree
             </Link>
             {/* Future nav items will go here */}
           </nav>

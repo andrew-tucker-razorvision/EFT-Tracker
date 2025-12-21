@@ -20,6 +20,15 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
+        // Tactical variant with angled corners (clip-path)
+        tactical:
+          "bg-[var(--accent-gold)] text-[var(--bg-dark)] font-bold uppercase tracking-wide font-[family-name:var(--font-rajdhani)] hover:bg-[#d4ba7a] hover:-translate-y-0.5 transition-all [clip-path:polygon(6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%,0_6px)] rounded-none",
+        // Tactical outline variant
+        "tactical-outline":
+          "bg-transparent border border-[var(--accent-gold)] text-[var(--accent-gold)] font-bold uppercase tracking-wide font-[family-name:var(--font-rajdhani)] hover:bg-[var(--accent-gold-dim)] hover:text-[var(--text-bright)]",
+        // Tactical ghost variant
+        "tactical-ghost":
+          "bg-transparent border border-[var(--tactical-border)] text-[var(--text-secondary)] font-bold uppercase tracking-wide font-[family-name:var(--font-rajdhani)] hover:border-[var(--tactical-border-hover)] hover:text-[var(--text-bright)]",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
