@@ -1,0 +1,43 @@
+name: Auto Merge
+
+# Automatically merge PRs when all required checks pass
+# NOTE: This is for fast iteration during active development. Disable later.
+
+on:
+  pull_request:
+    branches: [master]
+  check_suite:
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    name: Auto Merge PR
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || (github.event_name == 'check_suite' && github.event.check_suite.conclusion == 'success')
+
+    steps:
+      - name: Wait for checks to complete
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          running-workflow-name: "Auto Merge PR"
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+          allowed-conclusions: success,skipped
+
+      - name: Auto merge PR
+        uses: pascalgn/automerge-action@v0.16.4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MERGE_LABELS: ""
+          MERGE_METHOD: squash
+          MERGE_DELETE_BRANCH: true
+          MERGE_COMMIT_MESSAGE: "pull-request-title"
+          MERGE_FILTER_AUTHOR: ""
+          MERGE_FORKS: false
+          MERGE_RETRIES: 3
+          MERGE_RETRY_SLEEP: 10000
