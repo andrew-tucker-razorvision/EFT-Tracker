@@ -47,7 +47,9 @@ export function CatchUpDialog({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedQuests, setSelectedQuests] = useState<QuestWithProgress[]>([]);
   const [playerLevel, setPlayerLevel] = useState<number | null>(null);
-  const [confirmedBranches, setConfirmedBranches] = useState<Set<string>>(new Set());
+  const [confirmedBranches, setConfirmedBranches] = useState<Set<string>>(
+    new Set()
+  );
   const [isLoading, setIsLoading] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -95,8 +97,7 @@ export function CatchUpDialog({
     return quests
       .filter(
         (q) =>
-          q.title.toLowerCase().includes(lowerQuery) &&
-          !selectedIds.has(q.id)
+          q.title.toLowerCase().includes(lowerQuery) && !selectedIds.has(q.id)
       )
       .sort((a, b) => {
         const aExact = a.title.toLowerCase() === lowerQuery;
@@ -203,7 +204,13 @@ export function CatchUpDialog({
     } finally {
       setIsLoading(false);
     }
-  }, [selectedQuests, playerLevel, confirmedBranches, onComplete, onOpenChange]);
+  }, [
+    selectedQuests,
+    playerLevel,
+    confirmedBranches,
+    onComplete,
+    onOpenChange,
+  ]);
 
   const canProceed = selectedQuests.length > 0 && playerLevel !== null;
 
@@ -314,7 +321,9 @@ export function CatchUpDialog({
                               className="w-2 h-2 rounded-full shrink-0"
                               style={{ backgroundColor: traderColor.primary }}
                             />
-                            <span className="flex-1 truncate">{quest.title}</span>
+                            <span className="flex-1 truncate">
+                              {quest.title}
+                            </span>
                             <span className="text-xs text-muted-foreground shrink-0">
                               Lv {quest.levelRequired}
                             </span>
@@ -349,11 +358,12 @@ export function CatchUpDialog({
               <AlertTriangle className="h-12 w-12 text-yellow-500" />
               <div className="text-center space-y-2">
                 <p className="font-medium">
-                  You have {existingProgressCount} quest{existingProgressCount !== 1 ? "s" : ""} marked complete.
+                  You have {existingProgressCount} quest
+                  {existingProgressCount !== 1 ? "s" : ""} marked complete.
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Continuing will reset all existing progress and apply the new catch-up state.
-                  This cannot be undone.
+                  Continuing will reset all existing progress and apply the new
+                  catch-up state. This cannot be undone.
                 </p>
               </div>
             </div>
@@ -376,16 +386,18 @@ export function CatchUpDialog({
                 </p>
                 {catchUpData.prerequisites.length > 0 ? (
                   <div className="space-y-1">
-                    {Array.from(prerequisitesByTrader.entries()).map(([traderId, selections]) => (
-                      <TraderQuestGroup
-                        key={traderId}
-                        traderId={traderId}
-                        traderName={selections[0].traderName}
-                        traderColor={selections[0].traderColor}
-                        quests={selections}
-                        locked
-                      />
-                    ))}
+                    {Array.from(prerequisitesByTrader.entries()).map(
+                      ([traderId, selections]) => (
+                        <TraderQuestGroup
+                          key={traderId}
+                          traderId={traderId}
+                          traderName={selections[0].traderName}
+                          traderColor={selections[0].traderColor}
+                          quests={selections}
+                          locked
+                        />
+                      )
+                    )}
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground italic">
@@ -405,22 +417,25 @@ export function CatchUpDialog({
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">
-                    These quest chains ended before your current position. Check the ones you&apos;ve completed.
+                    These quest chains ended before your current position. Check
+                    the ones you&apos;ve completed.
                   </p>
                   <div className="space-y-1">
-                    {Array.from(branchesByTrader.entries()).map(([traderId, selections]) => (
-                      <TraderQuestGroup
-                        key={traderId}
-                        traderId={traderId}
-                        traderName={selections[0].traderName}
-                        traderColor={selections[0].traderColor}
-                        quests={selections}
-                        showCheckboxes
-                        checkedIds={confirmedBranches}
-                        onToggle={handleToggleBranch}
-                        playerLevel={playerLevel}
-                      />
-                    ))}
+                    {Array.from(branchesByTrader.entries()).map(
+                      ([traderId, selections]) => (
+                        <TraderQuestGroup
+                          key={traderId}
+                          traderId={traderId}
+                          traderName={selections[0].traderName}
+                          traderColor={selections[0].traderColor}
+                          quests={selections}
+                          showCheckboxes
+                          checkedIds={confirmedBranches}
+                          onToggle={handleToggleBranch}
+                          playerLevel={playerLevel}
+                        />
+                      )
+                    )}
                   </div>
                 </div>
               )}
@@ -467,10 +482,7 @@ export function CatchUpDialog({
                 )}
               </Button>
             ) : (
-              <Button
-                onClick={handleNext}
-                disabled={!canProceed}
-              >
+              <Button onClick={handleNext} disabled={!canProceed}>
                 Next
               </Button>
             )}

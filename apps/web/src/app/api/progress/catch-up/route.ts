@@ -74,7 +74,11 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { targetQuests, playerLevel: _playerLevel, confirmedBranches } = catchUpSchema.parse(body);
+    const {
+      targetQuests,
+      playerLevel: _playerLevel,
+      confirmedBranches,
+    } = catchUpSchema.parse(body);
 
     // Fetch all quests with their dependencies
     const allQuests = await prisma.quest.findMany({
@@ -322,7 +326,8 @@ export async function POST(request: Request) {
       completed: completedIds,
       completedBranches: completedBranchIds,
       available: availableIds,
-      totalChanged: completedIds.length + completedBranchIds.length + availableIds.length,
+      totalChanged:
+        completedIds.length + completedBranchIds.length + availableIds.length,
     });
   } catch (error) {
     if (error instanceof z.ZodError) {

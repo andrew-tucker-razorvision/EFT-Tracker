@@ -234,7 +234,11 @@ export function calculateCatchUp(
 ): CatchUpCalculation {
   return {
     prerequisites: getPrerequisitesForSelection(targetQuestIds, quests),
-    completedBranches: getCompletedBranches(targetQuestIds, quests, playerLevel),
+    completedBranches: getCompletedBranches(
+      targetQuestIds,
+      quests,
+      playerLevel
+    ),
   };
 }
 

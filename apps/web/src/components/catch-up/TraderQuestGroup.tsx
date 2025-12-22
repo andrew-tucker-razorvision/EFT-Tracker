@@ -26,9 +26,10 @@ export function TraderQuestGroup({
 }: TraderQuestGroupProps) {
   const [expanded, setExpanded] = useState(defaultExpanded);
 
-  const checkedCount = showCheckboxes && checkedQuests
-    ? quests.filter((q) => checkedQuests.has(q.questId)).length
-    : quests.length;
+  const checkedCount =
+    showCheckboxes && checkedQuests
+      ? quests.filter((q) => checkedQuests.has(q.questId)).length
+      : quests.length;
 
   return (
     <div className="border border-[var(--tactical-border)] rounded-md overflow-hidden">
@@ -45,10 +46,7 @@ export function TraderQuestGroup({
           ) : (
             <ChevronRight className="h-4 w-4 text-[var(--text-secondary)]" />
           )}
-          <span
-            className="font-medium"
-            style={{ color: traderColor }}
-          >
+          <span className="font-medium" style={{ color: traderColor }}>
             {traderName}
           </span>
           <span className="text-xs text-[var(--text-dim)]">
