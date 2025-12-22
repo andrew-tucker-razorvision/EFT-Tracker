@@ -1,4 +1,3 @@
-// @ts-nocheck - React 19 component type compatibility
 "use client";
 
 import * as React from "react";

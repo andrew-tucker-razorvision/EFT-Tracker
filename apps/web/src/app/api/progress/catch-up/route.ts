@@ -74,7 +74,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { targetQuests, playerLevel, confirmedBranches } = catchUpSchema.parse(body);
+    const { targetQuests, playerLevel: _playerLevel, confirmedBranches } = catchUpSchema.parse(body);
 
     // Fetch all quests with their dependencies
     const allQuests = await prisma.quest.findMany({

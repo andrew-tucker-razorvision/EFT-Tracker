@@ -1,4 +1,3 @@
-// @ts-nocheck - React 19 Input component type compatibility
 "use client";
 
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
@@ -12,7 +11,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { getTraderColor } from "@/lib/trader-colors";
 import { calculateCatchUp, groupByTrader } from "@/lib/catch-up-algorithm";
 import { TraderQuestGroup } from "./TraderQuestGroup";

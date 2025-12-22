@@ -158,7 +158,7 @@ export function getPrerequisitesForSelection(
 export function getCompletedBranches(
   targetQuestIds: string[],
   quests: QuestWithProgress[],
-  playerLevel: number
+  _playerLevel: number
 ): CatchUpSelection[] {
   const questMap = buildQuestMap(quests);
   const targetSet = new Set(targetQuestIds);
