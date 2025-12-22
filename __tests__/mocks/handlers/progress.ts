@@ -92,12 +92,7 @@ export const progressHandlers = [
     }
 
     // Validate status value
-    const validStatuses: QuestStatus[] = [
-      "locked",
-      "available",
-      "in_progress",
-      "completed",
-    ];
+    const validStatuses: QuestStatus[] = ["locked", "available", "completed"];
     if (!validStatuses.includes(body.status)) {
       return HttpResponse.json(
         { error: "Invalid status value" },

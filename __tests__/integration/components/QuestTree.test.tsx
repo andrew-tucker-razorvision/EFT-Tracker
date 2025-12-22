@@ -156,9 +156,7 @@ describe("QuestTree Integration Tests", () => {
       expect(onStatusChange).toHaveBeenCalled();
       const [questId, status] = onStatusChange.mock.calls[0];
       expect(questId).toBe(QUEST_IDS.DEBUT);
-      expect(["available", "in_progress", "completed", "locked"]).toContain(
-        status
-      );
+      expect(["available", "completed", "locked"]).toContain(status);
     });
 
     it("should mark selected quest with data attribute", () => {

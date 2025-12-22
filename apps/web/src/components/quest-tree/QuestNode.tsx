@@ -106,7 +106,7 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
       color: isLevelAppropriate
         ? STATUS_COLORS.completed.primary
         : isUpcoming
-          ? STATUS_COLORS.in_progress.primary
+          ? STATUS_COLORS.available.primary
           : STATUS_COLORS.locked.primary,
       fontWeight: isLevelAppropriate ? 600 : 400,
     }),
@@ -176,9 +176,7 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
           selected && "ring-2 ring-offset-2 ring-blue-500",
           quest.computedStatus === "locked" && !isDimmed && "opacity-70",
           quest.computedStatus === "completed" && !isDimmed && "opacity-80",
-          // in_progress treated same as available (no special styling)
-          (quest.computedStatus === "available" ||
-            quest.computedStatus === "in_progress") &&
+          quest.computedStatus === "available" &&
             !isDimmed &&
             "shadow-sm hover:shadow-lg",
           // Visual hierarchy indicators (only when not dimmed)

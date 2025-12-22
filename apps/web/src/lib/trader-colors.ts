@@ -48,11 +48,6 @@ export const STATUS_COLORS = {
     bg: "#1a1a1a", // Same dark background for consistency
     border: "#4db8ff", // Bright blue border
   },
-  in_progress: {
-    primary: "#ffcc00", // Bright yellow/gold
-    bg: "#1a1a1a", // Same dark background
-    border: "#ffcc00", // Bright yellow border
-  },
   completed: {
     primary: "#4ade80", // Bright green
     bg: "#1e2e1e", // Tinted green background for clear distinction

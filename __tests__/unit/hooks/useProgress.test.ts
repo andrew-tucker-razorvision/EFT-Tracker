@@ -113,7 +113,7 @@ describe("useProgress", () => {
 
       expect(result.current.progress.size).toBe(2);
       expect(result.current.progress.get("quest_1")).toBe("completed");
-      expect(result.current.progress.get("quest_2")).toBe("in_progress");
+      expect(result.current.progress.get("quest_2")).toBe("available");
     });
 
     it("should handle fetch errors", async () => {

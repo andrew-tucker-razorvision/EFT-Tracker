@@ -35,8 +35,7 @@ export function ProgressStats({ quests, traders }: ProgressStatsProps) {
       (q) => q.computedStatus === "completed"
     ).length;
     const available = quests.filter(
-      (q) =>
-        q.computedStatus === "available" || q.computedStatus === "in_progress"
+      (q) => q.computedStatus === "available"
     ).length;
     const locked = quests.filter((q) => q.computedStatus === "locked").length;
 
@@ -57,8 +56,7 @@ export function ProgressStats({ quests, traders }: ProgressStatsProps) {
       (q) => q.computedStatus === "completed"
     ).length;
     const available = kappaQuests.filter(
-      (q) =>
-        q.computedStatus === "available" || q.computedStatus === "in_progress"
+      (q) => q.computedStatus === "available"
     ).length;
 
     return {
@@ -81,8 +79,7 @@ export function ProgressStats({ quests, traders }: ProgressStatsProps) {
         (q) => q.computedStatus === "completed"
       ).length;
       const available = traderQuests.filter(
-        (q) =>
-          q.computedStatus === "available" || q.computedStatus === "in_progress"
+        (q) => q.computedStatus === "available"
       ).length;
       const locked = traderQuests.filter(
         (q) => q.computedStatus === "locked"

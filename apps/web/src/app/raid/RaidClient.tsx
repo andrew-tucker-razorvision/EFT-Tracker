@@ -131,8 +131,7 @@ export function RaidClient() {
         (q) => q.computedStatus === "completed"
       ).length,
       available: allQuestsWithProgress.filter(
-        (q) =>
-          q.computedStatus === "available" || q.computedStatus === "in_progress"
+        (q) => q.computedStatus === "available"
       ).length,
       locked: allQuestsWithProgress.filter((q) => q.computedStatus === "locked")
         .length,

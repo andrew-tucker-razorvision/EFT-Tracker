@@ -44,7 +44,7 @@ describe("useQuests", () => {
         playerLevel: 1,
         questsPerTree: 5,
         bypassLevelRequirement: false,
-        questType: null,
+        questTypes: [],
         hideReputationQuests: true,
       });
     });

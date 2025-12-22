@@ -11,7 +11,6 @@ import type { QuestStatus } from "@/types";
 
 const STATUSES: { value: QuestStatus; label: string; color: string }[] = [
   { value: "available", label: "Available", color: "#0292c0" },
-  { value: "in_progress", label: "In Progress", color: "#c4aa6a" },
   { value: "completed", label: "Completed", color: "#00a700" },
   { value: "locked", label: "Locked", color: "#636363" },
 ];

@@ -5,7 +5,6 @@ import type { QuestFilters, Trader, QuestStatus, QuestType } from "@/types";
 
 const STATUS_LABELS: Record<QuestStatus, string> = {
   available: "Available",
-  in_progress: "In Progress",
   completed: "Completed",
   locked: "Locked",
 };

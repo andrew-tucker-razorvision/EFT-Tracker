@@ -240,20 +240,6 @@ describe("Quest Status Styling", () => {
     expect(nodeDiv).toBeInTheDocument();
   });
 
-  it("should apply in_progress styling same as available", () => {
-    const quests = createMixedStatusQuests();
-    const inProgressQuest = quests.find(
-      (q) => q.id === MIXED_STATUS_IDS.IN_PROGRESS
-    )!;
-
-    const props = createNodeProps(inProgressQuest);
-    const { container } = renderWithReactFlow(<QuestNode {...props} />);
-
-    // in_progress is treated same as available - should have shadow styling
-    const nodeDiv = container.querySelector(".shadow-sm");
-    expect(nodeDiv).toBeInTheDocument();
-  });
-
   it("should apply completed status styling with reduced opacity", () => {
     const quests = createMixedStatusQuests();
     const completedQuest = quests.find(

@@ -153,19 +153,6 @@ describe("QuestNode", () => {
       expect(nodeDiv).toBeInTheDocument();
     });
 
-    it("should apply in_progress status styling (same as available)", () => {
-      // Use a non-Kappa quest (BP Depot at index 4) to test in_progress styling
-      // in_progress is now treated the same as available (simplified status model)
-      const quest = createQuestWithProgress(mockQuests[4], "in_progress");
-      const props = createNodeProps(quest);
-
-      const { container } = renderWithReactFlow(<QuestNode {...props} />);
-
-      // In progress quests now have shadow styling like available quests
-      const nodeDiv = container.querySelector(".shadow-sm");
-      expect(nodeDiv).toBeInTheDocument();
-    });
-
     it("should show checkmark for completed quests", () => {
       const quest = createQuestWithProgress(mockQuests[0], "completed");
       const props = createNodeProps(quest);

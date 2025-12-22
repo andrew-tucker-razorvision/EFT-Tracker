@@ -63,7 +63,7 @@ export const defaultTestFilters: QuestFilters = {
   playerLevel: 1,
   questsPerTree: 5,
   bypassLevelRequirement: false,
-  questType: null,
+  questTypes: [],
   hideReputationQuests: true, // Default to hiding reputation quests
 };
 
@@ -135,8 +135,8 @@ export function createMixedStatusQuests(): QuestWithProgress[] {
     createQuest("quest_locked_1", "Locked Quest", "trader_prapor", 15),
     createQuest("quest_available_1", "Available Quest", "trader_prapor", 1),
     createQuest(
-      "quest_in_progress_1",
-      "In Progress Quest",
+      "quest_available_3",
+      "Third Available Quest",
       "trader_therapist",
       3
     ),
@@ -153,7 +153,7 @@ export function createMixedStatusQuests(): QuestWithProgress[] {
   return [
     toQuestWithProgress(quests[0], "locked"),
     toQuestWithProgress(quests[1], "available"),
-    toQuestWithProgress(quests[2], "in_progress"),
+    toQuestWithProgress(quests[2], "available"),
     toQuestWithProgress(quests[3], "completed"),
     toQuestWithProgress(quests[4], "available"),
     toQuestWithProgress(quests[5], "completed"),
@@ -166,7 +166,7 @@ export function createMixedStatusQuests(): QuestWithProgress[] {
 export const MIXED_STATUS_IDS = {
   LOCKED: "quest_locked_1",
   AVAILABLE: "quest_available_1",
-  IN_PROGRESS: "quest_in_progress_1",
+  AVAILABLE_3: "quest_available_3",
   COMPLETED: "quest_completed_1",
   AVAILABLE_2: "quest_available_2",
   COMPLETED_2: "quest_completed_2",
@@ -298,12 +298,7 @@ export function createLargeQuestSet(
   tradersToUse: string[] = mockTraders.map((t) => t.id)
 ): QuestWithProgress[] {
   const quests: QuestWithProgress[] = [];
-  const statuses: QuestStatus[] = [
-    "locked",
-    "available",
-    "in_progress",
-    "completed",
-  ];
+  const statuses: QuestStatus[] = ["locked", "available", "completed"];
 
   for (let i = 0; i < count; i++) {
     const traderId = tradersToUse[i % tradersToUse.length];

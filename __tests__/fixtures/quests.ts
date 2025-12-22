@@ -172,7 +172,7 @@ export function createQuestWithProgress(
 export const mockQuestsWithProgress: QuestWithProgress[] = [
   createQuestWithProgress(mockQuests[0], "completed"), // Debut - completed
   createQuestWithProgress(mockQuests[1], "available"), // Checking - available (unlocked by Debut)
-  createQuestWithProgress(mockQuests[2], "in_progress"), // Shortage - in progress
+  createQuestWithProgress(mockQuests[2], "available"), // Shortage - available
   createQuestWithProgress(mockQuests[3], "locked"), // Delivery - locked
   createQuestWithProgress(mockQuests[4], "available"), // BP Depot - available
 ];

@@ -53,10 +53,9 @@ export function RaidPlanner({ quests, onQuestDetails }: RaidPlannerProps) {
   const raidObjectives = useMemo(() => {
     const objectives: QuestObjective[] = [];
 
-    // Filter to only available/in_progress quests
+    // Filter to only available quests
     const availableQuests = quests.filter(
-      (q) =>
-        q.computedStatus === "available" || q.computedStatus === "in_progress"
+      (q) => q.computedStatus === "available"
     );
 
     for (const quest of availableQuests) {
@@ -125,8 +124,7 @@ export function RaidPlanner({ quests, onQuestDetails }: RaidPlannerProps) {
   const mapSuggestions = useMemo(() => {
     const suggestions: MapSuggestion[] = [];
     const availableQuests = quests.filter(
-      (q) =>
-        q.computedStatus === "available" || q.computedStatus === "in_progress"
+      (q) => q.computedStatus === "available"
     );
 
     for (const map of MAPS) {

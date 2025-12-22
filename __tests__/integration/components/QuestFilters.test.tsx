@@ -27,7 +27,7 @@ describe("QuestFilters Integration Tests", () => {
     statuses: [],
     kappaOnly: false,
     map: null,
-    questType: null,
+    questTypes: [],
     playerLevel: 1,
     questsPerTree: 5,
     bypassLevelRequirement: false,

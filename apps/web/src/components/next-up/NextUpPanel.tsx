@@ -35,8 +35,7 @@ export function NextUpPanel({
 
     // Get available quests only
     const availableQuests = quests.filter(
-      (q) =>
-        q.computedStatus === "available" || q.computedStatus === "in_progress"
+      (q) => q.computedStatus === "available"
     );
 
     // 1. At-level quests (highest priority)

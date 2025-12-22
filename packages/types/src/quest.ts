@@ -6,7 +6,7 @@
 import type { Node, Edge } from "@xyflow/react";
 
 // Quest status enum
-export type QuestStatus = "locked" | "available" | "in_progress" | "completed";
+export type QuestStatus = "locked" | "available" | "completed";
 
 // Quest type enum for categorization
 export type QuestType =

@@ -82,7 +82,6 @@ model QuestProgress {
 enum QuestStatus {
   LOCKED
   AVAILABLE
-  IN_PROGRESS
   COMPLETED
 }
 
