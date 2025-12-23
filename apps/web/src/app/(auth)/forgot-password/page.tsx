@@ -1,9 +1,7 @@
 // @ts-nocheck
 "use client";
 
-import { useState, useEffect } from "react";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,29 +16,18 @@ import {
 } from "@/components/ui/card";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 
-export default function LoginPage() {
-  const router = useRouter();
+export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [failedAttempts, setFailedAttempts] = useState(0);
-  const [showCaptcha, setShowCaptcha] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-
-  // Show CAPTCHA after 2 failed login attempts
-  useEffect(() => {
-    if (failedAttempts >= 2) {
-      setShowCaptcha(true);
-    }
-  }, [failedAttempts]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    // Validate CAPTCHA if shown
-    if (showCaptcha && !turnstileToken) {
+    if (!turnstileToken) {
       setError("Please complete the CAPTCHA verification");
       return;
     }
@@ -48,36 +35,67 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        turnstileToken: showCaptcha ? turnstileToken : undefined,
-        redirect: false,
+      const response = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, turnstileToken }),
       });
 
-      if (result?.error) {
-        setError("Invalid email or password");
-        setFailedAttempts((prev) => prev + 1);
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Something went wrong");
         setTurnstileToken(null); // Reset CAPTCHA on failure
       } else {
-        router.push("/quest-tree");
-        router.refresh();
+        setSuccess(true);
       }
     } catch (err) {
-      console.error("Sign-in error:", err);
+      console.error("Forgot password error:", err);
       setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  if (success) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold">
+              Check Your Email
+            </CardTitle>
+            <CardDescription>
+              If an account with that email exists, we&apos;ve sent you a
+              password reset link.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              The link will expire in 1 hour. If you don&apos;t see the email,
+              check your spam folder.
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Link href="/login" className="w-full">
+              <Button variant="outline" className="w-full">
+                Back to Sign In
+              </Button>
+            </Link>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Sign In</CardTitle>
+          <CardTitle className="text-2xl font-bold">Forgot Password</CardTitle>
           <CardDescription>
-            Enter your credentials to access your quest progress
+            Enter your email address and we&apos;ll send you a link to reset
+            your password.
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
@@ -98,41 +116,21 @@ export default function LoginPage() {
                 required
               />
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link
-                  href="/forgot-password"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+            <div className="pt-2">
+              <TurnstileWidget
+                onVerify={setTurnstileToken}
+                onError={() => setError("CAPTCHA verification failed.")}
               />
             </div>
-            {showCaptcha && (
-              <div className="pt-2">
-                <TurnstileWidget
-                  onVerify={setTurnstileToken}
-                  onError={() => setError("CAPTCHA verification failed.")}
-                />
-              </div>
-            )}
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? "Sending..." : "Send Reset Link"}
             </Button>
             <p className="text-sm text-muted-foreground text-center">
-              Don&apos;t have an account?{" "}
-              <Link href="/register" className="text-primary hover:underline">
-                Sign up
+              Remember your password?{" "}
+              <Link href="/login" className="text-primary hover:underline">
+                Sign in
               </Link>
             </p>
           </CardFooter>
