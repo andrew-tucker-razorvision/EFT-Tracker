@@ -141,6 +141,18 @@ model SecurityEvent {
   @@index([createdAt])
 }
 
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  email     String
+  token     String    @unique
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  usedAt    DateTime?
+
+  @@index([email])
+  @@index([token])
+}
+
 enum SecurityEventType {
   LOGIN_SUCCESS
   LOGIN_FAILED
@@ -148,6 +160,7 @@ enum SecurityEventType {
   TOKEN_GENERATED
   TOKEN_REVOKED
   PASSWORD_RESET_REQUESTED
+  PASSWORD_RESET_COMPLETED
   RATE_LIMIT_EXCEEDED
   CAPTCHA_FAILED
 }
