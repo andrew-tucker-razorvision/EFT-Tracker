@@ -30,7 +30,6 @@
     "@auth/prisma-adapter": "^2.11.1",
     "@eft-tracker/types": "workspace:*",
     "@eft-tracker/utils": "workspace:*",
-    "@marsidev/react-turnstile": "^1.4.0",
     "@prisma/adapter-pg": "^7.0.0",
     "@prisma/client": "^7.0.0",
     "@prisma/extension-accelerate": "2.0.2",

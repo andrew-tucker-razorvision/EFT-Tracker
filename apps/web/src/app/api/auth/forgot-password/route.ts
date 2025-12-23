@@ -5,12 +5,10 @@ import { z } from "zod";
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 import { logSecurityEvent } from "@/lib/security-logger";
-import { verifyTurnstile } from "@/lib/turnstile";
 import { sendPasswordResetEmail } from "@/lib/email";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Invalid email address"),
-  turnstileToken: z.string().optional(),
 });
 
 // Token expiry in milliseconds (1 hour)
@@ -59,25 +57,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { email, turnstileToken } = forgotPasswordSchema.parse(body);
-
-    // Verify CAPTCHA if token provided
-    if (turnstileToken) {
-      const isValidCaptcha = await verifyTurnstile(turnstileToken);
-      if (!isValidCaptcha) {
-        await logSecurityEvent({
-          type: "CAPTCHA_FAILED",
-          ipAddress: clientIp,
-          userAgent: request.headers.get("user-agent") ?? undefined,
-          metadata: { endpoint: "/api/auth/forgot-password" },
-        });
-
-        return NextResponse.json(
-          { error: "CAPTCHA verification failed. Please try again." },
-          { status: 400 }
-        );
-      }
-    }
+    const { email } = forgotPasswordSchema.parse(body);
 
     // Check if user exists
     const user = await prisma.user.findUnique({

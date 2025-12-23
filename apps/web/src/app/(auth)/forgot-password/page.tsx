@@ -14,38 +14,29 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
-    if (!turnstileToken) {
-      setError("Please complete the CAPTCHA verification");
-      return;
-    }
-
     setLoading(true);
 
     try {
       const response = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, turnstileToken }),
+        body: JSON.stringify({ email }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
         setError(data.error || "Something went wrong");
-        setTurnstileToken(null); // Reset CAPTCHA on failure
       } else {
         setSuccess(true);
       }
@@ -114,12 +105,6 @@ export default function ForgotPasswordPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-              />
-            </div>
-            <div className="pt-2">
-              <TurnstileWidget
-                onVerify={setTurnstileToken}
-                onError={() => setError("CAPTCHA verification failed.")}
               />
             </div>
           </CardContent>

@@ -142,7 +142,7 @@ export const typography = {
       'Menlo',
       'Consolas',
       '"Liberation Mono"',
-      'Courier,
+      'Courier',
       'monospace',
     ],
   },

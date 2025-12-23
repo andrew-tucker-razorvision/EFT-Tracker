@@ -5,13 +5,11 @@ import { z } from "zod";
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 import { logSecurityEvent } from "@/lib/security-logger";
-import { verifyTurnstile } from "@/lib/turnstile";
 
 const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   name: z.string().min(1, "Name is required").optional(),
-  turnstileToken: z.string().optional(),
 });
 
 export async function POST(request: Request) {
@@ -49,26 +47,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { email, password, name, turnstileToken } =
-      registerSchema.parse(body);
-
-    // Verify CAPTCHA if token provided
-    if (turnstileToken) {
-      const isValidCaptcha = await verifyTurnstile(turnstileToken);
-      if (!isValidCaptcha) {
-        await logSecurityEvent({
-          type: "CAPTCHA_FAILED",
-          ipAddress: clientIp,
-          userAgent: request.headers.get("user-agent") ?? undefined,
-          metadata: { endpoint: "/api/auth/register" },
-        });
-
-        return NextResponse.json(
-          { error: "CAPTCHA verification failed. Please try again." },
-          { status: 400 }
-        );
-      }
-    }
+    const { email, password, name } = registerSchema.parse(body);
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({

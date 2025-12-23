@@ -51,11 +51,6 @@ vi.mock("@/lib/rate-limit", () => ({
   },
 }));
 
-// Mock turnstile
-vi.mock("@/lib/turnstile", () => ({
-  verifyTurnstile: vi.fn(() => true),
-}));
-
 // Mock email service
 vi.mock("@/lib/email", () => ({
   sendPasswordResetEmail: vi.fn(() => Promise.resolve({ success: true })),
@@ -67,8 +62,10 @@ vi.mock("@/lib/security-logger", () => ({
 }));
 
 // Import route handlers after all mocks are set up
-const { POST: forgotPasswordPOST } = await import("@/app/api/auth/forgot-password/route");
-const { POST: resetPasswordPOST } = await import("@/app/api/auth/reset-password/route");
+const { POST: forgotPasswordPOST } =
+  await import("@/app/api/auth/forgot-password/route");
+const { POST: resetPasswordPOST } =
+  await import("@/app/api/auth/reset-password/route");
 
 describe("/api/auth/forgot-password", () => {
   beforeEach(() => {
@@ -103,7 +100,6 @@ describe("/api/auth/forgot-password", () => {
           method: "POST",
           body: JSON.stringify({
             email: "test@example.com",
-            turnstileToken: "valid-token",
           }),
         }
       );
@@ -124,7 +120,6 @@ describe("/api/auth/forgot-password", () => {
           method: "POST",
           body: JSON.stringify({
             email: "nonexistent@example.com",
-            turnstileToken: "valid-token",
           }),
         }
       );
@@ -159,7 +154,6 @@ describe("/api/auth/forgot-password", () => {
           method: "POST",
           body: JSON.stringify({
             email: "test@example.com",
-            turnstileToken: "valid-token",
           }),
         }
       );
@@ -178,7 +172,6 @@ describe("/api/auth/forgot-password", () => {
           method: "POST",
           body: JSON.stringify({
             email: "not-an-email",
-            turnstileToken: "valid-token",
           }),
         }
       );
@@ -270,7 +263,9 @@ describe("/api/auth/reset-password", () => {
         createdAt: new Date(Date.now() - 7200000),
         usedAt: null,
       } as never);
-      vi.mocked(prisma.passwordResetToken.delete).mockResolvedValue({} as never);
+      vi.mocked(prisma.passwordResetToken.delete).mockResolvedValue(
+        {} as never
+      );
 
       const request = new Request(
         "http://localhost:3000/api/auth/reset-password",
