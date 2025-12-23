@@ -7,8 +7,7 @@ const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null;
 
-const FROM_EMAIL =
-  process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
 const APP_NAME = "Learn to Tarkov";
 
 interface SendEmailResult {
@@ -42,7 +41,10 @@ export async function sendPasswordResetEmail(
     });
 
     if (error) {
-      logger.error({ error, email: email.substring(0, 3) + "***" }, "Failed to send password reset email");
+      logger.error(
+        { error, email: email.substring(0, 3) + "***" },
+        "Failed to send password reset email"
+      );
       return { success: false, error: error.message };
     }
 
