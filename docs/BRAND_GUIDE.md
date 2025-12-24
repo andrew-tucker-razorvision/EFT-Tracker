@@ -151,6 +151,21 @@ shadow-[0_0_8px_var(--success)]
 
 ## Layout & Spacing
 
+> Based on "Refactoring UI" by Adam Wathan & Steve Schoger - use strict spacing scales to maintain visual consistency.
+
+### Spacing Scale (8px base)
+
+Use these semantic spacing classes defined in `globals.css`:
+
+| Class | Value | Usage |
+| ----- | ----- | ----- |
+| `gap-form` | `1.5rem` (24px) | Between form field groups |
+| `gap-form-field` | `0.375rem` (6px) | Between label and input within a group |
+| `gap-component` | `1rem` (16px) | Between related components |
+| `p-card` | `1.5rem` (24px) | Card internal padding |
+
+**Why this matters:** More space between groups than within them creates clear visual hierarchy without relying on dividers.
+
 ### Container Widths
 
 | Context | Max Width |
@@ -171,10 +186,77 @@ shadow-[0_0_8px_var(--success)]
 
 | Context | Value |
 | ------- | ----- |
-| Card padding | `p-6` |
+| Card padding | `p-card` (semantic, 24px) |
 | Compact card padding | `p-4` |
 | Gap between cards | `gap-6` |
 | Gap between list items | `gap-2` |
+
+---
+
+## Shadow Elevation System
+
+> "Use shadows to convey elevation" - Refactoring UI
+
+Shadows communicate depth and importance. Use consistent elevation levels:
+
+| Class | Usage | Components |
+| ----- | ----- | ---------- |
+| `shadow-sm` | Subtle elevation | Buttons at rest |
+| `shadow-elevation-sm` | Low elevation | Cards at rest |
+| `shadow-elevation-md` | Medium elevation | Cards on hover |
+| `shadow-elevation-lg` | High elevation | Dropdowns, popovers |
+| `shadow-elevation-xl` | Maximum elevation | Modals, dialogs |
+| `shadow-inset-input` | Inset shadow | Form inputs (emulates light source) |
+
+### Shadow Definitions
+
+```css
+--shadow-elevation-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px -1px rgba(0, 0, 0, 0.2);
+--shadow-elevation-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+--shadow-elevation-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.25), 0 4px 6px -4px rgba(0, 0, 0, 0.25);
+--shadow-elevation-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+--shadow-inset-input: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+```
+
+---
+
+## Text Hierarchy
+
+> "Labels are a last resort" - Refactoring UI. De-emphasize labels, emphasize data.
+
+### Three-Level System
+
+| Level | Class | Color | Usage |
+| ----- | ----- | ----- | ----- |
+| Primary | `text-primary` | `--text-bright` | Headlines, key data values |
+| Secondary | `text-secondary` | `--text-secondary` | Body text, supporting info |
+| Tertiary | `text-tertiary` / `text-label` | `--text-tertiary` | Labels, metadata, timestamps |
+
+### Label/Value Pattern
+
+**Before (wrong):**
+
+```html
+<span>Level: 15</span>  <!-- Both same weight/color -->
+```
+
+**After (correct):**
+
+```html
+<span class="text-label">Lv.</span>
+<span class="text-primary font-semibold">15</span>
+```
+
+The label is de-emphasized (smaller, dimmer) while the value is prominent.
+
+### Form Labels
+
+Use `text-label` class for form labels:
+
+```html
+<Label className="text-label">Email</Label>
+<Input ... />
+```
 
 ### Grid Patterns
 
@@ -319,6 +401,7 @@ All variables should be defined in your global CSS:
   --text-bright: #e8e6d4;
   --text-secondary: #9a9a8a;
   --text-dim: #6a6a5a;
+  --text-tertiary: #6a6a5a; /* Same as dim, semantic alias */
 
   /* Accent */
   --accent-gold: #c4aa6a;
@@ -334,5 +417,25 @@ All variables should be defined in your global CSS:
   --tactical-border: rgba(196, 170, 106, 0.2);
   --tactical-border-hover: rgba(196, 170, 106, 0.4);
   --grid-line: rgba(196, 170, 106, 0.03);
+
+  /* Shadow Elevation System (Refactoring UI) */
+  --shadow-elevation-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px -1px rgba(0, 0, 0, 0.2);
+  --shadow-elevation-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+  --shadow-elevation-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.25), 0 4px 6px -4px rgba(0, 0, 0, 0.25);
+  --shadow-elevation-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  --shadow-inset-input: inset 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 ```
+
+---
+
+## Refactoring UI Principles Applied
+
+This design system incorporates key principles from "Refactoring UI":
+
+1. **Limit your choices** - Strict spacing scale (8px base), defined shadow levels
+2. **Labels are a last resort** - De-emphasize labels, emphasize data values
+3. **Avoid ambiguous spacing** - More space between groups than within
+4. **Use shadows to convey elevation** - Consistent depth hierarchy
+5. **Start with too much white space** - Generous padding creates breathing room
+6. **Semantics are secondary** - Button hierarchy based on visual importance, not HTML semantics
