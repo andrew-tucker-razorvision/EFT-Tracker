@@ -15,6 +15,7 @@ type QuestWithRelations = Prisma.QuestGetPayload<{
         requiredQuest: {
           include: {
             trader: true;
+            progress: true;
           };
         };
       };
@@ -85,17 +86,8 @@ function isQuestEffectivelyLocked(
     return false;
   }
 
-  // If no dependencies AND no progress record, quest is locked (user hasn't started it yet)
-  // This prevents unstarted quests from showing as "available" by default
-  if (
-    quest.dependsOn.length === 0 &&
-    (!quest.progress || quest.progress.length === 0)
-  ) {
-    memo.set(questId, true);
-    return true;
-  }
-
-  // If no dependencies AND user HAS progress on it, not locked (use stored status)
+  // If no dependencies, quest is not locked - it's available to start
+  // (The actual status will come from stored progress or default to "available")
   if (quest.dependsOn.length === 0) {
     memo.set(questId, false);
     return false;
@@ -104,16 +96,22 @@ function isQuestEffectivelyLocked(
   // Check each dependency
   for (const dep of quest.dependsOn) {
     const depQuest = quests.find((q) => q.id === dep.requiredQuest.id);
-    if (!depQuest) {
-      // Dependency not in results - check if progress exists via the dependency data
-      // If we can't find the quest, we can't check its status, so assume dependency not met
-      memo.set(questId, true);
-      return true;
-    }
-
-    const depProgress = depQuest.progress?.[0];
-    const storedStatus = depProgress?.status || null;
     const requirementStatus = dep.requirementStatus || ["complete"];
+
+    // Get progress status - prefer from filtered results, fall back to dependency data
+    // This is important when searching/filtering: the dependency quest may not be in
+    // the filtered results, but we still have its progress via the dependsOn relation
+    let storedStatus: string | null = null;
+    if (depQuest) {
+      storedStatus = depQuest.progress?.[0]?.status || null;
+    } else {
+      // Quest not in filtered results - use progress from dependency relation
+      // The requiredQuest now includes progress data for the current user
+      const reqQuestProgress = (
+        dep.requiredQuest as { progress?: { status: string }[] }
+      ).progress;
+      storedStatus = reqQuestProgress?.[0]?.status || null;
+    }
 
     // First check: Is the stored status sufficient?
     if (!isDependencyMet(requirementStatus, storedStatus)) {
@@ -124,7 +122,12 @@ function isQuestEffectivelyLocked(
 
     // Second check: Even if stored status is COMPLETED/IN_PROGRESS,
     // is the prerequisite quest effectively locked due to its own dependencies?
-    if (isQuestEffectivelyLocked(dep.requiredQuest.id, quests, memo)) {
+    // Only do this recursive check if the quest is in the filtered results
+    // (we can't check deeper dependencies if the quest isn't loaded)
+    if (
+      depQuest &&
+      isQuestEffectivelyLocked(dep.requiredQuest.id, quests, memo)
+    ) {
       // The prerequisite is effectively locked, so this dependency is not truly met
       memo.set(questId, true);
       return true;
@@ -185,6 +188,11 @@ async function handleGET(request: Request) {
             requiredQuest: {
               include: {
                 trader: true,
+                progress: userId
+                  ? {
+                      where: { userId },
+                    }
+                  : false,
               },
             },
           },
