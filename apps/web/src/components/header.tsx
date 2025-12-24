@@ -112,22 +112,23 @@ export function Header() {
               <span className="sm:hidden">L2T</span>
             </span>
           </Link>
+          {/* Navigation - Refactoring UI: De-emphasize inactive items */}
           <nav className="hidden md:flex items-center gap-6">
             <Link
               href="/maps"
-              className="text-sm font-[family-name:var(--font-rajdhani)] font-semibold uppercase tracking-wide text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors"
+              className="text-sm font-[family-name:var(--font-rajdhani)] font-semibold uppercase tracking-wide text-[var(--text-tertiary)] hover:text-[var(--accent-gold)] transition-colors"
             >
               Map Select
             </Link>
             <Link
               href="/raid"
-              className="text-sm font-[family-name:var(--font-rajdhani)] font-semibold uppercase tracking-wide text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors"
+              className="text-sm font-[family-name:var(--font-rajdhani)] font-semibold uppercase tracking-wide text-[var(--text-tertiary)] hover:text-[var(--accent-gold)] transition-colors"
             >
               Raid Prep
             </Link>
             <Link
               href="/quest-tree"
-              className="text-sm font-[family-name:var(--font-rajdhani)] font-semibold uppercase tracking-wide text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors"
+              className="text-sm font-[family-name:var(--font-rajdhani)] font-semibold uppercase tracking-wide text-[var(--text-tertiary)] hover:text-[var(--accent-gold)] transition-colors"
             >
               Quest Tree
             </Link>
