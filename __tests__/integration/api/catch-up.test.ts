@@ -92,12 +92,13 @@ const mockQuestsFromDb = [
 ];
 
 // Extract mock functions for easier access
-const { mockUpsert, mockQuestFindMany, mockProgressFindMany, mockTransaction } = prismaMocks as {
-  mockUpsert: ReturnType<typeof vi.fn>;
-  mockQuestFindMany: ReturnType<typeof vi.fn>;
-  mockProgressFindMany: ReturnType<typeof vi.fn>;
-  mockTransaction: ReturnType<typeof vi.fn>;
-};
+const { mockUpsert, mockQuestFindMany, mockProgressFindMany, mockTransaction } =
+  prismaMocks as {
+    mockUpsert: ReturnType<typeof vi.fn>;
+    mockQuestFindMany: ReturnType<typeof vi.fn>;
+    mockProgressFindMany: ReturnType<typeof vi.fn>;
+    mockTransaction: ReturnType<typeof vi.fn>;
+  };
 const { mockAuth } = authMocks as { mockAuth: ReturnType<typeof vi.fn> };
 
 describe("catch-up API", () => {
@@ -109,13 +110,15 @@ describe("catch-up API", () => {
     mockQuestFindMany.mockResolvedValue(mockQuestsFromDb);
     mockProgressFindMany.mockResolvedValue([]); // No existing progress by default
     mockUpsert.mockResolvedValue({});
-    mockTransaction.mockImplementation(async (callback: (tx: unknown) => Promise<void>) => {
-      await callback({
-        questProgress: {
-          upsert: mockUpsert,
-        },
-      });
-    });
+    mockTransaction.mockImplementation(
+      async (callback: (tx: unknown) => Promise<void>) => {
+        await callback({
+          questProgress: {
+            upsert: mockUpsert,
+          },
+        });
+      }
+    );
   });
 
   describe("Authentication", () => {
@@ -219,23 +222,33 @@ describe("catch-up API", () => {
   describe("Prerequisites Completion", () => {
     it("completes all prerequisites for target quest", async () => {
       const upsertedQuests: { questId: string; status: string }[] = [];
-      mockTransaction.mockImplementation(async (callback: (tx: unknown) => Promise<void>) => {
-        await callback({
-          questProgress: {
-            upsert: vi.fn().mockImplementation(({ where, create, update }: {
-              where: { userId_questId: { questId: string } };
-              create: { questId: string; status: string };
-              update: { status: string };
-            }) => {
-              upsertedQuests.push({
-                questId: where.userId_questId.questId,
-                status: create.status,
-              });
-              return Promise.resolve({});
-            }),
-          },
-        });
-      });
+      mockTransaction.mockImplementation(
+        async (callback: (tx: unknown) => Promise<void>) => {
+          await callback({
+            questProgress: {
+              upsert: vi
+                .fn()
+                .mockImplementation(
+                  ({
+                    where,
+                    create,
+                    update,
+                  }: {
+                    where: { userId_questId: { questId: string } };
+                    create: { questId: string; status: string };
+                    update: { status: string };
+                  }) => {
+                    upsertedQuests.push({
+                      questId: where.userId_questId.questId,
+                      status: create.status,
+                    });
+                    return Promise.resolve({});
+                  }
+                ),
+            },
+          });
+        }
+      );
 
       const request = new Request("http://localhost/api/progress/catch-up", {
         method: "POST",
@@ -302,10 +315,12 @@ describe("catch-up API", () => {
       expect(data.success).toBe(true);
       expect(data).toHaveProperty("completed");
       expect(data).toHaveProperty("completedBranches");
+      expect(data).toHaveProperty("levelCompleted");
       expect(data).toHaveProperty("available");
       expect(data).toHaveProperty("totalChanged");
       expect(Array.isArray(data.completed)).toBe(true);
       expect(Array.isArray(data.completedBranches)).toBe(true);
+      expect(Array.isArray(data.levelCompleted)).toBe(true);
       expect(Array.isArray(data.available)).toBe(true);
       expect(typeof data.totalChanged).toBe("number");
     });
@@ -324,9 +339,12 @@ describe("catch-up API", () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      // totalChanged should equal completed + completedBranches + available count
+      // totalChanged should equal completed + completedBranches + levelCompleted + available count
       expect(data.totalChanged).toBe(
-        data.completed.length + data.completedBranches.length + data.available.length
+        data.completed.length +
+          data.completedBranches.length +
+          data.levelCompleted.length +
+          data.available.length
       );
     });
   });
