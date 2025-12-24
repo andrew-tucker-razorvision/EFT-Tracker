@@ -7,8 +7,8 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card"
       className={cn(
-        // Refactoring UI: Use elevation shadow, consistent padding
-        "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border p-card shadow-elevation-sm",
+        // Refactoring UI: Use elevation shadow, consistent padding, hover lift
+        "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border p-card shadow-elevation-sm transition-all hover:shadow-elevation-md hover:-translate-y-0.5",
         className
       )}
       {...props}
