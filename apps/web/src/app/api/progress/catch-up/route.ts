@@ -74,11 +74,8 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const {
-      targetQuests,
-      playerLevel: _playerLevel,
-      confirmedBranches,
-    } = catchUpSchema.parse(body);
+    const { targetQuests, playerLevel, confirmedBranches } =
+      catchUpSchema.parse(body);
 
     // Fetch all quests with their dependencies
     const allQuests = await prisma.quest.findMany({
@@ -264,6 +261,76 @@ export async function POST(request: Request) {
       }
     }
 
+    // Mark all non-target quests at or below player level as COMPLETED
+    // These are quests the user likely completed before reaching their current position
+    const levelBasedCompletions = new Set<string>();
+
+    for (const quest of allQuests) {
+      // Skip target quests (they should be AVAILABLE)
+      if (targetQuestSet.has(quest.id)) continue;
+
+      // Skip already-marked quests (prerequisites or branches)
+      if (prerequisitesToComplete.has(quest.id)) continue;
+      if (branchQuestsToComplete.has(quest.id)) continue;
+
+      // Skip quests above player level
+      if (quest.levelRequired > playerLevel) continue;
+
+      // Skip already completed quests
+      const currentStatus = progressMap.get(quest.id);
+      if (currentStatus === "COMPLETED") continue;
+
+      levelBasedCompletions.add(quest.id);
+    }
+
+    // Batch upsert level-based completions
+    const levelCompletedIds: string[] = [];
+    const levelArray = Array.from(levelBasedCompletions);
+
+    if (levelArray.length > 0) {
+      const CHUNK_SIZE = 50;
+      for (let i = 0; i < levelArray.length; i += CHUNK_SIZE) {
+        const chunk = levelArray.slice(i, i + CHUNK_SIZE);
+
+        try {
+          await prisma.$transaction(
+            async (tx) => {
+              for (const questId of chunk) {
+                await tx.questProgress.upsert({
+                  where: {
+                    userId_questId: {
+                      userId: session.user.id,
+                      questId,
+                    },
+                  },
+                  create: {
+                    userId: session.user.id,
+                    questId,
+                    status: "COMPLETED",
+                    syncSource: "WEB",
+                  },
+                  update: {
+                    status: "COMPLETED",
+                    syncSource: "WEB",
+                  },
+                });
+              }
+            },
+            { timeout: 30000 }
+          );
+          levelCompletedIds.push(...chunk);
+        } catch (error) {
+          logger.error(
+            { err: error, chunk: chunk.length, userId: session.user.id },
+            "Transaction failed for level-based completion chunk"
+          );
+          throw new Error(
+            `Failed to complete level-based quests (chunk ${i / CHUNK_SIZE + 1})`
+          );
+        }
+      }
+    }
+
     // Set target quests as AVAILABLE
     const availableIds: string[] = [];
 
@@ -325,9 +392,13 @@ export async function POST(request: Request) {
       success: true,
       completed: completedIds,
       completedBranches: completedBranchIds,
+      levelCompleted: levelCompletedIds,
       available: availableIds,
       totalChanged:
-        completedIds.length + completedBranchIds.length + availableIds.length,
+        completedIds.length +
+        completedBranchIds.length +
+        levelCompletedIds.length +
+        availableIds.length,
     });
   } catch (error) {
     if (error instanceof z.ZodError) {

@@ -87,7 +87,10 @@ function isQuestEffectivelyLocked(
 
   // If no dependencies AND no progress record, quest is locked (user hasn't started it yet)
   // This prevents unstarted quests from showing as "available" by default
-  if (quest.dependsOn.length === 0 && (!quest.progress || quest.progress.length === 0)) {
+  if (
+    quest.dependsOn.length === 0 &&
+    (!quest.progress || quest.progress.length === 0)
+  ) {
     memo.set(questId, true);
     return true;
   }
