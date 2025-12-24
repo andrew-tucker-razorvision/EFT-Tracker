@@ -132,6 +132,12 @@ export function Header() {
             >
               Quest Tree
             </Link>
+            <Link
+              href="/guides/game-settings"
+              className="text-sm font-[family-name:var(--font-rajdhani)] font-semibold uppercase tracking-wide text-[var(--text-tertiary)] hover:text-[var(--accent-gold)] transition-colors"
+            >
+              Game Settings
+            </Link>
           </nav>
         </div>
 
@@ -171,6 +177,9 @@ export function Header() {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/quest-tree">Quest Tree</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/guides/game-settings">Game Settings</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/settings" className="flex items-center gap-2">
@@ -251,6 +260,13 @@ export function Header() {
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Quest Tree
+                    </Link>
+                    <Link
+                      href="/guides/game-settings"
+                      className="px-2 py-2 text-sm hover:bg-muted rounded-md"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Game Settings
                     </Link>
                     <Link
                       href="/settings"
