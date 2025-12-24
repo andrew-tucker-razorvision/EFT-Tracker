@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
 export default function GameSettingsPage() {
-  const [activeTab, setActiveTab] = useState('game-settings');
+  const [activeTab, setActiveTab] = useState("game-settings");
 
   return (
     <div className="page" style={styles.page}>
@@ -13,7 +13,9 @@ export default function GameSettingsPage() {
       <header style={styles.header}>
         <div>
           <h1 style={styles.h1}>Tarkov 1.0 Settings Guide</h1>
-          <p style={styles.subtitle}>Complete reference for RTX 3080 + 5800X3D @ 1440p</p>
+          <p style={styles.subtitle}>
+            Complete reference for RTX 3080 + 5800X3D @ 1440p
+          </p>
           <p style={styles.creatorCredit}>
             📺 Based on <strong>Klemintime</strong>&apos;s comprehensive guide.
             <a
@@ -22,9 +24,10 @@ export default function GameSettingsPage() {
               rel="noopener noreferrer"
               style={styles.creatorLink}
             >
-              {' '}▶ Subscribe to his channel
-            </a>
-            {' '} — he puts serious work into this!
+              {" "}
+              ▶ Subscribe to his channel
+            </a>{" "}
+            — he puts serious work into this!
           </p>
         </div>
         <div style={styles.headerRight}>
@@ -42,17 +45,23 @@ export default function GameSettingsPage() {
 
       {/* Tab Navigation */}
       <div style={styles.tabsNav}>
-        {['Game Settings', 'NVIDIA CP', 'Afterburner', 'Testing', 'Known Bugs'].map((tab, idx) => {
-          const tabId = tab
-            .toLowerCase()
-            .replace(/\s+/g, '-');
+        {[
+          "Game Settings",
+          "NVIDIA CP",
+          "Afterburner",
+          "Testing",
+          "Known Bugs",
+        ].map((tab) => {
+          const tabId = tab.toLowerCase().replace(/\s+/g, "-");
           return (
             <button
               key={tabId}
               onClick={() => setActiveTab(tabId)}
               style={{
                 ...styles.tabButton,
-                ...(activeTab === tabId ? styles.tabButtonActive : styles.tabButtonInactive),
+                ...(activeTab === tabId
+                  ? styles.tabButtonActive
+                  : styles.tabButtonInactive),
               }}
             >
               {tab}
@@ -64,13 +73,20 @@ export default function GameSettingsPage() {
       {/* Color Legend */}
       <div style={styles.colorLegend}>
         <div style={styles.legendItem}>
-          <div style={{ ...styles.legendColor, backgroundColor: 'var(--accent-gold)' }}></div>
+          <div
+            style={{
+              ...styles.legendColor,
+              backgroundColor: "var(--accent-gold)",
+            }}
+          ></div>
           <span style={styles.legendText}>
             <strong>Gold values</strong> = Recommended setting
           </span>
         </div>
         <div style={styles.legendItem}>
-          <div style={{ ...styles.legendColor, backgroundColor: 'var(--kappa)' }}></div>
+          <div
+            style={{ ...styles.legendColor, backgroundColor: "var(--kappa)" }}
+          ></div>
           <span style={styles.legendText}>
             <strong>Yellow border</strong> = Critical warning (can cause bugs)
           </span>
@@ -78,7 +94,7 @@ export default function GameSettingsPage() {
       </div>
 
       {/* TAB 1: GAME SETTINGS */}
-      {activeTab === 'game-settings' && (
+      {activeTab === "game-settings" && (
         <div>
           <div style={styles.settingsPanel}>
             {/* Game Performance Settings */}
@@ -87,9 +103,22 @@ export default function GameSettingsPage() {
               <span style={styles.badge}>Important</span>
             </div>
             <div style={styles.settingsList}>
-              <SettingRow label="FOV" value="75" note="Max FOV, +15-20% FPS" valueClass="gold" />
-              <SettingRow label="Only use physical cores" value="✓ ON" note="Hyperthreaded CPUs only" type="checkbox" />
-              <SettingRow label="Automatic RAM Cleaner" value="✗ OFF" note="64GB RAM doesn't need it" type="checkbox" />
+              <SettingRow
+                label="FOV"
+                value="75"
+                note="Max FOV, +15-20% FPS"
+                valueClass="gold"
+              />
+              <SettingRow
+                label="Only use physical cores"
+                value="✓ ON"
+                note="Hyperthreaded CPUs only"
+              />
+              <SettingRow
+                label="Automatic RAM Cleaner"
+                value="✗ OFF"
+                note="64GB RAM doesn't need it"
+              />
             </div>
 
             <div style={styles.sectionDivider}></div>
@@ -100,7 +129,12 @@ export default function GameSettingsPage() {
               <span style={styles.badge}>Critical</span>
             </div>
             <div style={styles.settingsList}>
-              <SettingRow label="Screen resolution" value="2560x1440 (16:9)" note="Native 1440p" valueClass="gold" />
+              <SettingRow
+                label="Screen resolution"
+                value="2560x1440 (16:9)"
+                note="Native 1440p"
+                valueClass="gold"
+              />
               <SettingRow label="Aspect ratio" value="16:9" />
               <SettingRow
                 label="Screen mode"
@@ -110,7 +144,11 @@ export default function GameSettingsPage() {
                 isCritical
               />
               <SettingRow label="Monitor" value="Primary Display" />
-              <SettingRow label="VSync" value="✗ OFF" note="Use G-SYNC instead" type="checkbox" />
+              <SettingRow
+                label="VSync"
+                value="✗ OFF"
+                note="Use G-SYNC instead"
+              />
             </div>
 
             <div style={styles.sectionDivider}></div>
@@ -128,11 +166,29 @@ export default function GameSettingsPage() {
                 valueClass="warning"
                 isCritical
               />
-              <SettingRow label="Shadows quality" value="HIGH" note="Minimal FPS impact, looks great" valueClass="gold" />
-              <SettingRow label="Shadow Visibility" value="80" type="slider" />
-              <SettingRow label="Object LOD quality" value="2" note="+10% FPS vs 2.5" type="slider" valueClass="gold" />
-              <SettingRow label="Overall visibility" value="1500" note="Minimal FPS impact" type="slider" />
-              <SettingRow label="Clouds quality" value="HIGH" note="No FPS impact" />
+              <SettingRow
+                label="Shadows quality"
+                value="HIGH"
+                note="Minimal FPS impact, looks great"
+                valueClass="gold"
+              />
+              <SettingRow label="Shadow Visibility" value="80" />
+              <SettingRow
+                label="Object LOD quality"
+                value="2"
+                note="+10% FPS vs 2.5"
+                valueClass="gold"
+              />
+              <SettingRow
+                label="Overall visibility"
+                value="1500"
+                note="Minimal FPS impact"
+              />
+              <SettingRow
+                label="Clouds quality"
+                value="HIGH"
+                note="No FPS impact"
+              />
             </div>
 
             <div style={styles.sectionDivider}></div>
@@ -142,13 +198,27 @@ export default function GameSettingsPage() {
               <h3 style={styles.sectionTitle}>Anti-aliasing &amp; Upscaling</h3>
             </div>
             <div style={styles.settingsList}>
-              <SettingRow label="Anti-aliasing" value="OFF" note="DLSS replaces this" />
-              <SettingRow label="NVIDIA DLSS" value="QUALITY" note="Best balance" valueClass="gold" />
-              <SettingRow label="DLSS Preset" value="K" note="RTX 30 optimized" valueClass="gold" />
+              <SettingRow
+                label="Anti-aliasing"
+                value="OFF"
+                note="DLSS replaces this"
+              />
+              <SettingRow
+                label="NVIDIA DLSS"
+                value="QUALITY"
+                note="Best balance"
+                valueClass="gold"
+              />
+              <SettingRow
+                label="DLSS Preset"
+                value="K"
+                note="RTX 30 optimized"
+                valueClass="gold"
+              />
               <SettingRow label="AMD FSR 2.2" value="OFF" />
               <SettingRow label="AMD FSR 3.0" value="OFF" />
               <SettingRow label="Resampling" value="1x off" />
-              <SettingRow label="Sharpness" value="0.7" note="Edge clarity" type="slider" />
+              <SettingRow label="Sharpness" value="0.7" note="Edge clarity" />
             </div>
 
             <div style={styles.sectionDivider}></div>
@@ -158,10 +228,30 @@ export default function GameSettingsPage() {
               <h3 style={styles.sectionTitle}>Lighting &amp; Effects</h3>
             </div>
             <div style={styles.settingsList}>
-              <SettingRow label="Volumetric lighting" value="LOW" note="25% FPS on Ultra" valueClass="gold" />
-              <SettingRow label="HBAO" value="MAX PERFORMANCE" note="Detail shadows, low cost" valueClass="gold" />
-              <SettingRow label="SSR" value="MEDIUM" note="Low shimmers too much" valueClass="gold" />
-              <SettingRow label="Anisotropic filtering" value="ON" note="Big visual gain, low cost" valueClass="gold" />
+              <SettingRow
+                label="Volumetric lighting"
+                value="LOW"
+                note="25% FPS on Ultra"
+                valueClass="gold"
+              />
+              <SettingRow
+                label="HBAO"
+                value="MAX PERFORMANCE"
+                note="Detail shadows, low cost"
+                valueClass="gold"
+              />
+              <SettingRow
+                label="SSR"
+                value="MEDIUM"
+                note="Low shimmers too much"
+                valueClass="gold"
+              />
+              <SettingRow
+                label="Anisotropic filtering"
+                value="ON"
+                note="Big visual gain, low cost"
+                valueClass="gold"
+              />
             </div>
 
             <div style={styles.sectionDivider}></div>
@@ -178,9 +268,17 @@ export default function GameSettingsPage() {
                 valueClass="warning"
                 isCritical
               />
-              <SettingRow label="Disable game FPS limit" value="✓ ON" note="Uncapped" type="checkbox" />
-              <SettingRow label="Lobby FPS Limit" value="60" note="Save power in menus" type="slider" />
-              <SettingRow label="Game FPS Limit" value="Uncapped" type="slider" />
+              <SettingRow
+                label="Disable game FPS limit"
+                value="✓ ON"
+                note="Uncapped"
+              />
+              <SettingRow
+                label="Lobby FPS Limit"
+                value="60"
+                note="Save power in menus"
+              />
+              <SettingRow label="Game FPS Limit" value="Uncapped" />
             </div>
 
             <div style={styles.sectionDivider}></div>
@@ -191,22 +289,40 @@ export default function GameSettingsPage() {
               <span style={styles.badge}>Critical</span>
             </div>
             <div style={styles.settingsList}>
-              <SettingRow label="Mip Streaming" value="✗ OFF" note="Causes crashes!" type="checkbox" />
-              <SettingRow label="High-quality color" value="✗ OFF" note="0 visual gain" type="checkbox" />
-              <SettingRow label="Streets Lower Texture Resolution" value="✗ OFF" note="Only for Ultra tex" type="checkbox" />
+              <SettingRow
+                label="Mip Streaming"
+                value="✗ OFF"
+                note="Causes crashes!"
+              />
+              <SettingRow
+                label="High-quality color"
+                value="✗ OFF"
+                note="0 visual gain"
+              />
+              <SettingRow
+                label="Streets Lower Texture Resolution"
+                value="✗ OFF"
+                note="Only for Ultra tex"
+              />
             </div>
 
             <div style={styles.sectionDivider}></div>
 
             {/* Effects to Disable */}
             <div style={styles.sectionHeader}>
-              <h3 style={styles.sectionTitle}>Effects (Disable for Visibility)</h3>
+              <h3 style={styles.sectionTitle}>
+                Effects (Disable for Visibility)
+              </h3>
             </div>
             <div style={styles.settingsList}>
-              <SettingRow label="Z-Blur" value="✗ OFF" type="checkbox" />
-              <SettingRow label="Chromatic aberrations" value="✗ OFF" type="checkbox" />
-              <SettingRow label="Noise" value="✗ OFF" type="checkbox" />
-              <SettingRow label="Grass shadows" value="✓ ON" note="Slight GPU cost, looks great" type="checkbox" />
+              <SettingRow label="Z-Blur" value="✗ OFF" />
+              <SettingRow label="Chromatic aberrations" value="✗ OFF" />
+              <SettingRow label="Noise" value="✗ OFF" />
+              <SettingRow
+                label="Grass shadows"
+                value="✓ ON"
+                note="Slight GPU cost, looks great"
+              />
             </div>
           </div>
 
@@ -230,61 +346,116 @@ export default function GameSettingsPage() {
       )}
 
       {/* TAB 2: NVIDIA CONTROL PANEL */}
-      {activeTab === 'nvidia-cp' && (
+      {activeTab === "nvidia-cp" && (
         <div style={styles.settingsPanel}>
           <div style={styles.sectionHeader}>
             <h3 style={styles.sectionTitle}>Program-Specific Settings</h3>
           </div>
           <p style={styles.helpText}>
-            Set these in NVIDIA Control Panel → Manage 3D Settings → Program Settings (select EscapeFromTarkov.exe)
+            Set these in NVIDIA Control Panel → Manage 3D Settings → Program
+            Settings (select EscapeFromTarkov.exe)
           </p>
 
           <div style={styles.settingsList}>
-            <SettingRow label="Power Management Mode" value="Prefer Maximum Performance" valueClass="gold" />
-            <SettingRow label="Low Latency Mode" value="ULTRA" note="(if Reflex disabled)" valueClass="gold" />
+            <SettingRow
+              label="Power Management Mode"
+              value="Prefer Maximum Performance"
+              valueClass="gold"
+            />
+            <SettingRow
+              label="Low Latency Mode"
+              value="ULTRA"
+              note="(if Reflex disabled)"
+              valueClass="gold"
+            />
             <SettingRow label="Texture Filtering" value="High Performance" />
-            <SettingRow label="Threaded Optimization" value="✓ ON" type="checkbox" />
-            <SettingRow label="Max Frame Rate" value="✗ OFF" note="Let game handle it" type="checkbox" />
+            <SettingRow label="Threaded Optimization" value="✓ ON" />
+            <SettingRow
+              label="Max Frame Rate"
+              value="✗ OFF"
+              note="Let game handle it"
+            />
           </div>
 
           <div style={styles.sectionDivider}></div>
 
           <div style={styles.sectionHeader}>
-            <h3 style={styles.sectionTitle}>G-SYNC Configuration (if supported)</h3>
+            <h3 style={styles.sectionTitle}>
+              G-SYNC Configuration (if supported)
+            </h3>
           </div>
           <div style={styles.settingsList}>
-            <SettingRow label="Enable G-SYNC" value="✓ YES" type="checkbox" />
-            <SettingRow label="In-Game FPS Limit" value="Monitor Hz - 3" note="e.g., 144Hz → 141 FPS" />
-            <SettingRow label="Why" value="" note="Prevents G-SYNC boundary crossing" hideValue />
+            <SettingRow label="Enable G-SYNC" value="✓ YES" />
+            <SettingRow
+              label="In-Game FPS Limit"
+              value="Monitor Hz - 3"
+              note="e.g., 144Hz → 141 FPS"
+            />
+            <SettingRow
+              label="Why"
+              value=""
+              note="Prevents G-SYNC boundary crossing"
+              hideValue
+            />
           </div>
         </div>
       )}
 
       {/* TAB 3: MSI AFTERBURNER */}
-      {activeTab === 'afterburner' && (
+      {activeTab === "afterburner" && (
         <div style={styles.settingsPanel}>
           <div style={styles.sectionHeader}>
             <h3 style={styles.sectionTitle}>Installation &amp; Setup</h3>
           </div>
           <div style={styles.helpText}>
             <p>1. Download MSI Afterburner from MSI&apos;s official website</p>
-            <p style={{ marginTop: '8px' }}>2. Install and launch with admin privileges</p>
-            <p style={{ marginTop: '8px' }}>3. Enable the on-screen display (OSD) in settings</p>
-            <p style={{ marginTop: '8px' }}>4. Configure monitoring tab to show desired metrics</p>
+            <p style={{ marginTop: "8px" }}>
+              2. Install and launch with admin privileges
+            </p>
+            <p style={{ marginTop: "8px" }}>
+              3. Enable the on-screen display (OSD) in settings
+            </p>
+            <p style={{ marginTop: "8px" }}>
+              4. Configure monitoring tab to show desired metrics
+            </p>
           </div>
 
           <div style={styles.sectionDivider}></div>
 
           <div style={styles.sectionHeader}>
-            <h3 style={styles.sectionTitle}>Metrics to Monitor During Testing</h3>
+            <h3 style={styles.sectionTitle}>
+              Metrics to Monitor During Testing
+            </h3>
           </div>
           <div style={styles.settingsList}>
             <SettingRow label="GPU Usage" value="95-100%" note="If GPU-bound" />
-            <SettingRow label="VRAM Usage" value="< 9.5GB" note="For RTX 3080 on HIGH" />
-            <SettingRow label="CPU Usage" value="Monitor all cores" note="Look for bottleneck" />
-            <SettingRow label="FPS (Average)" value="80+ Streets" note="Target minimum" valueClass="gold" />
-            <SettingRow label="FPS (1% Low)" value="> 60 FPS" note="Consistency matters" valueClass="gold" />
-            <SettingRow label="GPU Temperature" value="< 80°C" note="Safe operating zone" />
+            <SettingRow
+              label="VRAM Usage"
+              value="< 9.5GB"
+              note="For RTX 3080 on HIGH"
+            />
+            <SettingRow
+              label="CPU Usage"
+              value="Monitor all cores"
+              note="Look for bottleneck"
+            />
+            <SettingRow
+              label="FPS (Average)"
+              value="80+ Streets"
+              note="Target minimum"
+              valueClass="gold"
+            />
+            <SettingRow
+              label="FPS (1% Low)"
+              value="> 60 FPS"
+              note="Consistency matters"
+              valueClass="gold"
+            />
+            <SettingRow
+              label="GPU Temperature"
+              value="< 80°C"
+              note="Safe operating zone"
+            />
           </div>
 
           <div style={styles.sectionDivider}></div>
@@ -294,47 +465,91 @@ export default function GameSettingsPage() {
           </div>
           <div style={styles.helpText}>
             <p>
-              <strong style={{ color: 'var(--text-bright)' }}>Recommended OSD Layout:</strong>
+              <strong style={{ color: "var(--text-bright)" }}>
+                Recommended OSD Layout:
+              </strong>
             </p>
-            <p style={{ marginTop: '8px' }}>- GPU Load (%)</p>
+            <p style={{ marginTop: "8px" }}>- GPU Load (%)</p>
             <p>- GPU Temperature (°C)</p>
             <p>- GPU Memory Usage (MB)</p>
             <p>- FPS Counter</p>
-            <p style={{ marginTop: '12px' }}>
-              <strong style={{ color: 'var(--text-bright)' }}>Position:</strong> Top-left corner (doesn&apos;t block HUD)
+            <p style={{ marginTop: "12px" }}>
+              <strong style={{ color: "var(--text-bright)" }}>Position:</strong>{" "}
+              Top-left corner (doesn&apos;t block HUD)
             </p>
-            <p style={{ marginTop: '8px' }}>
-              <strong style={{ color: 'var(--text-bright)' }}>Hotkey:</strong> Set custom hotkey to toggle on/off during raids
+            <p style={{ marginTop: "8px" }}>
+              <strong style={{ color: "var(--text-bright)" }}>Hotkey:</strong>{" "}
+              Set custom hotkey to toggle on/off during raids
             </p>
           </div>
         </div>
       )}
 
       {/* TAB 4: TESTING PROTOCOL */}
-      {activeTab === 'testing' && (
+      {activeTab === "testing" && (
         <div style={styles.settingsPanel}>
           <div style={styles.sectionHeader}>
             <h3 style={styles.sectionTitle}>Pre-Launch Checklist</h3>
             <span style={styles.badge}>Important</span>
           </div>
           <div style={styles.checklist}>
-            <ChecklistItem icon="✓" label="Screen Mode" desc="BORDERLESS verified (test in-game)" isCritical />
-            <ChecklistItem icon="✓" label="Texture Quality" desc="HIGH (12-16GB VRAM)" />
-            <ChecklistItem icon="✓" label="DLSS" desc="ON (QUALITY, Preset K)" />
-            <ChecklistItem icon="⚠" label="Reflex" desc="ON but will test for bug" isWarning />
-            <ChecklistItem icon="✓" label="All Critical Settings" desc="See Game Settings tab" />
+            <ChecklistItem
+              icon="✓"
+              label="Screen Mode"
+              desc="BORDERLESS verified (test in-game)"
+              isCritical
+            />
+            <ChecklistItem
+              icon="✓"
+              label="Texture Quality"
+              desc="HIGH (12-16GB VRAM)"
+            />
+            <ChecklistItem
+              icon="✓"
+              label="DLSS"
+              desc="ON (QUALITY, Preset K)"
+            />
+            <ChecklistItem
+              icon="⚠"
+              label="Reflex"
+              desc="ON but will test for bug"
+              isWarning
+            />
+            <ChecklistItem
+              icon="✓"
+              label="All Critical Settings"
+              desc="See Game Settings tab"
+            />
           </div>
 
           <div style={styles.sectionDivider}></div>
 
           <div style={styles.sectionHeader}>
-            <h3 style={styles.sectionTitle}>Initial Testing (Streets Offline)</h3>
+            <h3 style={styles.sectionTitle}>
+              Initial Testing (Streets Offline)
+            </h3>
           </div>
           <div style={styles.checklist}>
-            <ChecklistItem icon="✓" label="MSI Afterburner" desc="Installed and monitoring active" />
-            <ChecklistItem icon="✓" label="VRAM Usage" desc="Stays below 9.5GB throughout" />
-            <ChecklistItem icon="✓" label="FPS 1% Low" desc="No drops below 60 FPS" />
-            <ChecklistItem icon="✓" label="GPU Temperature" desc="Stays below 80°C" />
+            <ChecklistItem
+              icon="✓"
+              label="MSI Afterburner"
+              desc="Installed and monitoring active"
+            />
+            <ChecklistItem
+              icon="✓"
+              label="VRAM Usage"
+              desc="Stays below 9.5GB throughout"
+            />
+            <ChecklistItem
+              icon="✓"
+              label="FPS 1% Low"
+              desc="No drops below 60 FPS"
+            />
+            <ChecklistItem
+              icon="✓"
+              label="GPU Temperature"
+              desc="Stays below 80°C"
+            />
           </div>
 
           <div style={styles.sectionDivider}></div>
@@ -344,9 +559,24 @@ export default function GameSettingsPage() {
             <span style={styles.badge}>Critical</span>
           </div>
           <div style={styles.checklist}>
-            <ChecklistItem icon="!" label="Run 3 Online Raids" desc="Monitor for sudden 30% FPS drops" isWarning />
-            <ChecklistItem icon="!" label="Document Performance" desc="Note any drops or anomalies" isWarning />
-            <ChecklistItem icon="!" label="If Drops Occur" desc="Disable Reflex and retest" isWarning />
+            <ChecklistItem
+              icon="!"
+              label="Run 3 Online Raids"
+              desc="Monitor for sudden 30% FPS drops"
+              isWarning
+            />
+            <ChecklistItem
+              icon="!"
+              label="Document Performance"
+              desc="Note any drops or anomalies"
+              isWarning
+            />
+            <ChecklistItem
+              icon="!"
+              label="If Drops Occur"
+              desc="Disable Reflex and retest"
+              isWarning
+            />
           </div>
 
           <div style={styles.sectionDivider}></div>
@@ -355,15 +585,27 @@ export default function GameSettingsPage() {
             <h3 style={styles.sectionTitle}>Final Validation</h3>
           </div>
           <div style={styles.checklist}>
-            <ChecklistItem icon="✓" label="FPS Targets Met" desc="See Game Settings tab for map targets" />
-            <ChecklistItem icon="✓" label="No Crashes or Stutters" desc="Stable across multiple raids" />
-            <ChecklistItem icon="✓" label="Comfortable Performance" desc="Ready for competitive gameplay" />
+            <ChecklistItem
+              icon="✓"
+              label="FPS Targets Met"
+              desc="See Game Settings tab for map targets"
+            />
+            <ChecklistItem
+              icon="✓"
+              label="No Crashes or Stutters"
+              desc="Stable across multiple raids"
+            />
+            <ChecklistItem
+              icon="✓"
+              label="Comfortable Performance"
+              desc="Ready for competitive gameplay"
+            />
           </div>
         </div>
       )}
 
       {/* TAB 5: KNOWN BUGS */}
-      {activeTab === 'known-bugs' && (
+      {activeTab === "known-bugs" && (
         <div style={styles.settingsPanel}>
           <div style={styles.sectionHeader}>
             <h3 style={styles.sectionTitle}>Critical Bugs (Must Know)</h3>
@@ -373,19 +615,19 @@ export default function GameSettingsPage() {
           <BugItem
             title="Fullscreen Mode Bug"
             details={[
-              'Symptom: ~50 FPS loss (30% reduction)',
-              'Example: Factory offline: 230 FPS borderless → 185 FPS fullscreen',
-              'Cause: Unity engine bug with fullscreen mode',
-              'Fix: ALWAYS use BORDERLESS mode',
+              "Symptom: ~50 FPS loss (30% reduction)",
+              "Example: Factory offline: 230 FPS borderless → 185 FPS fullscreen",
+              "Cause: Unity engine bug with fullscreen mode",
+              "Fix: ALWAYS use BORDERLESS mode",
             ]}
           />
 
           <BugItem
             title="Nvidia Reflex FPS Bug"
             details={[
-              'Symptom: Sudden 30% FPS drop mid-raid that persists',
-              'Status: Recurring bug across patches',
-              'Fix: Disable Nvidia Reflex, restart game',
+              "Symptom: Sudden 30% FPS drop mid-raid that persists",
+              "Status: Recurring bug across patches",
+              "Fix: Disable Nvidia Reflex, restart game",
               'Note: This is why "test first" is emphasized',
             ]}
           />
@@ -393,9 +635,9 @@ export default function GameSettingsPage() {
           <BugItem
             title="MIP Streaming Crashes"
             details={[
-              'Symptom: Game crashes at raid end or during load',
-              'Status: Broken in current patch',
-              'Recommendation: Keep OFF unless you know it helps',
+              "Symptom: Game crashes at raid end or during load",
+              "Status: Broken in current patch",
+              "Recommendation: Keep OFF unless you know it helps",
             ]}
           />
 
@@ -408,19 +650,19 @@ export default function GameSettingsPage() {
           <BugItem
             title="Streets Stuttering/Micro-Stutters"
             details={[
-              'Check 1: Ensure Texture Quality = HIGH (not Ultra)',
-              'Check 2: Disable VRAM-hungry settings (Volumetric Ultra, SSR Ultra, etc.)',
-              'Monitor: VRAM usage should stay < 9.5GB',
+              "Check 1: Ensure Texture Quality = HIGH (not Ultra)",
+              "Check 2: Disable VRAM-hungry settings (Volumetric Ultra, SSR Ultra, etc.)",
+              "Monitor: VRAM usage should stay < 9.5GB",
             ]}
           />
 
           <BugItem
             title="DLSS Ghosting/Motion Blur"
             details={[
-              'Symptom: Trails on fast camera movement',
-              'Fix 1: Update GPU drivers to latest version',
-              'Fix 2: Try DLSS Preset F (if K is problematic)',
-              'Note: K is recommended, F is older CNN model',
+              "Symptom: Trails on fast camera movement",
+              "Fix 1: Update GPU drivers to latest version",
+              "Fix 2: Try DLSS Preset F (if K is problematic)",
+              "Note: K is recommended, F is older CNN model",
             ]}
           />
 
@@ -432,29 +674,31 @@ export default function GameSettingsPage() {
           </div>
           <div style={styles.helpText}>
             <p>
-              <strong style={{ color: 'var(--text-bright)' }}>Only use if Streets FPS drops below 60:</strong>
+              <strong style={{ color: "var(--text-bright)" }}>
+                Only use if Streets FPS drops below 60:
+              </strong>
             </p>
-            <p style={{ marginTop: '12px' }}>
+            <p style={{ marginTop: "12px" }}>
               <strong>1. DLSS Quality → Balanced</strong>
               <br />
               +15-20 FPS, slight blur
             </p>
-            <p style={{ marginTop: '10px' }}>
+            <p style={{ marginTop: "10px" }}>
               <strong>2. SSR Medium → Low</strong>
               <br />
               +5 FPS, minimal reflection impact
             </p>
-            <p style={{ marginTop: '10px' }}>
+            <p style={{ marginTop: "10px" }}>
               <strong>3. Object LOD 2.2 → 2.0</strong>
               <br />
               +10 FPS, more pop-in
             </p>
-            <p style={{ marginTop: '10px' }}>
+            <p style={{ marginTop: "10px" }}>
               <strong>4. Volumetric LOW → OFF</strong>
               <br />
               +5-8 FPS
             </p>
-            <p style={{ marginTop: '12px', color: 'var(--kappa)' }}>
+            <p style={{ marginTop: "12px", color: "var(--kappa)" }}>
               <strong>⚠ Stop sequence once FPS stable above 60</strong>
             </p>
           </div>
@@ -471,7 +715,6 @@ function SettingRow({
   note,
   valueClass,
   isCritical,
-  type = 'default',
   hideValue,
 }: {
   label: string;
@@ -479,35 +722,77 @@ function SettingRow({
   note?: string;
   valueClass?: string;
   isCritical?: boolean;
-  type?: 'default' | 'checkbox' | 'slider';
   hideValue?: boolean;
 }) {
   return (
     <div
       style={{
         ...styles.settingRow,
-        ...(isCritical ? { borderLeft: '3px solid var(--kappa)' } : {}),
+        ...(isCritical ? { borderLeft: "3px solid var(--kappa)" } : {}),
       }}
     >
       <span style={styles.settingLabel}>{label}</span>
       {!hideValue && (
         <div style={styles.settingValue}>
-          <span style={{ ...styles.valueBox, ...(valueClass === 'gold' ? styles.valueBoxGold : valueClass === 'warning' ? styles.valueBoxWarning : {}) }}>
+          <span
+            style={{
+              ...styles.valueBox,
+              ...(valueClass === "gold"
+                ? styles.valueBoxGold
+                : valueClass === "warning"
+                  ? styles.valueBoxWarning
+                  : {}),
+            }}
+          >
             {value}
           </span>
-          {note && <span style={valueClass === 'warning' ? styles.settingNoteWarning : styles.settingNote}>{note}</span>}
+          {note && (
+            <span
+              style={
+                valueClass === "warning"
+                  ? styles.settingNoteWarning
+                  : styles.settingNote
+              }
+            >
+              {note}
+            </span>
+          )}
         </div>
       )}
-      {hideValue && note && <div style={styles.settingValue}><span style={styles.settingNote}>{note}</span></div>}
+      {hideValue && note && (
+        <div style={styles.settingValue}>
+          <span style={styles.settingNote}>{note}</span>
+        </div>
+      )}
     </div>
   );
 }
 
-function FpsBadge({ map, fps, isWarning }: { map: string; fps: string; isWarning?: boolean }) {
+function FpsBadge({
+  map,
+  fps,
+  isWarning,
+}: {
+  map: string;
+  fps: string;
+  isWarning?: boolean;
+}) {
   return (
-    <div style={{ ...styles.fpsBadge, ...(isWarning ? styles.fpsBadgeWarning : {}) }}>
+    <div
+      style={{
+        ...styles.fpsBadge,
+        ...(isWarning ? styles.fpsBadgeWarning : {}),
+      }}
+    >
       <span style={styles.fpsMap}>{map}</span>
-      <span style={{ ...styles.fpsValue, ...(isWarning ? { color: 'var(--kappa)' } : {}) }}>{fps}</span>
+      <span
+        style={{
+          ...styles.fpsValue,
+          ...(isWarning ? { color: "var(--kappa)" } : {}),
+        }}
+      >
+        {fps}
+      </span>
     </div>
   );
 }
@@ -526,8 +811,20 @@ function ChecklistItem({
   isWarning?: boolean;
 }) {
   return (
-    <div style={{ ...styles.checklistItem, ...(isCritical || isWarning ? styles.checklistItemCritical : {}) }}>
-      <div style={{ ...styles.checklistItemIcon, color: isWarning ? 'var(--kappa)' : 'var(--success)' }}>{icon}</div>
+    <div
+      style={{
+        ...styles.checklistItem,
+        ...(isCritical || isWarning ? styles.checklistItemCritical : {}),
+      }}
+    >
+      <div
+        style={{
+          ...styles.checklistItemIcon,
+          color: isWarning ? "var(--kappa)" : "var(--success)",
+        }}
+      >
+        {icon}
+      </div>
       <div style={styles.checklistItemText}>
         <div style={styles.checklistLabel}>{label}</div>
         <div style={styles.checklistDesc}>{desc}</div>
@@ -552,335 +849,335 @@ function BugItem({ title, details }: { title: string; details: string[] }) {
 // Inline styles object
 const styles = {
   page: {
-    maxWidth: '800px',
-    margin: '0 auto',
-    padding: '24px',
+    maxWidth: "800px",
+    margin: "0 auto",
+    padding: "24px",
   },
   header: {
-    display: 'grid',
-    gridTemplateColumns: '1fr auto',
-    gap: '32px',
-    alignItems: 'start',
-    marginBottom: '32px',
-    paddingBottom: '32px',
-    borderBottom: '1px solid var(--tactical-border)',
+    display: "grid",
+    gridTemplateColumns: "1fr auto",
+    gap: "32px",
+    alignItems: "start",
+    marginBottom: "32px",
+    paddingBottom: "32px",
+    borderBottom: "1px solid var(--tactical-border)",
   } as React.CSSProperties,
   h1: {
-    fontFamily: 'var(--font-heading)',
-    fontSize: '1.75rem',
+    fontFamily: "var(--font-heading)",
+    fontSize: "1.75rem",
     fontWeight: 700,
-    color: 'var(--text-bright)',
-    textTransform: 'uppercase',
-    letterSpacing: '0.08em',
+    color: "var(--text-bright)",
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
     margin: 0,
     lineHeight: 1.2,
   } as React.CSSProperties,
   subtitle: {
     margin: 0,
-    fontSize: '0.85rem',
-    color: 'var(--text-secondary)',
+    fontSize: "0.85rem",
+    color: "var(--text-secondary)",
     lineHeight: 1.5,
   } as React.CSSProperties,
   creatorCredit: {
-    fontSize: '0.85rem',
-    color: 'var(--text-secondary)',
-    marginTop: '8px',
+    fontSize: "0.85rem",
+    color: "var(--text-secondary)",
+    marginTop: "8px",
   } as React.CSSProperties,
   creatorLink: {
-    color: 'var(--accent-gold)',
-    textDecoration: 'none',
+    color: "var(--accent-gold)",
+    textDecoration: "none",
     fontWeight: 600,
-    transition: 'all 0.2s',
+    transition: "all 0.2s",
   } as React.CSSProperties,
   headerRight: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-end',
-    gap: '12px',
-    justifyContent: 'flex-start',
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-end",
+    gap: "12px",
+    justifyContent: "flex-start",
   } as React.CSSProperties,
   hardwareBadge: {
-    padding: '10px 14px',
-    background: 'var(--bg-card)',
-    border: '1px solid var(--tactical-border)',
-    borderRadius: '6px',
-    fontFamily: 'var(--font-heading)',
-    fontSize: '0.8rem',
+    padding: "10px 14px",
+    background: "var(--bg-card)",
+    border: "1px solid var(--tactical-border)",
+    borderRadius: "6px",
+    fontFamily: "var(--font-heading)",
+    fontSize: "0.8rem",
     fontWeight: 600,
-    color: 'var(--accent-gold)',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    minWidth: 'max-content',
+    color: "var(--accent-gold)",
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
+    minWidth: "max-content",
   } as React.CSSProperties,
   videoLink: {
-    padding: '10px 14px',
-    background: 'var(--bg-card)',
-    border: '1px solid var(--tactical-border)',
-    borderRadius: '6px',
-    color: 'var(--text-tertiary)',
-    fontSize: '0.75rem',
-    textDecoration: 'none',
-    transition: 'all 0.2s',
-    whiteSpace: 'nowrap',
-    minWidth: 'max-content',
+    padding: "10px 14px",
+    background: "var(--bg-card)",
+    border: "1px solid var(--tactical-border)",
+    borderRadius: "6px",
+    color: "var(--text-tertiary)",
+    fontSize: "0.75rem",
+    textDecoration: "none",
+    transition: "all 0.2s",
+    whiteSpace: "nowrap",
+    minWidth: "max-content",
   } as React.CSSProperties,
   tabsNav: {
-    display: 'flex',
-    gap: '8px',
-    marginBottom: '20px',
-    borderBottom: '1px solid var(--tactical-border)',
-    overflowX: 'auto',
-    paddingBottom: '0',
+    display: "flex",
+    gap: "8px",
+    marginBottom: "20px",
+    borderBottom: "1px solid var(--tactical-border)",
+    overflowX: "auto",
+    paddingBottom: "0",
   } as React.CSSProperties,
   tabButton: {
-    padding: '12px 16px',
-    background: 'transparent',
-    border: 'none',
-    borderBottom: '2px solid transparent',
-    color: 'var(--text-tertiary)',
-    fontFamily: 'var(--font-heading)',
-    fontSize: '0.85rem',
+    padding: "12px 16px",
+    background: "transparent",
+    border: "none",
+    borderBottom: "2px solid transparent",
+    color: "var(--text-tertiary)",
+    fontFamily: "var(--font-heading)",
+    fontSize: "0.85rem",
     fontWeight: 600,
-    textTransform: 'uppercase',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    whiteSpace: 'nowrap',
+    textTransform: "uppercase",
+    cursor: "pointer",
+    transition: "all 0.2s",
+    whiteSpace: "nowrap",
   } as React.CSSProperties,
   tabButtonInactive: {
-    color: 'var(--text-tertiary)',
+    color: "var(--text-tertiary)",
   } as React.CSSProperties,
   tabButtonActive: {
-    color: 'var(--accent-gold)',
-    borderBottomColor: 'var(--accent-gold)',
+    color: "var(--accent-gold)",
+    borderBottomColor: "var(--accent-gold)",
   } as React.CSSProperties,
   colorLegend: {
-    display: 'flex',
-    gap: '24px',
-    padding: '12px 16px',
-    background: 'var(--bg-card)',
-    border: '1px solid var(--tactical-border)',
-    borderRadius: '6px',
-    marginBottom: '20px',
-    flexWrap: 'wrap',
+    display: "flex",
+    gap: "24px",
+    padding: "12px 16px",
+    background: "var(--bg-card)",
+    border: "1px solid var(--tactical-border)",
+    borderRadius: "6px",
+    marginBottom: "20px",
+    flexWrap: "wrap",
   } as React.CSSProperties,
   legendItem: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    fontSize: '0.75rem',
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    fontSize: "0.75rem",
   } as React.CSSProperties,
   legendColor: {
-    width: '16px',
-    height: '16px',
-    borderRadius: '3px',
+    width: "16px",
+    height: "16px",
+    borderRadius: "3px",
     flexShrink: 0,
   } as React.CSSProperties,
   legendText: {
-    color: 'var(--text-tertiary)',
+    color: "var(--text-tertiary)",
   } as React.CSSProperties,
   settingsPanel: {
-    background: 'var(--bg-panel)',
-    border: '1px solid var(--tactical-border)',
-    borderRadius: '8px',
-    padding: '20px',
+    background: "var(--bg-panel)",
+    border: "1px solid var(--tactical-border)",
+    borderRadius: "8px",
+    padding: "20px",
   } as React.CSSProperties,
   sectionHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    marginBottom: '16px',
-    paddingBottom: '8px',
-    borderBottom: '1px solid var(--tactical-border)',
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    marginBottom: "16px",
+    paddingBottom: "8px",
+    borderBottom: "1px solid var(--tactical-border)",
   } as React.CSSProperties,
   sectionTitle: {
-    fontFamily: 'var(--font-heading)',
-    fontSize: '0.85rem',
+    fontFamily: "var(--font-heading)",
+    fontSize: "0.85rem",
     fontWeight: 600,
-    color: 'var(--text-bright)',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
+    color: "var(--text-bright)",
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
     margin: 0,
   } as React.CSSProperties,
   badge: {
-    fontSize: '0.6rem',
-    padding: '2px 6px',
-    background: 'var(--warning-bg)',
-    border: '1px solid var(--warning-border)',
-    borderRadius: '3px',
-    color: 'var(--kappa)',
-    textTransform: 'uppercase',
+    fontSize: "0.6rem",
+    padding: "2px 6px",
+    background: "var(--warning-bg)",
+    border: "1px solid var(--warning-border)",
+    borderRadius: "3px",
+    color: "var(--kappa)",
+    textTransform: "uppercase",
     fontWeight: 600,
   } as React.CSSProperties,
   settingsList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '2px',
+    display: "flex",
+    flexDirection: "column",
+    gap: "2px",
   } as React.CSSProperties,
   settingRow: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 110px',
-    alignItems: 'start',
-    gap: '12px',
-    padding: '8px 12px',
-    background: 'var(--bg-card)',
-    borderRadius: '4px',
-    transition: 'background 0.15s',
+    display: "grid",
+    gridTemplateColumns: "1fr 110px",
+    alignItems: "start",
+    gap: "12px",
+    padding: "8px 12px",
+    background: "var(--bg-card)",
+    borderRadius: "4px",
+    transition: "background 0.15s",
   } as React.CSSProperties,
   settingLabel: {
-    fontSize: '0.8rem',
-    color: 'var(--text-tertiary)',
-    paddingTop: '4px',
+    fontSize: "0.8rem",
+    color: "var(--text-tertiary)",
+    paddingTop: "4px",
   } as React.CSSProperties,
   settingValue: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'stretch',
-    gap: '4px',
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "stretch",
+    gap: "4px",
   } as React.CSSProperties,
   valueBox: {
-    padding: '5px 10px',
-    background: 'var(--bg-input)',
-    border: '1px solid var(--tactical-border)',
-    borderRadius: '4px',
-    fontFamily: 'var(--font-heading)',
-    fontSize: '0.8rem',
+    padding: "5px 10px",
+    background: "var(--bg-input)",
+    border: "1px solid var(--tactical-border)",
+    borderRadius: "4px",
+    fontFamily: "var(--font-heading)",
+    fontSize: "0.8rem",
     fontWeight: 600,
-    color: 'var(--text-bright)',
-    textAlign: 'center',
+    color: "var(--text-bright)",
+    textAlign: "center",
   } as React.CSSProperties,
   valueBoxGold: {
-    color: 'var(--accent-gold)',
-    borderColor: 'var(--accent-gold-dim)',
+    color: "var(--accent-gold)",
+    borderColor: "var(--accent-gold-dim)",
   } as React.CSSProperties,
   valueBoxWarning: {
-    color: 'var(--kappa)',
-    borderColor: 'var(--warning-border)',
-    background: 'var(--warning-bg)',
+    color: "var(--kappa)",
+    borderColor: "var(--warning-border)",
+    background: "var(--warning-bg)",
   } as React.CSSProperties,
   settingNote: {
-    fontSize: '0.65rem',
-    color: 'var(--text-tertiary)',
-    textAlign: 'center',
+    fontSize: "0.65rem",
+    color: "var(--text-tertiary)",
+    textAlign: "center",
     lineHeight: 1.3,
   } as React.CSSProperties,
   settingNoteWarning: {
-    fontSize: '0.65rem',
-    color: 'var(--kappa)',
-    textAlign: 'center',
+    fontSize: "0.65rem",
+    color: "var(--kappa)",
+    textAlign: "center",
     lineHeight: 1.3,
   } as React.CSSProperties,
   sectionDivider: {
-    height: '1px',
-    background: 'var(--tactical-border)',
-    margin: '20px 0',
+    height: "1px",
+    background: "var(--tactical-border)",
+    margin: "20px 0",
   } as React.CSSProperties,
   fpsSection: {
-    marginTop: '20px',
-    padding: '16px',
-    background: 'var(--bg-card)',
-    border: '1px solid var(--tactical-border)',
-    borderRadius: '8px',
+    marginTop: "20px",
+    padding: "16px",
+    background: "var(--bg-card)",
+    border: "1px solid var(--tactical-border)",
+    borderRadius: "8px",
   } as React.CSSProperties,
   fpsTitle: {
-    fontFamily: 'var(--font-heading)',
-    fontSize: '0.8rem',
+    fontFamily: "var(--font-heading)",
+    fontSize: "0.8rem",
     fontWeight: 600,
-    color: 'var(--text-tertiary)',
-    textTransform: 'uppercase',
-    marginBottom: '12px',
+    color: "var(--text-tertiary)",
+    textTransform: "uppercase",
+    marginBottom: "12px",
   } as React.CSSProperties,
   fpsGrid: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '8px',
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "8px",
   } as React.CSSProperties,
   fpsBadge: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '6px 12px',
-    background: 'var(--bg-panel)',
-    borderRadius: '4px',
-    borderLeft: '2px solid var(--success)',
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: "6px 12px",
+    background: "var(--bg-panel)",
+    borderRadius: "4px",
+    borderLeft: "2px solid var(--success)",
   } as React.CSSProperties,
   fpsBadgeWarning: {
-    borderLeftColor: 'var(--kappa)',
-    background: 'var(--warning-bg)',
+    borderLeftColor: "var(--kappa)",
+    background: "var(--warning-bg)",
   } as React.CSSProperties,
   fpsMap: {
-    fontSize: '0.75rem',
-    color: 'var(--text-secondary)',
+    fontSize: "0.75rem",
+    color: "var(--text-secondary)",
   } as React.CSSProperties,
   fpsValue: {
-    fontFamily: 'var(--font-heading)',
-    fontSize: '0.8rem',
+    fontFamily: "var(--font-heading)",
+    fontSize: "0.8rem",
     fontWeight: 600,
-    color: 'var(--success)',
+    color: "var(--success)",
   } as React.CSSProperties,
   checklist: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
   } as React.CSSProperties,
   checklistItem: {
-    display: 'grid',
-    gridTemplateColumns: 'auto 1fr',
-    gap: '12px',
-    padding: '12px',
-    background: 'var(--bg-card)',
-    borderRadius: '4px',
-    alignItems: 'start',
+    display: "grid",
+    gridTemplateColumns: "auto 1fr",
+    gap: "12px",
+    padding: "12px",
+    background: "var(--bg-card)",
+    borderRadius: "4px",
+    alignItems: "start",
   } as React.CSSProperties,
   checklistItemCritical: {
-    borderLeft: '3px solid var(--kappa)',
+    borderLeft: "3px solid var(--kappa)",
   } as React.CSSProperties,
   checklistItemIcon: {
-    fontSize: '1.1rem',
-    color: 'var(--success)',
-    marginTop: '2px',
+    fontSize: "1.1rem",
+    color: "var(--success)",
+    marginTop: "2px",
   } as React.CSSProperties,
   checklistItemText: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
   } as React.CSSProperties,
   checklistLabel: {
-    fontFamily: 'var(--font-heading)',
-    fontSize: '0.85rem',
+    fontFamily: "var(--font-heading)",
+    fontSize: "0.85rem",
     fontWeight: 600,
-    color: 'var(--text-bright)',
-    textTransform: 'uppercase',
+    color: "var(--text-bright)",
+    textTransform: "uppercase",
   } as React.CSSProperties,
   checklistDesc: {
-    fontSize: '0.75rem',
-    color: 'var(--text-tertiary)',
+    fontSize: "0.75rem",
+    color: "var(--text-tertiary)",
   } as React.CSSProperties,
   bugItem: {
-    padding: '12px',
-    background: 'var(--bg-card)',
-    borderLeft: '3px solid var(--kappa)',
-    borderRadius: '4px',
-    marginBottom: '12px',
+    padding: "12px",
+    background: "var(--bg-card)",
+    borderLeft: "3px solid var(--kappa)",
+    borderRadius: "4px",
+    marginBottom: "12px",
   } as React.CSSProperties,
   bugTitle: {
-    fontFamily: 'var(--font-heading)',
-    fontSize: '0.85rem',
+    fontFamily: "var(--font-heading)",
+    fontSize: "0.85rem",
     fontWeight: 600,
-    color: 'var(--text-bright)',
-    marginBottom: '6px',
+    color: "var(--text-bright)",
+    marginBottom: "6px",
   } as React.CSSProperties,
   bugDetail: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-    fontSize: '0.75rem',
-    color: 'var(--text-tertiary)',
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+    fontSize: "0.75rem",
+    color: "var(--text-tertiary)",
   } as React.CSSProperties,
   helpText: {
-    fontSize: '0.8rem',
-    color: 'var(--text-secondary)',
+    fontSize: "0.8rem",
+    color: "var(--text-secondary)",
     lineHeight: 1.6,
-    marginBottom: '20px',
+    marginBottom: "20px",
   } as React.CSSProperties,
 };
 
