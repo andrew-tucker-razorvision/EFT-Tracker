@@ -75,15 +75,18 @@ export default function RegisterPage() {
             Sign up to start tracking your quest progress
           </CardDescription>
         </CardHeader>
+        {/* Refactoring UI: gap-form between groups, gap-form-field within */}
         <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
+          <CardContent className="flex flex-col gap-form">
             {error && (
               <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-950 rounded-md">
                 {error}
               </div>
             )}
-            <div className="space-y-2">
-              <Label htmlFor="name">Name (optional)</Label>
+            <div className="flex flex-col gap-form-field">
+              <Label htmlFor="name" className="text-label">
+                Name (optional)
+              </Label>
               <Input
                 id="name"
                 type="text"
@@ -92,8 +95,10 @@ export default function RegisterPage() {
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+            <div className="flex flex-col gap-form-field">
+              <Label htmlFor="email" className="text-label">
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -103,8 +108,10 @@ export default function RegisterPage() {
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+            <div className="flex flex-col gap-form-field">
+              <Label htmlFor="password" className="text-label">
+                Password
+              </Label>
               <Input
                 id="password"
                 type="password"
@@ -114,8 +121,10 @@ export default function RegisterPage() {
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <div className="flex flex-col gap-form-field">
+              <Label htmlFor="confirmPassword" className="text-label">
+                Confirm Password
+              </Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -125,7 +134,7 @@ export default function RegisterPage() {
               />
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col gap-4">
+          <CardFooter className="flex flex-col gap-form pt-2">
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Creating account..." : "Create Account"}
             </Button>

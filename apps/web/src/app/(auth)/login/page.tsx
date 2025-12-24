@@ -59,15 +59,18 @@ export default function LoginPage() {
             Enter your credentials to access your quest progress
           </CardDescription>
         </CardHeader>
+        {/* Refactoring UI: gap-form between groups, gap-form-field within */}
         <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
+          <CardContent className="flex flex-col gap-form">
             {error && (
               <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-950 rounded-md">
                 {error}
               </div>
             )}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+            <div className="flex flex-col gap-form-field">
+              <Label htmlFor="email" className="text-label">
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -77,12 +80,14 @@ export default function LoginPage() {
                 required
               />
             </div>
-            <div className="space-y-2">
+            <div className="flex flex-col gap-form-field">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-label">
+                  Password
+                </Label>
                 <Link
                   href="/forgot-password"
-                  className="text-sm text-primary hover:underline"
+                  className="text-sm text-[var(--text-tertiary)] hover:text-primary transition-colors"
                 >
                   Forgot password?
                 </Link>
@@ -96,7 +101,7 @@ export default function LoginPage() {
               />
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col gap-4">
+          <CardFooter className="flex flex-col gap-form pt-2">
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Signing in..." : "Sign In"}
             </Button>
