@@ -184,26 +184,36 @@ export function LevelQuestCard({
       </div>
 
       {/* Bottom row: trader + level + action buttons */}
+      {/* Refactoring UI: Labels tertiary, data primary */}
       <div className="flex items-center justify-between mt-1">
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
+          {/* Trader name - primary emphasis (colored by trader) */}
           <span
-            className="text-[12px] font-medium"
+            className="text-[12px] font-semibold"
             style={{ color: traderColor.primary }}
           >
             {quest.trader.name}
           </span>
-          <span
-            className="text-[12px]"
-            style={{
-              color: isLevelAppropriate
-                ? "#00a700"
-                : isUpcoming
-                  ? "#ca8a00"
-                  : "#636363",
-              fontWeight: isLevelAppropriate ? 600 : 400,
-            }}
-          >
-            Lv.{quest.levelRequired}
+          {/* Level - label de-emphasized, value emphasized */}
+          <span className="flex items-center gap-0.5">
+            <span
+              className="text-[10px] uppercase tracking-wide"
+              style={{ color: "var(--text-tertiary)" }}
+            >
+              Lv
+            </span>
+            <span
+              className="text-[12px] font-semibold"
+              style={{
+                color: isLevelAppropriate
+                  ? "var(--success)"
+                  : isUpcoming
+                    ? "#ca8a00"
+                    : "var(--text-secondary)",
+              }}
+            >
+              {quest.levelRequired}
+            </span>
           </span>
         </div>
         {/* Action buttons - info and wiki link */}
