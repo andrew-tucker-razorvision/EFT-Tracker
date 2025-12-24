@@ -10,11 +10,13 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        // Refactoring UI: Buttons have subtle shadow and lift on hover
+        default:
+          "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-md",
         destructive:
           "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
-          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+          "border bg-background shadow-sm hover:bg-accent hover:text-accent-foreground hover:-translate-y-0.5 hover:shadow-md dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost:
@@ -26,9 +28,12 @@ const buttonVariants = cva(
         // Tactical outline variant
         "tactical-outline":
           "bg-transparent border border-[var(--accent-gold)] text-[var(--accent-gold)] font-bold uppercase tracking-wide font-[family-name:var(--font-rajdhani)] hover:bg-[var(--accent-gold-dim)] hover:text-[var(--text-bright)]",
-        // Tactical ghost variant
+        // Tactical ghost variant (tertiary actions)
         "tactical-ghost":
           "bg-transparent border border-[var(--tactical-border)] text-[var(--text-secondary)] font-bold uppercase tracking-wide font-[family-name:var(--font-rajdhani)] hover:border-[var(--tactical-border-hover)] hover:text-[var(--text-bright)]",
+        // Tertiary variant - minimal emphasis for ancillary actions (Refactoring UI)
+        tertiary:
+          "bg-transparent text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] font-medium",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

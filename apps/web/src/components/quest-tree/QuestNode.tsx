@@ -285,10 +285,19 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
         </div>
 
         {/* Level badge and action buttons row */}
+        {/* Refactoring UI: Labels tertiary, data primary */}
         <div className="flex items-center justify-between mt-1">
-          <div className="text-[12px]" style={levelBadgeStyle}>
-            Lv.{quest.levelRequired}
-          </div>
+          <span className="flex items-center gap-0.5">
+            <span
+              className="text-[10px] uppercase tracking-wide"
+              style={{ color: "var(--text-tertiary)" }}
+            >
+              Lv
+            </span>
+            <span className="text-[12px] font-semibold" style={levelBadgeStyle}>
+              {quest.levelRequired}
+            </span>
+          </span>
           {/* Action buttons - info and wiki link */}
           {/* Touch targets: 24px visible area with padding for easier clicking */}
           <div className="flex items-center gap-1">

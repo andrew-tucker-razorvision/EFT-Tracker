@@ -2,6 +2,15 @@
 
 **Full documentation:** `docs/BRAND_GUIDE.md`
 
+## Universal Design Principles
+
+For general UI design principles, see:
+
+- `.claude/REFACTORING_UI_GUIDE.md` - Condensed Refactoring UI principles
+- `.claude/UI_REVIEW_CHECKLIST.md` - Pre-ship UI checklist
+
+Project-specific rules below override global defaults where they conflict.
+
 ## Quick Reference
 
 When making UI changes, follow the tactical/military dark theme:

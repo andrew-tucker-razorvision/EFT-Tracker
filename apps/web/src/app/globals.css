@@ -2,12 +2,46 @@
 @import "tw-animate-css";
 
 @theme inline {
+  /* Base colors */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  /* Fonts */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-rajdhani);
   --font-body: var(--font-inter);
+
+  /* Text hierarchy colors (Refactoring UI) */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-disabled: var(--text-disabled);
+
+  /* Background layers */
+  --color-bg-dark: var(--bg-dark);
+  --color-bg-panel: var(--bg-panel);
+  --color-bg-card: var(--bg-card);
+  --color-bg-elevated: var(--bg-elevated);
+
+  /* Accent colors */
+  --color-accent-gold: var(--accent-gold);
+  --color-accent-gold-dim: var(--accent-gold-dim);
+
+  /* Status colors */
+  --color-success: var(--success);
+  --color-available: var(--available);
+  --color-kappa: var(--kappa);
+
+  /* Shadow elevation (expose as Tailwind shadows) */
+  --shadow-elevation-xs: var(--shadow-xs);
+  --shadow-elevation-sm: var(--shadow-sm);
+  --shadow-elevation-md: var(--shadow-md);
+  --shadow-elevation-lg: var(--shadow-lg);
+  --shadow-elevation-xl: var(--shadow-xl);
+  --shadow-inset: var(--shadow-inset);
+
+  /* Sidebar */
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -16,11 +50,15 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
+
+  /* Charts */
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
+
+  /* Component tokens */
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -37,6 +75,8 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+
+  /* Border radius */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -46,23 +86,176 @@
 :root {
   --radius: 0.625rem;
 
+  /* ============================================================
+     EFT-TRACKER DESIGN SYSTEM
+     Based on "Refactoring UI" by Adam Wathan & Steve Schoger
+     ============================================================ */
+
+  /* ============================================================
+     SPACING SCALE (Refactoring UI: "Establish a spacing system")
+
+     Use Tailwind classes that map to these values:
+     - Tight:      gap-1, p-1, m-1      (4px)  - icon gaps, compact UI
+     - Default:    gap-2, p-2, m-2      (8px)  - standard component gaps
+     - Comfortable: gap-3, p-3, m-3     (12px) - form field spacing
+     - Spacious:   gap-4, p-4, m-4      (16px) - card padding, section gaps
+     - Section:    gap-6, p-6, m-6      (24px) - between major sections
+     - Large:      gap-8, p-8, m-8      (32px) - hero sections, modal padding
+     - XLarge:     gap-12, p-12, m-12   (48px) - page sections
+     - XXLarge:    gap-16, p-16, m-16   (64px) - major page divisions
+     - Huge:       gap-24, p-24, m-24   (96px) - landing page sections
+
+     RULE: Never use arbitrary pixel values. Pick from this scale.
+     ============================================================ */
+  --space-0: 0;
+  --space-px: 1px;
+  --space-0-5: 0.125rem; /* 2px - hairline spacing */
+  --space-1: 0.25rem; /* 4px - tight */
+  --space-2: 0.5rem; /* 8px - default */
+  --space-3: 0.75rem; /* 12px - comfortable */
+  --space-4: 1rem; /* 16px - spacious */
+  --space-5: 1.25rem; /* 20px */
+  --space-6: 1.5rem; /* 24px - section */
+  --space-8: 2rem; /* 32px - large */
+  --space-10: 2.5rem; /* 40px */
+  --space-12: 3rem; /* 48px - xlarge */
+  --space-16: 4rem; /* 64px - xxlarge */
+  --space-20: 5rem; /* 80px */
+  --space-24: 6rem; /* 96px - huge */
+
+  /* Semantic spacing tokens - use these for consistency */
+  --space-component-gap: var(
+    --space-2
+  ); /* 8px - gap between related elements */
+  --space-component-padding: var(
+    --space-4
+  ); /* 16px - padding inside components */
+  --space-form-gap: var(--space-4); /* 16px - gap between form groups */
+  --space-form-field-gap: var(
+    --space-2
+  ); /* 8px - gap between label and input */
+  --space-section-gap: var(--space-8); /* 32px - gap between page sections */
+  --space-card-padding: var(--space-6); /* 24px - padding inside cards */
+
+  /* ============================================================
+     SHADOW ELEVATION SYSTEM (Refactoring UI: "Use shadows to convey elevation")
+
+     5 levels of elevation, each with purpose:
+     - xs:  Subtle lift (buttons at rest, input focus)
+     - sm:  Raised elements (cards, buttons on hover)
+     - md:  Floating elements (dropdowns, tooltips)
+     - lg:  Modals, dialogs
+     - xl:  Maximum emphasis (rare, critical overlays)
+
+     Each shadow has two parts:
+     1. Larger, softer shadow (ambient/diffused light)
+     2. Tighter, darker shadow (contact/direct shadow)
+     ============================================================ */
+  --shadow-color: 0 0% 0%; /* HSL for shadow color - pure black */
+
+  /* XS: Subtle lift - buttons, subtle cards */
+  --shadow-xs: 0 1px 2px hsl(var(--shadow-color) / 0.05);
+
+  /* SM: Raised elements - cards, buttons on hover */
+  --shadow-sm:
+    0 1px 3px hsl(var(--shadow-color) / 0.12),
+    0 1px 2px hsl(var(--shadow-color) / 0.24);
+
+  /* MD: Floating - dropdowns, popovers, tooltips */
+  --shadow-md:
+    0 4px 6px hsl(var(--shadow-color) / 0.15),
+    0 2px 4px hsl(var(--shadow-color) / 0.12);
+
+  /* LG: Modals, dialogs, high-priority overlays */
+  --shadow-lg:
+    0 10px 20px hsl(var(--shadow-color) / 0.2),
+    0 3px 6px hsl(var(--shadow-color) / 0.15);
+
+  /* XL: Maximum elevation - critical overlays */
+  --shadow-xl:
+    0 15px 30px hsl(var(--shadow-color) / 0.25),
+    0 5px 15px hsl(var(--shadow-color) / 0.15);
+
+  /* Inset shadows for inputs (Refactoring UI: "Emulate a light source") */
+  --shadow-inset: inset 0 1px 2px hsl(var(--shadow-color) / 0.15);
+  --shadow-inset-sm: inset 0 1px 1px hsl(var(--shadow-color) / 0.1);
+
+  /* ============================================================
+     COLOR SYSTEM
+     ============================================================ */
+
   /* EFT Dark Theme - Tarkov Wiki inspired for maximum readability */
-  /* Following Safe Rules: near-black (not pure), saturated neutrals, 8px spacing */
+  /* Following Safe Rules: near-black (not pure), saturated neutrals */
   --background: #0a0a0a; /* Near-black (not pure #000) */
   --foreground: #e8e6d4; /* Warm near-white */
 
-  /* Tactical theme - background layers (each ~4-8% lighter) */
+  /* Background layers (each ~4-8% lighter) */
   --bg-dark: #0a0a0a;
   --bg-panel: #111111;
   --bg-card: #161616;
   --bg-elevated: #1a1a1a;
 
-  /* Text hierarchy - saturated with warm gold tint */
-  --text-bright: #e8e6d4;
-  --text-secondary: #9a9a8a;
-  --text-dim: #6a6a5a;
+  /* ============================================================
+     TEXT HIERARCHY (Refactoring UI: "Size isn't everything")
 
-  /* Accent colors */
+     Use color and weight, not just size, to create hierarchy.
+
+     Primary:   Headlines, important data, key values
+     Secondary: Body text, supporting information
+     Tertiary:  Labels, metadata, timestamps, captions
+
+     RULE: Labels should be tertiary. Data should be primary.
+     ============================================================ */
+  --text-primary: #e8e6d4; /* Warm cream - headlines, key data */
+  --text-secondary: #b0ae9e; /* Muted cream - body text */
+  --text-tertiary: #7a7868; /* Dim - labels, metadata */
+  --text-disabled: #4a4a40; /* Very dim - disabled states */
+
+  /* Legacy aliases (for backward compatibility) */
+  --text-bright: var(--text-primary);
+  --text-dim: var(--text-tertiary);
+
+  /* ============================================================
+     TYPOGRAPHY SCALE (Refactoring UI: "Establish a type scale")
+
+     Use rem units. Scale increases ~25% between steps.
+     Tailwind classes: text-xs, text-sm, text-base, text-lg, etc.
+     ============================================================ */
+  --text-xs: 0.75rem; /* 12px */
+  --text-sm: 0.875rem; /* 14px */
+  --text-base: 1rem; /* 16px */
+  --text-lg: 1.125rem; /* 18px */
+  --text-xl: 1.25rem; /* 20px */
+  --text-2xl: 1.5rem; /* 24px */
+  --text-3xl: 1.875rem; /* 30px */
+  --text-4xl: 2.25rem; /* 36px */
+  --text-5xl: 3rem; /* 48px */
+
+  /* Line heights - inversely proportional to font size */
+  --leading-tight: 1.1; /* Large headlines */
+  --leading-snug: 1.25; /* Subheadings */
+  --leading-normal: 1.5; /* Body text */
+  --leading-relaxed: 1.625; /* Small text, captions */
+  --leading-loose: 2; /* Very small text */
+
+  /* Letter spacing for all-caps text (Refactoring UI: "Use letter-spacing effectively") */
+  --tracking-tight: -0.025em; /* Large headlines */
+  --tracking-normal: 0; /* Body text */
+  --tracking-wide: 0.05em; /* All-caps, small text */
+  --tracking-wider: 0.1em; /* All-caps headings */
+  --tracking-widest: 0.15em; /* All-caps labels */
+
+  /* Font weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* ============================================================
+     ACCENT & STATUS COLORS
+     ============================================================ */
+
+  /* Primary accent - gold */
   --accent-gold: #c4aa6a;
   --accent-gold-dim: rgba(196, 170, 106, 0.25);
   --accent-gold-glow: rgba(196, 170, 106, 0.08);
@@ -72,19 +265,17 @@
   --available: #4db8ff;
   --kappa: #ffcc00;
 
-  /* Borders - 0.2 opacity for better contrast */
+  /* ============================================================
+     BORDERS
+     ============================================================ */
+
   --tactical-border: rgba(196, 170, 106, 0.2);
   --tactical-border-hover: rgba(196, 170, 106, 0.4);
   --grid-line: rgba(196, 170, 106, 0.03);
 
-  /* Spacing scale - 8px base */
-  --space-1: 0.5rem; /* 8px */
-  --space-2: 1rem; /* 16px */
-  --space-3: 1.5rem; /* 24px */
-  --space-4: 2rem; /* 32px */
-  --space-6: 3rem; /* 48px */
-  --space-8: 4rem; /* 64px */
-  --space-12: 6rem; /* 96px */
+  /* ============================================================
+     COMPONENT TOKENS (Shadcn/UI compatibility)
+     ============================================================ */
 
   --card: #1a1a1a; /* Slightly lighter than background */
   --card-foreground: #e8e6d4; /* Bright cream/gold */
@@ -134,5 +325,111 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* ============================================================
+   UTILITY CLASSES FOR DESIGN SYSTEM
+   ============================================================ */
+
+@layer utilities {
+  /* Text Hierarchy Utilities */
+  .text-hierarchy-primary {
+    color: var(--text-primary);
+    font-weight: var(--font-semibold);
+  }
+
+  .text-hierarchy-secondary {
+    color: var(--text-secondary);
+    font-weight: var(--font-normal);
+  }
+
+  .text-hierarchy-tertiary {
+    color: var(--text-tertiary);
+    font-weight: var(--font-normal);
+    font-size: var(--text-sm);
+  }
+
+  /* Label styling - should always be tertiary (Refactoring UI principle) */
+  .text-label {
+    color: var(--text-tertiary);
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+
+  /* All-caps with proper letter-spacing */
+  .uppercase-tactical {
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wider);
+  }
+
+  .uppercase-label {
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-widest);
+  }
+
+  /* Shadow utilities using the elevation system */
+  .shadow-elevation-xs {
+    box-shadow: var(--shadow-xs);
+  }
+
+  .shadow-elevation-sm {
+    box-shadow: var(--shadow-sm);
+  }
+
+  .shadow-elevation-md {
+    box-shadow: var(--shadow-md);
+  }
+
+  .shadow-elevation-lg {
+    box-shadow: var(--shadow-lg);
+  }
+
+  .shadow-elevation-xl {
+    box-shadow: var(--shadow-xl);
+  }
+
+  .shadow-inset-input {
+    box-shadow: var(--shadow-inset);
+  }
+
+  /* Semantic spacing utilities */
+  .gap-component {
+    gap: var(--space-component-gap);
+  }
+
+  .p-card {
+    padding: var(--space-card-padding);
+  }
+
+  .gap-form {
+    gap: var(--space-form-gap);
+  }
+
+  .gap-form-field {
+    gap: var(--space-form-field-gap);
+  }
+
+  .gap-section {
+    gap: var(--space-section-gap);
+  }
+
+  /* Line height utilities matching typography scale */
+  .leading-headline {
+    line-height: var(--leading-tight);
+  }
+
+  .leading-subhead {
+    line-height: var(--leading-snug);
+  }
+
+  .leading-body {
+    line-height: var(--leading-normal);
+  }
+
+  .leading-caption {
+    line-height: var(--leading-relaxed);
   }
 }
