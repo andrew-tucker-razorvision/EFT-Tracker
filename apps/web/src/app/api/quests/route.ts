@@ -142,8 +142,6 @@ function isQuestEffectivelyLocked(
 async function handleGET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const trader = searchParams.get("trader");
-    const map = searchParams.get("map");
     const kappa = searchParams.get("kappa");
     const search = searchParams.get("search");
 
@@ -154,10 +152,6 @@ async function handleGET(request: Request) {
     // Build where clause
     const where: Record<string, unknown> = {};
 
-    if (trader) {
-      where.traderId = trader;
-    }
-
     if (kappa === "true") {
       where.kappaRequired = true;
     }
@@ -166,14 +160,6 @@ async function handleGET(request: Request) {
       where.title = {
         contains: search,
         mode: "insensitive",
-      };
-    }
-
-    if (map) {
-      where.objectives = {
-        some: {
-          map: map,
-        },
       };
     }
 

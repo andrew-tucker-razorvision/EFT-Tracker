@@ -8,13 +8,6 @@ import { ProgressStats } from "@/components/progress-stats";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -31,34 +24,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { StatusMultiSelect } from "./StatusMultiSelect";
-import { QuestTypeMultiSelect } from "./QuestTypeMultiSelect";
 import { ActiveFilterChips } from "./ActiveFilterChips";
-import { getTraderColor } from "@/lib/trader-colors";
 import type {
   Trader,
   QuestFilters as Filters,
   QuestWithProgress,
 } from "@/types";
-
-const MAPS = [
-  "Factory",
-  "Customs",
-  "Woods",
-  "Shoreline",
-  "Interchange",
-  "Reserve",
-  "Labs",
-  "Lighthouse",
-  "Streets of Tarkov",
-  "Ground Zero",
-];
-
-const COLUMNS_OPTIONS: { value: number | null; label: string }[] = [
-  { value: 3, label: "3 columns" },
-  { value: 5, label: "5 columns" },
-  { value: 10, label: "10 columns" },
-  { value: null, label: "All columns" },
-];
 
 interface QuestFiltersProps {
   traders: Trader[];
@@ -140,32 +111,6 @@ function AdvancedFilters({
         </div>
       </div>
 
-      {/* Columns */}
-      <div className="space-y-2">
-        <Label className="text-sm">Display Columns</Label>
-        <Select
-          value={filters.questsPerTree?.toString() ?? "all"}
-          onValueChange={(value) => {
-            const numValue = value === "all" ? null : parseInt(value);
-            onFilterChange({ questsPerTree: numValue });
-          }}
-        >
-          <SelectTrigger className="h-9">
-            <SelectValue placeholder="5 columns" />
-          </SelectTrigger>
-          <SelectContent>
-            {COLUMNS_OPTIONS.map((option) => (
-              <SelectItem
-                key={option.value?.toString() ?? "all"}
-                value={option.value?.toString() ?? "all"}
-              >
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
       {/* Actions */}
       <div className="flex gap-2 pt-2 border-t">
         <Button
@@ -206,7 +151,6 @@ export function QuestFilters({
   const initialPrefsLoaded = useRef(false);
   const prefsFullyLoaded = useRef(false); // True only after prefs fetch completes
   const lastSavedLevel = useRef<number | null>(null);
-  const lastSavedQuestsPerTree = useRef<number | null>(5);
   const lastSavedBypassLevel = useRef<boolean>(false);
 
   // Stable ref for onApplyFilters to avoid infinite loops
@@ -231,10 +175,6 @@ export function QuestFilters({
           if (data.user?.playerLevel != null) {
             lastSavedLevel.current = data.user.playerLevel;
             updates.playerLevel = data.user.playerLevel;
-          }
-          if (data.user?.questsPerTree != null) {
-            lastSavedQuestsPerTree.current = data.user.questsPerTree;
-            updates.questsPerTree = data.user.questsPerTree;
           }
           if (data.user?.bypassLevelRequirement != null) {
             lastSavedBypassLevel.current = data.user.bypassLevelRequirement;
@@ -287,39 +227,6 @@ export function QuestFilters({
 
     return () => clearTimeout(timer);
   }, [filters.playerLevel, sessionStatus, savePlayerLevel]);
-
-  // Auto-save questsPerTree when it changes
-  const saveQuestsPerTree = useCallback(
-    async (count: number | null) => {
-      if (!session?.user) return;
-      if (count === lastSavedQuestsPerTree.current) return;
-
-      try {
-        const res = await fetch("/api/user", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ questsPerTree: count }),
-        });
-        if (res.ok) {
-          lastSavedQuestsPerTree.current = count;
-        }
-      } catch (err) {
-        console.error("Failed to save quests per tree:", err);
-      }
-    },
-    [session?.user]
-  );
-
-  useEffect(() => {
-    if (sessionStatus !== "authenticated") return;
-    if (!prefsFullyLoaded.current) return; // Wait until prefs are fully loaded
-
-    const timer = setTimeout(() => {
-      saveQuestsPerTree(filters.questsPerTree);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [filters.questsPerTree, sessionStatus, saveQuestsPerTree]);
 
   // Auto-save bypassLevelRequirement when it changes
   const saveBypassLevelRequirement = useCallback(
@@ -397,15 +304,11 @@ export function QuestFilters({
   const handleReset = () => {
     setSearchValue("");
     onFilterChange({
-      traderId: null,
       statuses: ["available"], // Default to showing only available quests
       search: "",
       kappaOnly: false,
-      map: null,
       playerLevel: 1,
-      questsPerTree: 5,
       bypassLevelRequirement: false,
-      questTypes: [],
       hideReputationQuests: true, // Default to hiding reputation quests
     });
     onApplyFilters();
@@ -422,23 +325,12 @@ export function QuestFilters({
     if (key === "statuses" && value) {
       const newStatuses = filters.statuses.filter((s) => s !== value);
       onFilterChange({ statuses: newStatuses });
-    } else if (key === "traderId") {
-      onFilterChange({ traderId: null });
-    } else if (key === "map") {
-      onFilterChange({ map: null });
     } else if (key === "kappaOnly") {
       onFilterChange({ kappaOnly: false });
     } else if (key === "playerLevel") {
       onFilterChange({ playerLevel: 1 });
     } else if (key === "bypassLevelRequirement") {
       onFilterChange({ bypassLevelRequirement: false });
-    } else if (key === "questsPerTree") {
-      onFilterChange({ questsPerTree: 5 });
-    } else if (key === "questTypes" && value) {
-      const newTypes = filters.questTypes.filter((t) => t !== value);
-      onFilterChange({ questTypes: newTypes });
-    } else if (key === "questTypes") {
-      onFilterChange({ questTypes: [] });
     } else if (key === "hideReputationQuests") {
       onFilterChange({ hideReputationQuests: false });
     }
@@ -455,18 +347,13 @@ export function QuestFilters({
     filters.kappaOnly,
     filters.playerLevel !== 1 ? filters.playerLevel : null,
     filters.bypassLevelRequirement,
-    filters.questsPerTree !== 5 ? filters.questsPerTree : null,
   ].filter(Boolean).length;
 
   // Count all active filters (for chips)
   const activeFilterCount = [
-    filters.traderId,
     filters.statuses.length > 0 ? filters.statuses : null,
     filters.kappaOnly,
-    filters.map,
-    filters.questTypes.length > 0 ? filters.questTypes : null,
     filters.playerLevel !== 1 ? filters.playerLevel : null,
-    filters.questsPerTree !== 5 ? filters.questsPerTree : null,
     filters.bypassLevelRequirement ? true : null,
   ].filter(Boolean).length;
 
@@ -522,46 +409,10 @@ export function QuestFilters({
               <SheetHeader>
                 <SheetTitle>Filter Quests</SheetTitle>
                 <SheetDescription className="sr-only">
-                  Filter quests by trader, status, map, and more
+                  Filter quests by status, level, and more
                 </SheetDescription>
               </SheetHeader>
               <div className="py-4 space-y-4 overflow-y-auto">
-                {/* Trader */}
-                <div>
-                  <Label className="text-xs text-muted-foreground">
-                    Trader
-                  </Label>
-                  <Select
-                    value={filters.traderId || "all"}
-                    onValueChange={(value) =>
-                      handlePrimaryFilterChange({
-                        traderId: value === "all" ? null : value,
-                      })
-                    }
-                  >
-                    <SelectTrigger className="h-9 mt-1">
-                      <SelectValue placeholder="All Traders" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Traders</SelectItem>
-                      {traders.map((trader) => (
-                        <SelectItem key={trader.id} value={trader.id}>
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="w-3 h-3 rounded-full"
-                              style={{
-                                backgroundColor: getTraderColor(trader.id)
-                                  .primary,
-                              }}
-                            />
-                            {trader.name}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
                 {/* Status */}
                 <div>
                   <Label className="text-xs text-muted-foreground">
@@ -572,46 +423,6 @@ export function QuestFilters({
                       selectedStatuses={filters.statuses}
                       onChange={(statuses) =>
                         handlePrimaryFilterChange({ statuses })
-                      }
-                    />
-                  </div>
-                </div>
-
-                {/* Map */}
-                <div>
-                  <Label className="text-xs text-muted-foreground">Map</Label>
-                  <Select
-                    value={filters.map || "all"}
-                    onValueChange={(value) =>
-                      handlePrimaryFilterChange({
-                        map: value === "all" ? null : value,
-                      })
-                    }
-                  >
-                    <SelectTrigger className="h-9 mt-1">
-                      <SelectValue placeholder="All Maps" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Maps</SelectItem>
-                      {MAPS.map((map) => (
-                        <SelectItem key={map} value={map}>
-                          {map}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Quest Type */}
-                <div>
-                  <Label className="text-xs text-muted-foreground">
-                    Quest Type
-                  </Label>
-                  <div className="mt-1">
-                    <QuestTypeMultiSelect
-                      selectedTypes={filters.questTypes}
-                      onChange={(types) =>
-                        handlePrimaryFilterChange({ questTypes: types })
                       }
                     />
                   </div>
@@ -638,7 +449,6 @@ export function QuestFilters({
           <div className="px-4 pb-2 overflow-x-auto">
             <ActiveFilterChips
               filters={filters}
-              traders={traders}
               onRemoveFilter={handleRemoveFilter}
               onClearAll={handleReset}
             />
@@ -663,70 +473,10 @@ export function QuestFilters({
               />
             </div>
 
-            {/* Trader */}
-            <Select
-              value={filters.traderId || "all"}
-              onValueChange={(value) =>
-                handlePrimaryFilterChange({
-                  traderId: value === "all" ? null : value,
-                })
-              }
-            >
-              <SelectTrigger className="h-9 w-[150px]">
-                <SelectValue placeholder="All Traders" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Traders</SelectItem>
-                {traders.map((trader) => (
-                  <SelectItem key={trader.id} value={trader.id}>
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{
-                          backgroundColor: getTraderColor(trader.id).primary,
-                        }}
-                      />
-                      {trader.name}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
             {/* Status */}
             <StatusMultiSelect
               selectedStatuses={filters.statuses}
               onChange={(statuses) => handlePrimaryFilterChange({ statuses })}
-            />
-
-            {/* Map */}
-            <Select
-              value={filters.map || "all"}
-              onValueChange={(value) =>
-                handlePrimaryFilterChange({
-                  map: value === "all" ? null : value,
-                })
-              }
-            >
-              <SelectTrigger className="h-9 w-[150px]">
-                <SelectValue placeholder="All Maps" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Maps</SelectItem>
-                {MAPS.map((map) => (
-                  <SelectItem key={map} value={map}>
-                    {map}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Quest Type */}
-            <QuestTypeMultiSelect
-              selectedTypes={filters.questTypes}
-              onChange={(types) =>
-                handlePrimaryFilterChange({ questTypes: types })
-              }
             />
 
             {/* Apply button for primary filters */}
@@ -791,7 +541,6 @@ export function QuestFilters({
           <div className="px-4 pb-2">
             <ActiveFilterChips
               filters={filters}
-              traders={traders}
               onRemoveFilter={handleRemoveFilter}
               onClearAll={handleReset}
             />

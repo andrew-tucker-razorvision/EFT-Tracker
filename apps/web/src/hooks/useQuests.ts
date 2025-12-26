@@ -48,15 +48,11 @@ interface UseQuestsReturn {
 }
 
 const defaultFilters: QuestFilters = {
-  traderId: null,
   statuses: ["available"], // Default to showing only available quests
   search: "",
   kappaOnly: false,
-  map: null,
   playerLevel: 1, // Default to level 1 for all users
-  questsPerTree: 5, // Default to showing 5 columns (depth levels) per trader
   bypassLevelRequirement: false, // Show all quests regardless of level when true
-  questTypes: [], // Default to all quest types (empty = all)
   hideReputationQuests: true, // Hide Fence reputation quests by default
 };
 
@@ -106,9 +102,6 @@ export function useQuests(): UseQuestsReturn {
 
     try {
       const params = new URLSearchParams();
-      if (appliedFilters.traderId)
-        params.set("trader", appliedFilters.traderId);
-      if (appliedFilters.map) params.set("map", appliedFilters.map);
       if (appliedFilters.kappaOnly) params.set("kappa", "true");
       if (appliedFilters.search) params.set("search", appliedFilters.search);
 
@@ -125,17 +118,6 @@ export function useQuests(): UseQuestsReturn {
       if (appliedFilters.statuses.length > 0) {
         filteredQuests = filteredQuests.filter((q: QuestWithProgress) =>
           appliedFilters.statuses.includes(q.computedStatus)
-        );
-      }
-
-      // Quest type filtering (empty array = all types)
-      // Compare case-insensitively since Prisma returns UPPERCASE, but filters use lowercase
-      if (appliedFilters.questTypes.length > 0) {
-        const filterTypes = appliedFilters.questTypes.map((t) =>
-          t.toUpperCase()
-        );
-        filteredQuests = filteredQuests.filter((q: QuestWithProgress) =>
-          filterTypes.includes(q.questType?.toUpperCase() || "")
         );
       }
 

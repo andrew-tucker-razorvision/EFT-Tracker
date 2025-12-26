@@ -271,7 +271,7 @@ export function MapFilters({
 
           {/* Quest Type */}
           <QuestTypeMultiSelect
-            selectedTypes={filters.questTypes}
+            selectedTypes={filters.questTypes || []}
             onChange={(types) => handleFilterChange({ questTypes: types })}
           />
         </div>

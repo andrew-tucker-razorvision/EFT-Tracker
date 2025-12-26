@@ -1,7 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
-import type { QuestFilters, Trader, QuestStatus, QuestType } from "@/types";
+import type { QuestFilters, QuestStatus } from "@/types";
 
 const STATUS_LABELS: Record<QuestStatus, string> = {
   available: "Available",
@@ -9,20 +9,8 @@ const STATUS_LABELS: Record<QuestStatus, string> = {
   locked: "Locked",
 };
 
-const QUEST_TYPE_LABELS: Record<QuestType, string> = {
-  standard: "Standard",
-  pvp_zone: "PVP Zone",
-  reputation: "Reputation (Fence)",
-  lightkeeper: "Lightkeeper",
-  faction_bear: "BEAR Only",
-  faction_usec: "USEC Only",
-  story: "Story",
-  prestige: "Prestige (New Beginning)",
-};
-
 interface ActiveFilterChipsProps {
   filters: QuestFilters;
-  traders: Trader[];
   onRemoveFilter: (key: keyof QuestFilters, value?: string) => void;
   onClearAll: () => void;
 }
@@ -50,21 +38,10 @@ function Chip({ label, onRemove }: ChipProps) {
 
 export function ActiveFilterChips({
   filters,
-  traders,
   onRemoveFilter,
   onClearAll,
 }: ActiveFilterChipsProps) {
   const chips: { key: string; label: string; onRemove: () => void }[] = [];
-
-  // Trader filter
-  if (filters.traderId) {
-    const trader = traders.find((t) => t.id === filters.traderId);
-    chips.push({
-      key: `trader-${filters.traderId}`,
-      label: trader?.name || filters.traderId,
-      onRemove: () => onRemoveFilter("traderId"),
-    });
-  }
 
   // Status filters (one chip per status)
   filters.statuses.forEach((status) => {
@@ -72,24 +49,6 @@ export function ActiveFilterChips({
       key: `status-${status}`,
       label: STATUS_LABELS[status],
       onRemove: () => onRemoveFilter("statuses", status),
-    });
-  });
-
-  // Map filter
-  if (filters.map) {
-    chips.push({
-      key: `map-${filters.map}`,
-      label: filters.map,
-      onRemove: () => onRemoveFilter("map"),
-    });
-  }
-
-  // Quest type filters (one chip per type)
-  filters.questTypes.forEach((type) => {
-    chips.push({
-      key: `questType-${type}`,
-      label: QUEST_TYPE_LABELS[type],
-      onRemove: () => onRemoveFilter("questTypes", type),
     });
   });
 
@@ -117,18 +76,6 @@ export function ActiveFilterChips({
       key: "bypass",
       label: "Bypass Level",
       onRemove: () => onRemoveFilter("bypassLevelRequirement"),
-    });
-  }
-
-  // Columns (only if not default of 5)
-  if (filters.questsPerTree !== null && filters.questsPerTree !== 5) {
-    chips.push({
-      key: "columns",
-      label:
-        filters.questsPerTree === null
-          ? "All Columns"
-          : `${filters.questsPerTree} Columns`,
-      onRemove: () => onRemoveFilter("questsPerTree"),
     });
   }
 

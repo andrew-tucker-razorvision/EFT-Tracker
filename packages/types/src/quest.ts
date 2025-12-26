@@ -91,16 +91,17 @@ export interface LevelRange {
 
 // Filter options for quest list/tree
 export interface QuestFilters {
-  traderId: string | null;
   statuses: QuestStatus[]; // Empty array = all statuses (multi-select)
   search: string;
   kappaOnly: boolean;
-  map: string | null;
   playerLevel: number | null;
-  questsPerTree: number | null; // null = show all
   bypassLevelRequirement: boolean; // Show all quests regardless of level
-  questTypes: QuestType[]; // Empty array = all quest types (multi-select)
   hideReputationQuests: boolean; // Hide Fence reputation quests by default
+  // Optional fields used by other pages (maps page)
+  traderId?: string | null;
+  map?: string | null;
+  questsPerTree?: number | null;
+  questTypes?: QuestType[];
 }
 
 // View mode for quest display

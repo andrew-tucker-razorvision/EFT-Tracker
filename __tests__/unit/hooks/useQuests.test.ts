@@ -36,15 +36,11 @@ describe("useQuests", () => {
     it("should have default filters", () => {
       const { result } = renderHook(() => useQuests());
       expect(result.current.filters).toEqual({
-        traderId: null,
         statuses: ["available"], // Default to showing only available quests
         search: "",
         kappaOnly: false,
-        map: null,
         playerLevel: 1,
-        questsPerTree: 5,
         bypassLevelRequirement: false,
-        questTypes: [],
         hideReputationQuests: true,
       });
     });
@@ -95,10 +91,10 @@ describe("useQuests", () => {
       });
 
       act(() => {
-        result.current.setFilters({ traderId: "trader_prapor" });
+        result.current.setFilters({ kappaOnly: true });
       });
 
-      expect(result.current.filters.traderId).toBe("trader_prapor");
+      expect(result.current.filters.kappaOnly).toBe(true);
     });
 
     it("should merge partial filter updates", async () => {
@@ -114,7 +110,7 @@ describe("useQuests", () => {
       });
 
       expect(result.current.filters.kappaOnly).toBe(true);
-      expect(result.current.filters.traderId).toBeNull(); // Other filters unchanged
+      expect(result.current.filters.playerLevel).toBe(1); // Other filters unchanged
     });
 
     it("should filter by status client-side", async () => {

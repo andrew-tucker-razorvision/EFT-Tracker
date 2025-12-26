@@ -145,37 +145,6 @@ describe("/api/quests", () => {
       expect(data.total).toBe(3);
     });
 
-    it("should filter quests by trader", async () => {
-      vi.mocked(auth).mockResolvedValue(null as any);
-      vi.mocked(prisma.quest.findMany).mockResolvedValue([
-        mockQuests[0],
-        mockQuests[1],
-      ] as never);
-
-      const request = new Request(
-        "http://localhost:3000/api/quests?trader=trader-prapor"
-      );
-      const response = await GET(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(200);
-      expect(data.quests).toHaveLength(2);
-      expect(
-        data.quests.every(
-          (q: { traderId: string }) => q.traderId === "trader-prapor"
-        )
-      ).toBe(true);
-
-      // Verify the where clause was passed to prisma
-      expect(prisma.quest.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.objectContaining({
-            traderId: "trader-prapor",
-          }),
-        })
-      );
-    });
-
     it("should filter quests by kappa requirement", async () => {
       vi.mocked(auth).mockResolvedValue(null as any);
       vi.mocked(prisma.quest.findMany).mockResolvedValue([
@@ -197,36 +166,6 @@ describe("/api/quests", () => {
         expect.objectContaining({
           where: expect.objectContaining({
             kappaRequired: true,
-          }),
-        })
-      );
-    });
-
-    it("should filter quests by map", async () => {
-      vi.mocked(auth).mockResolvedValue(null as any);
-      vi.mocked(prisma.quest.findMany).mockResolvedValue([
-        mockQuests[1],
-      ] as never);
-
-      const request = new Request(
-        "http://localhost:3000/api/quests?map=customs"
-      );
-      const response = await GET(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(200);
-      expect(data.quests).toHaveLength(1);
-      expect(data.quests[0].id).toBe("quest-2");
-
-      // Verify map filter was applied
-      expect(prisma.quest.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.objectContaining({
-            objectives: {
-              some: {
-                map: "customs",
-              },
-            },
           }),
         })
       );
@@ -264,11 +203,11 @@ describe("/api/quests", () => {
     it("should combine multiple filters", async () => {
       vi.mocked(auth).mockResolvedValue(null as any);
       vi.mocked(prisma.quest.findMany).mockResolvedValue([
-        mockQuests[1],
+        mockQuests[0],
       ] as never);
 
       const request = new Request(
-        "http://localhost:3000/api/quests?trader=trader-prapor&map=customs&kappa=true"
+        "http://localhost:3000/api/quests?kappa=true&search=Debut"
       );
       const response = await GET(request);
       const data = await response.json();
@@ -280,12 +219,10 @@ describe("/api/quests", () => {
       expect(prisma.quest.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            traderId: "trader-prapor",
             kappaRequired: true,
-            objectives: {
-              some: {
-                map: "customs",
-              },
+            title: {
+              contains: "Debut",
+              mode: "insensitive",
             },
           }),
         })

@@ -388,7 +388,7 @@ export function QuestTreeClient() {
             traders={traders}
             selectedQuestId={selectedQuestId}
             playerLevel={filters.playerLevel}
-            maxColumns={filters.questsPerTree}
+            maxColumns={null}
             savingQuestIds={savingQuestIds}
             onQuestSelect={handleQuestSelect}
             onStatusChange={handleStatusChange}
