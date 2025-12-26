@@ -3,7 +3,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { ProgressStats } from "@/components/progress-stats";
-import { QuestTypeMultiSelect } from "@/components/quest-tree";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -268,12 +267,6 @@ export function MapFilters({
               Kappa Only
             </Label>
           </div>
-
-          {/* Quest Type */}
-          <QuestTypeMultiSelect
-            selectedTypes={filters.questTypes || []}
-            onChange={(types) => handleFilterChange({ questTypes: types })}
-          />
         </div>
 
         {/* Progress Stats */}
