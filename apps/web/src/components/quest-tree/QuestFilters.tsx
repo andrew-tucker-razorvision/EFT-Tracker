@@ -370,7 +370,9 @@ export function QuestFilters({
                         id="bypass-mobile"
                         checked={filters.bypassLevelRequirement}
                         onCheckedChange={(checked) =>
-                          handleFilterChange({ bypassLevelRequirement: checked })
+                          handleFilterChange({
+                            bypassLevelRequirement: checked,
+                          })
                         }
                       />
                       <Label
