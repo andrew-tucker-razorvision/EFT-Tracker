@@ -63,7 +63,6 @@ export function TraderQuestGroup({
               className="flex items-center gap-3 p-3 bg-[var(--bg-card)]"
             >
               {showCheckboxes && checkedQuests && onToggleQuest ? (
-                // @ts-expect-error React 19 forwardRef type compatibility
                 <Checkbox
                   id={`quest-${quest.questId}`}
                   checked={checkedQuests.has(quest.questId)}
