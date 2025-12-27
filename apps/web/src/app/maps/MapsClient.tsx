@@ -38,23 +38,14 @@ export function MapsClient() {
     setFilters,
     applyFilters,
     refetch,
-  } = useQuests();
+  } = useQuests({
+    initialFilters: {
+      statuses: ["available"],
+      bypassLevelRequirement: false,
+      hideReputationQuests: false,
+    },
+  });
 
-  // Track if initial filters have been applied
-  const initialFiltersApplied = useRef(false);
-
-  // Apply map-specific default filters on mount
-  useEffect(() => {
-    if (!initialLoading && !initialFiltersApplied.current) {
-      initialFiltersApplied.current = true;
-      setFilters({
-        statuses: ["available"],
-        bypassLevelRequirement: false,
-        hideReputationQuests: false,
-      });
-      setTimeout(() => applyFilters(), 0);
-    }
-  }, [initialLoading, setFilters, applyFilters]);
   const {
     progress,
     updateStatus,

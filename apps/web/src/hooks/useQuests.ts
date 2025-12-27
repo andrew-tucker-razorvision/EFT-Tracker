@@ -56,7 +56,21 @@ const defaultFilters: QuestFilters = {
   hideReputationQuests: true, // Hide Fence reputation quests by default
 };
 
-export function useQuests(): UseQuestsReturn {
+interface UseQuestsOptions {
+  initialFilters?: Partial<QuestFilters>;
+}
+
+export function useQuests(options?: UseQuestsOptions): UseQuestsReturn {
+  // Merge initial filters with defaults (only computed once on mount)
+  const mergedInitialFilters = useMemo(
+    () => ({
+      ...defaultFilters,
+      ...(options?.initialFilters ?? {}),
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [] // Empty deps - only compute once on mount
+  );
+
   const [quests, setQuests] = useState<QuestWithProgress[]>([]);
   const [allQuests, setAllQuests] = useState<QuestWithProgress[]>([]); // Unfiltered for depth calc
   const [traders, setTraders] = useState<Trader[]>([]);
@@ -64,9 +78,9 @@ export function useQuests(): UseQuestsReturn {
   const [initialLoading, setInitialLoading] = useState(true); // Only true during first load
   const [error, setError] = useState<string | null>(null);
   const [pendingFilters, setPendingFilters] =
-    useState<QuestFilters>(defaultFilters);
+    useState<QuestFilters>(mergedInitialFilters);
   const [appliedFilters, setAppliedFilters] =
-    useState<QuestFilters>(defaultFilters);
+    useState<QuestFilters>(mergedInitialFilters);
   const [hiddenByLevelCount, setHiddenByLevelCount] = useState(0);
 
   // Ref to store pending filters for stable applyFilters callback
