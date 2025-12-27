@@ -20,6 +20,7 @@ const eslintConfig = defineConfig([
     files: [
       "src/app/(auth)/**/*.tsx",
       "src/components/catch-up/CatchUpDialog.tsx",
+      "src/components/catch-up/TraderQuestGroup.tsx",
       "src/components/progress-stats/ProgressStats.tsx",
       "src/components/quest-tree/QuestFilters.tsx",
       "src/components/quest-tree/QuestTree.tsx",

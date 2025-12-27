@@ -8,7 +8,7 @@ WORKDIR /app
 # Install dependencies for native modules and pnpm
 # hadolint ignore=DL3018
 RUN apk add --no-cache libc6-compat && \
-    npm install -g pnpm
+    npm install -g pnpm@10.21.0
 
 # Copy pnpm configuration
 COPY pnpm-lock.yaml pnpm-workspace.yaml ./
