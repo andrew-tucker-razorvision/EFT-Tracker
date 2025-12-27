@@ -190,13 +190,25 @@ export function useQuests(options?: UseQuestsOptions): UseQuestsReturn {
     await Promise.all([fetchQuests(), fetchAllQuests()]);
   }, [fetchQuests, fetchAllQuests]);
 
-  // Initial fetch
-  useEffect(() => {
-    fetchTraders();
-    fetchAllQuests(); // Fetch all quests for depth calculation
-  }, [fetchTraders, fetchAllQuests]);
+  // Track if initial fetch has been done
+  const initialFetchDone = useRef(false);
 
+  // Initial fetch - run once on mount
   useEffect(() => {
+    if (initialFetchDone.current) return;
+    initialFetchDone.current = true;
+
+    // Fetch traders, all quests, and filtered quests in parallel
+    Promise.all([fetchTraders(), fetchAllQuests(), fetchQuests()]);
+  }, [fetchTraders, fetchAllQuests, fetchQuests]);
+
+  // Re-fetch filtered quests when filters change (but skip initial mount)
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     fetchQuests();
   }, [fetchQuests]);
 
