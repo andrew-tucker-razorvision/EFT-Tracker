@@ -27,6 +27,20 @@ The MCP Playwright server uses a **persistent browser profile** by default, whic
 
 **Recovery steps for locked sessions:**
 
+**IMPORTANT:** When Playwright MCP commands fail with timeouts, "about:blank", "AbortError", or "Browser is already in use" errors, run the cleanup script:
+
+```bash
+powershell -ExecutionPolicy Bypass -File scripts/dev-cleanup.ps1
+```
+
+Or for Playwright-only cleanup (faster):
+
+```bash
+powershell -ExecutionPolicy Bypass -File scripts/dev-cleanup.ps1 -PlaywrightOnly
+```
+
+Manual recovery (if script unavailable):
+
 1. First try `browser_close` - may work even if other commands fail
 2. If that fails, manually close Chrome windows opened by Playwright
 3. As last resort, delete the lock: `Remove-Item -Recurse "$env:LOCALAPPDATA\ms-playwright\mcp-chrome-*" -Force`
