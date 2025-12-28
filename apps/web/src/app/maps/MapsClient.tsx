@@ -65,6 +65,22 @@ export function MapsClient() {
     initialFilters,
   });
 
+  // Sync saved preferences when they load (after initial mount)
+  const prefsLoaded = useRef(false);
+  useEffect(() => {
+    if (!prefs || prefsLoaded.current) return;
+    prefsLoaded.current = true;
+
+    // Apply saved preferences to filters
+    setFilters({
+      playerLevel: prefs.playerLevel ?? 1,
+      bypassLevelRequirement: prefs.bypassLevelRequirement ?? false,
+    });
+
+    // Apply filters immediately so the quest list updates
+    applyFilters();
+  }, [prefs, setFilters, applyFilters]);
+
   const {
     progress,
     updateStatus,
