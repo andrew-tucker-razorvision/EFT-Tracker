@@ -212,7 +212,7 @@ jobs:
           filters: |
             companion:
               - 'apps/companion/**'
-              - 'packages/**'
+              - 'packages/types/**'
 
   # Job 6: Build Companion App (Windows only, conditional)
   build-companion:
