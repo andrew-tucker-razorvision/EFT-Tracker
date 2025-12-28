@@ -58,7 +58,6 @@ export function QuestTreeClient() {
     applyFilters,
     hasPendingChanges,
     refetch,
-    hiddenByLevelCount,
   } = useQuests({
     initialFilters,
   });
@@ -72,7 +71,6 @@ export function QuestTreeClient() {
     // Apply saved preferences to filters
     setFilters({
       playerLevel: prefs.playerLevel ?? 1,
-      bypassLevelRequirement: prefs.bypassLevelRequirement ?? false,
     });
 
     // Apply filters immediately so the quest list updates
@@ -413,7 +411,6 @@ export function QuestTreeClient() {
         onFilterChange={setFilters}
         onApplyFilters={applyFilters}
         hasPendingChanges={hasPendingChanges}
-        hiddenByLevelCount={hiddenByLevelCount}
       />
       <div className="flex-1 min-h-0">
         {questsWithProgress.length > 0 ? (

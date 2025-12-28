@@ -44,7 +44,6 @@ interface UseQuestsReturn {
   applyFilters: () => void;
   hasPendingChanges: boolean;
   refetch: () => Promise<void>;
-  hiddenByLevelCount: number; // Number of quests hidden due to level filter
 }
 
 const defaultFilters: QuestFilters = {
@@ -53,11 +52,7 @@ const defaultFilters: QuestFilters = {
   search: "",
   kappaOnly: false,
   map: null,
-  playerLevel: 1, // Default to level 1 for all users
-  questsPerTree: null, // null = show all
-  bypassLevelRequirement: false, // Show all quests regardless of level when true
-  questType: null, // null = all quest types
-  hideReputationQuests: true, // Hide Fence reputation quests by default
+  playerLevel: 1, // Default to level 1 for all users (display only, no filtering)
 };
 
 interface UseQuestsOptions {
@@ -85,7 +80,6 @@ export function useQuests(options?: UseQuestsOptions): UseQuestsReturn {
     useState<QuestFilters>(mergedInitialFilters);
   const [appliedFilters, setAppliedFilters] =
     useState<QuestFilters>(mergedInitialFilters);
-  const [hiddenByLevelCount, setHiddenByLevelCount] = useState(0);
 
   // Ref to store pending filters for stable applyFilters callback
   const pendingFiltersRef = useRef(pendingFilters);
@@ -132,6 +126,13 @@ export function useQuests(options?: UseQuestsOptions): UseQuestsReturn {
       // Client-side filtering
       let filteredQuests = data.quests;
 
+      // Trader filtering
+      if (appliedFilters.traderId) {
+        filteredQuests = filteredQuests.filter(
+          (q: QuestWithProgress) => q.traderId === appliedFilters.traderId
+        );
+      }
+
       // Status filtering (multi-select: empty array = all)
       if (appliedFilters.statuses.length > 0) {
         filteredQuests = filteredQuests.filter((q: QuestWithProgress) =>
@@ -139,30 +140,6 @@ export function useQuests(options?: UseQuestsOptions): UseQuestsReturn {
         );
       }
 
-      // Hide reputation and prestige quests if enabled (default: true)
-      // Prestige quests require The Collector and are end-game content
-      if (appliedFilters.hideReputationQuests) {
-        filteredQuests = filteredQuests.filter((q: QuestWithProgress) => {
-          const questType = q.questType?.toUpperCase();
-          return questType !== "REPUTATION" && questType !== "PRESTIGE";
-        });
-      }
-
-      // Hide quests more than 5 levels above player level (skip if bypassLevelRequirement is enabled)
-      let levelHiddenCount = 0;
-      if (
-        appliedFilters.playerLevel &&
-        !appliedFilters.bypassLevelRequirement
-      ) {
-        const beforeCount = filteredQuests.length;
-        filteredQuests = filteredQuests.filter(
-          (q: QuestWithProgress) =>
-            q.levelRequired <= appliedFilters.playerLevel! + 5
-        );
-        levelHiddenCount = beforeCount - filteredQuests.length;
-      }
-
-      setHiddenByLevelCount(levelHiddenCount);
       setQuests(filteredQuests);
       setInitialLoading(false); // First load complete
     } catch (err) {
@@ -228,7 +205,6 @@ export function useQuests(options?: UseQuestsOptions): UseQuestsReturn {
     applyFilters,
     hasPendingChanges,
     refetch,
-    hiddenByLevelCount,
   };
 }
 

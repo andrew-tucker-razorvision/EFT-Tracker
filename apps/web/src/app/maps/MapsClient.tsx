@@ -44,8 +44,6 @@ export function MapsClient() {
   const initialFilters = useMemo(
     (): Partial<Filters> => ({
       statuses: ["available"],
-      bypassLevelRequirement: prefs?.bypassLevelRequirement ?? false,
-      hideReputationQuests: false,
       playerLevel: prefs?.playerLevel ?? 1,
     }),
     [prefs]
@@ -75,7 +73,6 @@ export function MapsClient() {
     // Apply saved preferences to filters
     setFilters({
       playerLevel: prefs.playerLevel ?? 1,
-      bypassLevelRequirement: prefs.bypassLevelRequirement ?? false,
     });
 
     // Apply filters immediately so the quest list updates
@@ -406,7 +403,6 @@ export function MapsClient() {
             quests={questsWithProgress}
             allQuests={allQuestsWithProgress}
             playerLevel={filters.playerLevel}
-            hideReputationQuests={filters.hideReputationQuests}
             onStatusChange={handleStatusChange}
             onQuestDetails={handleQuestDetails}
           />

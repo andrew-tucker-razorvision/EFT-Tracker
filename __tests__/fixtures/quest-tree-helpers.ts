@@ -61,10 +61,6 @@ export const defaultTestFilters: QuestFilters = {
   kappaOnly: false,
   map: null,
   playerLevel: 1,
-  questsPerTree: 5,
-  bypassLevelRequirement: false,
-  questTypes: [],
-  hideReputationQuests: true, // Default to hiding reputation quests
 };
 
 // ============================================================================

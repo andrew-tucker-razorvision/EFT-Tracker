@@ -53,17 +53,6 @@ export function MapFilters({
     return () => clearTimeout(timer);
   }, [filters.playerLevel, updatePrefsMutation]);
 
-  // Auto-save bypassLevelRequirement when it changes
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      updatePrefsMutation.mutate({
-        bypassLevelRequirement: filters.bypassLevelRequirement,
-      });
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [filters.bypassLevelRequirement, updatePrefsMutation]);
-
   // Auto-apply filter change
   const handleFilterChange = useCallback(
     (update: Partial<Filters>) => {
@@ -143,26 +132,8 @@ export function MapFilters({
                   : Math.min(79, Math.max(1, val));
                 handleLevelChange(level);
               }}
-              className="h-9 w-16 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={filters.bypassLevelRequirement}
+              className="h-9 w-16 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             />
-          </div>
-
-          {/* All Levels */}
-          <div className="flex items-center gap-1.5">
-            <Switch
-              id="bypass-level"
-              checked={filters.bypassLevelRequirement}
-              onCheckedChange={(checked) =>
-                handleFilterChange({ bypassLevelRequirement: checked })
-              }
-            />
-            <Label
-              htmlFor="bypass-level"
-              className="text-sm cursor-pointer whitespace-nowrap"
-            >
-              All Levels
-            </Label>
           </div>
 
           {/* Kappa */}

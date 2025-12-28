@@ -96,11 +96,7 @@ export interface QuestFilters {
   search: string;
   kappaOnly: boolean;
   map: string | null;
-  playerLevel: number | null;
-  questsPerTree: number | null; // null = show all
-  bypassLevelRequirement: boolean; // Show all quests regardless of level
-  questType: QuestType | null; // null = all quest types
-  hideReputationQuests: boolean; // Hide Fence reputation quests by default
+  playerLevel: number | null; // For display only, no filtering
 }
 
 // View mode for quest display

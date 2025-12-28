@@ -26,7 +26,6 @@ interface MapGroupsViewProps {
   quests: QuestWithProgress[];
   allQuests?: QuestWithProgress[];
   playerLevel?: number | null;
-  hideReputationQuests?: boolean;
   onStatusChange: (questId: string, status: QuestStatus) => void;
   onQuestDetails?: (questId: string) => void;
 }
@@ -35,7 +34,6 @@ export function MapGroupsView({
   quests,
   allQuests,
   playerLevel,
-  hideReputationQuests = true,
   onStatusChange,
   onQuestDetails,
 }: MapGroupsViewProps) {
@@ -109,16 +107,8 @@ export function MapGroupsView({
   // Get ordered list of maps (standard maps + Any Location at end)
   const orderedMaps = [...MAPS, ANY_LOCATION];
 
-  // Filter quests for NextUpPanel based on hideReputationQuests setting
-  // Also hides prestige quests (New Beginning) which require The Collector
-  const nextUpQuests = useMemo(() => {
-    if (!allQuests) return [];
-    if (!hideReputationQuests) return allQuests;
-    return allQuests.filter((q) => {
-      const questType = q.questType?.toUpperCase();
-      return questType !== "REPUTATION" && questType !== "PRESTIGE";
-    });
-  }, [allQuests, hideReputationQuests]);
+  // Quests for NextUpPanel
+  const nextUpQuests = allQuests ?? [];
 
   // Handler for clicking a quest in the NextUpPanel
   const handleNextUpQuestClick = (questId: string) => {
