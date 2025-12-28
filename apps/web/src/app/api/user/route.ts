@@ -30,7 +30,11 @@ async function handleGET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ user });
+    return NextResponse.json({
+      playerLevel: user.playerLevel,
+      questsPerTree: user.questsPerTree,
+      bypassLevelRequirement: user.bypassLevelRequirement,
+    });
   } catch (error) {
     logger.error({ err: error }, "Error fetching user");
     return NextResponse.json(
@@ -94,7 +98,11 @@ async function handlePATCH(request: Request) {
       },
     });
 
-    return NextResponse.json({ user });
+    return NextResponse.json({
+      playerLevel: user.playerLevel,
+      questsPerTree: user.questsPerTree,
+      bypassLevelRequirement: user.bypassLevelRequirement,
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
