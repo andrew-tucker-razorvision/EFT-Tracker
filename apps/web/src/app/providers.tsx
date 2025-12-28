@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "@/components/ui/sonner";
 import { StatsProvider } from "@/contexts/StatsContext";
+import { UserPrefsProvider } from "@/providers/UserPrefsProvider";
 import { checkForUpdates } from "@/lib/updater/check-updates";
 
 function createQueryClient() {
@@ -39,10 +40,12 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <SessionProvider>
-        <StatsProvider>
-          {children}
-          <Toaster richColors position="bottom-right" />
-        </StatsProvider>
+        <UserPrefsProvider>
+          <StatsProvider>
+            {children}
+            <Toaster richColors position="bottom-right" />
+          </StatsProvider>
+        </UserPrefsProvider>
       </SessionProvider>
       {process.env.NODE_ENV === "development" && (
         <ReactQueryDevtools initialIsOpen={false} />

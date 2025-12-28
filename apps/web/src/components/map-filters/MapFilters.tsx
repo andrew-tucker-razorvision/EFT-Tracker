@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useCallback } from "react";
-import { useSession } from "next-auth/react";
 import { ProgressStats } from "@/components/progress-stats";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -12,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useUpdateUserPrefs } from "@/hooks/useUserPrefs";
 import { getTraderColor } from "@/lib/trader-colors";
 import type {
   Trader,
@@ -34,11 +34,7 @@ export function MapFilters({
   onFilterChange,
   onApplyFilters,
 }: MapFiltersProps) {
-  const { data: session, status: sessionStatus } = useSession();
-  const initialPrefsLoaded = useRef(false);
-  const prefsFullyLoaded = useRef(false);
-  const lastSavedLevel = useRef<number | null>(null);
-  const lastSavedBypassLevel = useRef<boolean>(false);
+  const updatePrefsMutation = useUpdateUserPrefs();
 
   // Stable ref for onApplyFilters to avoid infinite loops
   const onApplyFiltersRef = useRef(onApplyFilters);
@@ -46,109 +42,27 @@ export function MapFilters({
     onApplyFiltersRef.current = onApplyFilters;
   });
 
-  // Load user's saved preferences on mount (only for logged-in users)
-  useEffect(() => {
-    // For non-authenticated users, mark prefs as loaded immediately
-    if (sessionStatus === "unauthenticated" && !prefsFullyLoaded.current) {
-      prefsFullyLoaded.current = true;
-    }
-
-    if (sessionStatus === "authenticated" && !initialPrefsLoaded.current) {
-      initialPrefsLoaded.current = true;
-      fetch("/api/user")
-        .then((res) => res.json())
-        .then((data) => {
-          const updates: Partial<Filters> = {};
-          if (data.user?.playerLevel != null) {
-            lastSavedLevel.current = data.user.playerLevel;
-            updates.playerLevel = data.user.playerLevel;
-          }
-          if (data.user?.bypassLevelRequirement != null) {
-            lastSavedBypassLevel.current = data.user.bypassLevelRequirement;
-            updates.bypassLevelRequirement = data.user.bypassLevelRequirement;
-          }
-          if (Object.keys(updates).length > 0) {
-            onFilterChange(updates);
-            setTimeout(() => onApplyFiltersRef.current(), 0);
-          }
-          prefsFullyLoaded.current = true;
-        })
-        .catch((err) => {
-          console.error("Failed to fetch user preferences:", err);
-          prefsFullyLoaded.current = true;
-        });
-    }
-  }, [sessionStatus, onFilterChange]);
-
   // Auto-save player level when it changes (debounced)
-  const savePlayerLevel = useCallback(
-    async (level: number | null) => {
-      if (!session?.user) return;
-      if (level === lastSavedLevel.current) return;
-
-      try {
-        const res = await fetch("/api/user", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ playerLevel: level }),
-        });
-        if (res.ok) {
-          lastSavedLevel.current = level;
-        }
-      } catch (err) {
-        console.error("Failed to save player level:", err);
-      }
-    },
-    [session?.user]
-  );
-
   useEffect(() => {
-    if (sessionStatus !== "authenticated") return;
-    if (!prefsFullyLoaded.current) return;
-
     const timer = setTimeout(() => {
-      savePlayerLevel(filters.playerLevel);
+      if (filters.playerLevel !== undefined && filters.playerLevel !== null) {
+        updatePrefsMutation.mutate({ playerLevel: filters.playerLevel });
+      }
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [filters.playerLevel, sessionStatus, savePlayerLevel]);
+  }, [filters.playerLevel, updatePrefsMutation]);
 
   // Auto-save bypassLevelRequirement when it changes
-  const saveBypassLevelRequirement = useCallback(
-    async (bypass: boolean) => {
-      if (!session?.user) return;
-      if (bypass === lastSavedBypassLevel.current) return;
-
-      try {
-        const res = await fetch("/api/user", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ bypassLevelRequirement: bypass }),
-        });
-        if (res.ok) {
-          lastSavedBypassLevel.current = bypass;
-        }
-      } catch (err) {
-        console.error("Failed to save bypass level requirement:", err);
-      }
-    },
-    [session?.user]
-  );
-
   useEffect(() => {
-    if (sessionStatus !== "authenticated") return;
-    if (!prefsFullyLoaded.current) return;
-
     const timer = setTimeout(() => {
-      saveBypassLevelRequirement(filters.bypassLevelRequirement);
+      updatePrefsMutation.mutate({
+        bypassLevelRequirement: filters.bypassLevelRequirement,
+      });
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [
-    filters.bypassLevelRequirement,
-    sessionStatus,
-    saveBypassLevelRequirement,
-  ]);
+  }, [filters.bypassLevelRequirement, updatePrefsMutation]);
 
   // Auto-apply filter change
   const handleFilterChange = useCallback(

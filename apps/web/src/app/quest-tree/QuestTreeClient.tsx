@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { useStats } from "@/contexts/StatsContext";
+import { useUserPrefsContext } from "@/providers/UserPrefsProvider";
 import {
   QuestTree,
   QuestFilters,
@@ -29,6 +30,21 @@ const STATUS_CYCLE: Record<QuestStatus, QuestStatus | null> = {
 export function QuestTreeClient() {
   const { status: sessionStatus } = useSession();
   const { setStats } = useStats();
+  const { prefs, isLoading: prefsLoading } = useUserPrefsContext();
+
+  // Show loading skeleton while user preferences load (authenticated users only)
+  const isInitializing =
+    sessionStatus === "loading" ||
+    (sessionStatus === "authenticated" && prefsLoading);
+
+  // Compute initial filters using user preferences
+  const initialFilters = useMemo(
+    () => ({
+      playerLevel: prefs?.playerLevel ?? 1,
+    }),
+    [prefs]
+  );
+
   const {
     quests,
     allQuests,
@@ -42,7 +58,9 @@ export function QuestTreeClient() {
     hasPendingChanges,
     refetch,
     hiddenByLevelCount,
-  } = useQuests();
+  } = useQuests({
+    initialFilters,
+  });
   const {
     progress,
     updateStatus,
@@ -321,7 +339,7 @@ export function QuestTreeClient() {
     return () => setStats(null);
   }, [stats, setStats, loading, error]);
 
-  if (initialLoading) {
+  if (initialLoading || isInitializing) {
     return <QuestTreeSkeleton />;
   }
 

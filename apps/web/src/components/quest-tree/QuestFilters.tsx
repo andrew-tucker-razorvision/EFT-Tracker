@@ -2,7 +2,6 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useSession } from "next-auth/react";
 import { Filter } from "lucide-react";
 import { ProgressStats } from "@/components/progress-stats";
 import { Input } from "@/components/ui/input";
@@ -17,6 +16,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useUpdateUserPrefs } from "@/hooks/useUserPrefs";
 import { StatusMultiSelect } from "./StatusMultiSelect";
 import { ActiveFilterChips } from "./ActiveFilterChips";
 import type {
@@ -43,14 +43,10 @@ export function QuestFilters({
   onApplyFilters,
   hiddenByLevelCount,
 }: QuestFiltersProps) {
-  const { data: session, status: sessionStatus } = useSession();
+  const updatePrefsMutation = useUpdateUserPrefs();
   const [searchValue, setSearchValue] = useState(filters.search);
   const [mobileOpen, setMobileOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const initialPrefsLoaded = useRef(false);
-  const prefsFullyLoaded = useRef(false); // True only after prefs fetch completes
-  const lastSavedLevel = useRef<number | null>(null);
-  const lastSavedBypassLevel = useRef<boolean>(false);
 
   // Stable ref for onApplyFilters to avoid infinite loops
   const onApplyFiltersRef = useRef(onApplyFilters);
@@ -58,111 +54,27 @@ export function QuestFilters({
     onApplyFiltersRef.current = onApplyFilters;
   });
 
-  // Load user's saved preferences on mount (only for logged-in users)
+  // Auto-save player level when it changes (debounced)
   useEffect(() => {
-    // For non-authenticated users, mark prefs as loaded immediately
-    if (sessionStatus === "unauthenticated" && !prefsFullyLoaded.current) {
-      prefsFullyLoaded.current = true;
-    }
-
-    if (sessionStatus === "authenticated" && !initialPrefsLoaded.current) {
-      initialPrefsLoaded.current = true;
-      fetch("/api/user")
-        .then((res) => res.json())
-        .then((data) => {
-          const updates: Partial<Filters> = {};
-          if (data.user?.playerLevel != null) {
-            lastSavedLevel.current = data.user.playerLevel;
-            updates.playerLevel = data.user.playerLevel;
-          }
-          if (data.user?.bypassLevelRequirement != null) {
-            lastSavedBypassLevel.current = data.user.bypassLevelRequirement;
-            updates.bypassLevelRequirement = data.user.bypassLevelRequirement;
-          }
-          if (Object.keys(updates).length > 0) {
-            onFilterChange(updates);
-            // Apply the loaded preferences immediately
-            setTimeout(() => onApplyFiltersRef.current(), 0);
-          }
-          // Mark prefs as fully loaded after applying
-          prefsFullyLoaded.current = true;
-        })
-        .catch((err) => {
-          console.error("Failed to fetch user preferences:", err);
-          prefsFullyLoaded.current = true; // Still mark as loaded on error
-        });
-    }
-  }, [sessionStatus, onFilterChange]);
-
-  // Auto-save player level when it changes (debounced, only for logged-in users)
-  const savePlayerLevel = useCallback(
-    async (level: number | null) => {
-      if (!session?.user) return;
-      if (level === lastSavedLevel.current) return;
-
-      try {
-        const res = await fetch("/api/user", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ playerLevel: level }),
-        });
-        if (res.ok) {
-          lastSavedLevel.current = level;
-        }
-      } catch (err) {
-        console.error("Failed to save player level:", err);
-      }
-    },
-    [session?.user]
-  );
-
-  useEffect(() => {
-    if (sessionStatus !== "authenticated") return;
-    if (!prefsFullyLoaded.current) return; // Wait until prefs are fully loaded
-
     const timer = setTimeout(() => {
-      savePlayerLevel(filters.playerLevel);
+      if (filters.playerLevel !== undefined && filters.playerLevel !== null) {
+        updatePrefsMutation.mutate({ playerLevel: filters.playerLevel });
+      }
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [filters.playerLevel, sessionStatus, savePlayerLevel]);
+  }, [filters.playerLevel, updatePrefsMutation]);
 
   // Auto-save bypassLevelRequirement when it changes
-  const saveBypassLevelRequirement = useCallback(
-    async (bypass: boolean) => {
-      if (!session?.user) return;
-      if (bypass === lastSavedBypassLevel.current) return;
-
-      try {
-        const res = await fetch("/api/user", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ bypassLevelRequirement: bypass }),
-        });
-        if (res.ok) {
-          lastSavedBypassLevel.current = bypass;
-        }
-      } catch (err) {
-        console.error("Failed to save bypass level requirement:", err);
-      }
-    },
-    [session?.user]
-  );
-
   useEffect(() => {
-    if (sessionStatus !== "authenticated") return;
-    if (!prefsFullyLoaded.current) return; // Wait until prefs are fully loaded
-
     const timer = setTimeout(() => {
-      saveBypassLevelRequirement(filters.bypassLevelRequirement);
+      updatePrefsMutation.mutate({
+        bypassLevelRequirement: filters.bypassLevelRequirement,
+      });
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [
-    filters.bypassLevelRequirement,
-    sessionStatus,
-    saveBypassLevelRequirement,
-  ]);
+  }, [filters.bypassLevelRequirement, updatePrefsMutation]);
 
   // Debounce search input and auto-apply
   useEffect(() => {

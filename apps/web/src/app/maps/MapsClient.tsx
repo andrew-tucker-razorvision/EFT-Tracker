@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { useStats } from "@/contexts/StatsContext";
+import { useUserPrefsContext } from "@/providers/UserPrefsProvider";
 import { SyncStatusIndicator } from "@/components/quest-tree";
 import { MapFilters } from "@/components/map-filters";
 import { QuestTreeSkeleton } from "@/components/quest-tree/QuestTreeSkeleton";
@@ -15,7 +16,11 @@ import { CatchUpDialog } from "@/components/catch-up";
 import { useQuests } from "@/hooks/useQuests";
 import { useProgress } from "@/hooks/useProgress";
 import { getIncompletePrerequisites } from "@/lib/quest-layout";
-import type { QuestStatus, QuestWithProgress } from "@/types";
+import type {
+  QuestStatus,
+  QuestWithProgress,
+  QuestFilters as Filters,
+} from "@/types";
 
 // Status cycle map for click handling (simplified: available <-> completed)
 const STATUS_CYCLE: Record<QuestStatus, QuestStatus | null> = {
@@ -27,6 +32,24 @@ const STATUS_CYCLE: Record<QuestStatus, QuestStatus | null> = {
 export function MapsClient() {
   const { status: sessionStatus } = useSession();
   const { setStats } = useStats();
+  const { prefs, isLoading: prefsLoading } = useUserPrefsContext();
+
+  // Show loading skeleton while user preferences load (authenticated users only)
+  const isInitializing =
+    sessionStatus === "loading" ||
+    (sessionStatus === "authenticated" && prefsLoading);
+
+  // Compute initial filters using user preferences
+  const initialFilters = useMemo(
+    (): Partial<Filters> => ({
+      statuses: ["available"],
+      bypassLevelRequirement: prefs?.bypassLevelRequirement ?? false,
+      hideReputationQuests: false,
+      playerLevel: prefs?.playerLevel ?? 1,
+    }),
+    [prefs]
+  );
+
   const {
     quests,
     allQuests,
@@ -39,11 +62,7 @@ export function MapsClient() {
     applyFilters,
     refetch,
   } = useQuests({
-    initialFilters: {
-      statuses: ["available"],
-      bypassLevelRequirement: false,
-      hideReputationQuests: false,
-    },
+    initialFilters,
   });
 
   const {
@@ -307,7 +326,7 @@ export function MapsClient() {
     return () => setStats(null);
   }, [stats, setStats, loading, error]);
 
-  if (initialLoading) {
+  if (initialLoading || isInitializing) {
     return <QuestTreeSkeleton />;
   }
 
