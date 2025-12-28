@@ -13,7 +13,7 @@ import { SessionProvider } from "next-auth/react";
 import { mockQuestsWithProgress } from "../../fixtures/quests";
 import { mockTraders } from "../../fixtures/traders";
 import { QuestFilters } from "@/components/quest-tree/QuestFilters";
-import type { QuestFilters as Filters, ViewMode } from "@/types";
+import type { QuestFilters as Filters } from "@/types";
 
 describe("QuestFilters Integration Tests", () => {
   // Mock session for SessionProvider
@@ -27,11 +27,7 @@ describe("QuestFilters Integration Tests", () => {
     statuses: [],
     kappaOnly: false,
     map: null,
-    questTypes: [],
     playerLevel: 1,
-    questsPerTree: 5,
-    bypassLevelRequirement: false,
-    hideReputationQuests: false,
   };
 
   const defaultProps = {
@@ -41,9 +37,6 @@ describe("QuestFilters Integration Tests", () => {
     onFilterChange: vi.fn(),
     onApplyFilters: vi.fn(),
     hasPendingChanges: false,
-    viewMode: "trader-lanes" as ViewMode,
-    onViewModeChange: vi.fn(),
-    hiddenByLevelCount: 0,
   };
 
   beforeEach(() => {

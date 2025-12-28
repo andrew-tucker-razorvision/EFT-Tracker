@@ -26,7 +26,6 @@ interface MapGroupsViewProps {
   quests: QuestWithProgress[];
   allQuests?: QuestWithProgress[];
   playerLevel?: number | null;
-  hideReputationQuests?: boolean;
   onStatusChange: (questId: string, status: QuestStatus) => void;
   onQuestDetails?: (questId: string) => void;
 }
@@ -35,11 +34,10 @@ export function MapGroupsView({
   quests,
   allQuests,
   playerLevel,
-  hideReputationQuests = true,
   onStatusChange,
   onQuestDetails,
 }: MapGroupsViewProps) {
-  // Group quests by map (a quest can appear in multiple maps)
+  // Group quests by map using quest.location (task-level map from API)
   const questsByMap = useMemo(() => {
     const groups = new Map<string, QuestWithProgress[]>();
 
@@ -50,23 +48,13 @@ export function MapGroupsView({
     groups.set(ANY_LOCATION, []);
 
     for (const quest of quests) {
-      // Get unique maps from quest objectives
-      const questMaps = new Set<string>();
-      for (const obj of quest.objectives || []) {
-        if (obj.map) {
-          questMaps.add(obj.map);
-        }
-      }
-
-      if (questMaps.size === 0) {
-        // No map-specific objectives - goes in "Any Location"
+      if (quest.location === null) {
+        // "Any map" quest → Any Location column
         groups.get(ANY_LOCATION)!.push(quest);
       } else {
-        // Add quest to each map where it has objectives
-        for (const map of questMaps) {
-          if (groups.has(map)) {
-            groups.get(map)!.push(quest);
-          }
+        // Specific map quest → that map's column
+        if (groups.has(quest.location)) {
+          groups.get(quest.location)!.push(quest);
         }
       }
     }
@@ -109,16 +97,8 @@ export function MapGroupsView({
   // Get ordered list of maps (standard maps + Any Location at end)
   const orderedMaps = [...MAPS, ANY_LOCATION];
 
-  // Filter quests for NextUpPanel based on hideReputationQuests setting
-  // Also hides prestige quests (New Beginning) which require The Collector
-  const nextUpQuests = useMemo(() => {
-    if (!allQuests) return [];
-    if (!hideReputationQuests) return allQuests;
-    return allQuests.filter((q) => {
-      const questType = q.questType?.toUpperCase();
-      return questType !== "REPUTATION" && questType !== "PRESTIGE";
-    });
-  }, [allQuests, hideReputationQuests]);
+  // Quests for NextUpPanel
+  const nextUpQuests = allQuests ?? [];
 
   // Handler for clicking a quest in the NextUpPanel
   const handleNextUpQuestClick = (questId: string) => {

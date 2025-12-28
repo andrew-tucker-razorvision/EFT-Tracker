@@ -36,12 +36,12 @@ describe("useQuests", () => {
     it("should have default filters", () => {
       const { result } = renderHook(() => useQuests());
       expect(result.current.filters).toEqual({
+        traderId: null,
         statuses: ["available", "locked"], // Default to showing available and locked quests
         search: "",
         kappaOnly: false,
+        map: null,
         playerLevel: 1,
-        bypassLevelRequirement: false,
-        hideReputationQuests: true,
       });
     });
   });

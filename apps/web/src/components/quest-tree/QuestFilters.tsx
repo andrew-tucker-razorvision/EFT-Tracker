@@ -32,7 +32,6 @@ interface QuestFiltersProps {
   onFilterChange: (filters: Partial<Filters>) => void;
   onApplyFilters: () => void;
   hasPendingChanges: boolean;
-  hiddenByLevelCount: number;
 }
 
 export function QuestFilters({
@@ -41,7 +40,6 @@ export function QuestFilters({
   filters,
   onFilterChange,
   onApplyFilters,
-  hiddenByLevelCount,
 }: QuestFiltersProps) {
   const updatePrefsMutation = useUpdateUserPrefs();
   const [searchValue, setSearchValue] = useState(filters.search);
@@ -64,17 +62,6 @@ export function QuestFilters({
 
     return () => clearTimeout(timer);
   }, [filters.playerLevel, updatePrefsMutation]);
-
-  // Auto-save bypassLevelRequirement when it changes
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      updatePrefsMutation.mutate({
-        bypassLevelRequirement: filters.bypassLevelRequirement,
-      });
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [filters.bypassLevelRequirement, updatePrefsMutation]);
 
   // Debounce search input and auto-apply
   useEffect(() => {
@@ -119,8 +106,6 @@ export function QuestFilters({
       search: "",
       kappaOnly: false,
       playerLevel: 1,
-      bypassLevelRequirement: false,
-      hideReputationQuests: true, // Default to hiding reputation quests
     });
     setTimeout(() => onApplyFiltersRef.current(), 0);
   };
@@ -159,10 +144,6 @@ export function QuestFilters({
       handleFilterChange({ kappaOnly: false });
     } else if (key === "playerLevel") {
       handleFilterChange({ playerLevel: 1 });
-    } else if (key === "bypassLevelRequirement") {
-      handleFilterChange({ bypassLevelRequirement: false });
-    } else if (key === "hideReputationQuests") {
-      handleFilterChange({ hideReputationQuests: false });
     }
   };
 
@@ -171,29 +152,10 @@ export function QuestFilters({
     filters.statuses.length > 0 ? filters.statuses : null,
     filters.kappaOnly,
     filters.playerLevel !== 1 ? filters.playerLevel : null,
-    filters.bypassLevelRequirement ? true : null,
   ].filter(Boolean).length;
 
   return (
     <div className="bg-background border-b">
-      {/* Hidden quests banner */}
-      {hiddenByLevelCount > 0 && !filters.bypassLevelRequirement && (
-        <div className="mx-4 mt-2 flex items-center justify-between gap-2 px-3 py-2 bg-muted/50 rounded-md text-sm">
-          <span className="text-muted-foreground">
-            {hiddenByLevelCount} quest{hiddenByLevelCount > 1 ? "s" : ""} hidden
-            (above level {(filters.playerLevel || 1) + 5})
-          </span>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 text-xs"
-            onClick={() => handleFilterChange({ bypassLevelRequirement: true })}
-          >
-            Show All
-          </Button>
-        </div>
-      )}
-
       {/* MOBILE LAYOUT */}
       <div className="md:hidden">
         {/* Row 1: Search + Filter Button */}
@@ -260,41 +222,21 @@ export function QuestFilters({
                 {/* Player Level */}
                 <div className="space-y-2">
                   <Label className="text-sm">Player Level</Label>
-                  <div className="flex gap-2 items-center">
-                    <Input
-                      type="number"
-                      min={1}
-                      max={79}
-                      placeholder="1-79"
-                      value={filters.playerLevel ?? ""}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value);
-                        const level = isNaN(val)
-                          ? null
-                          : Math.min(79, Math.max(1, val));
-                        handleLevelChange(level);
-                      }}
-                      className="h-9 w-20"
-                      disabled={filters.bypassLevelRequirement}
-                    />
-                    <div className="flex items-center gap-1.5">
-                      <Switch
-                        id="bypass-mobile"
-                        checked={filters.bypassLevelRequirement}
-                        onCheckedChange={(checked) =>
-                          handleFilterChange({
-                            bypassLevelRequirement: checked,
-                          })
-                        }
-                      />
-                      <Label
-                        htmlFor="bypass-mobile"
-                        className="text-xs cursor-pointer whitespace-nowrap"
-                      >
-                        Bypass
-                      </Label>
-                    </div>
-                  </div>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={79}
+                    placeholder="1-79"
+                    value={filters.playerLevel ?? ""}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      const level = isNaN(val)
+                        ? null
+                        : Math.min(79, Math.max(1, val));
+                      handleLevelChange(level);
+                    }}
+                    className="h-9 w-20"
+                  />
                 </div>
 
                 {/* Reset button */}
@@ -360,7 +302,7 @@ export function QuestFilters({
               </Label>
             </div>
 
-            {/* Level + Bypass */}
+            {/* Level */}
             <div className="flex items-center gap-2">
               <Label
                 htmlFor="player-level-desktop"
@@ -383,23 +325,7 @@ export function QuestFilters({
                   handleLevelChange(level);
                 }}
                 className="h-9 w-16"
-                disabled={filters.bypassLevelRequirement}
               />
-              <div className="flex items-center gap-1.5">
-                <Switch
-                  id="bypass-desktop"
-                  checked={filters.bypassLevelRequirement}
-                  onCheckedChange={(checked) =>
-                    handleFilterChange({ bypassLevelRequirement: checked })
-                  }
-                />
-                <Label
-                  htmlFor="bypass-desktop"
-                  className="text-xs cursor-pointer whitespace-nowrap"
-                >
-                  Bypass
-                </Label>
-              </div>
             </div>
           </div>
 

@@ -429,4 +429,133 @@ describe("catch-up API", () => {
       expect(data.completedBranches).toEqual([]);
     });
   });
+
+  describe("Downstream Quest Exclusion", () => {
+    it("does NOT complete downstream quests of targets even if below player level", async () => {
+      // Quest graph: A -> B -> C (target) -> D -> E
+      // At level 20, D and E are below player level but should NOT be completed
+      // because they depend ON the target C
+      const questsWithDownstream = [
+        {
+          id: "A",
+          title: "Quest A",
+          levelRequired: 5,
+          dependsOn: [],
+        },
+        {
+          id: "B",
+          title: "Quest B",
+          levelRequired: 8,
+          dependsOn: [{ requiredQuest: { id: "A" } }],
+        },
+        {
+          id: "C",
+          title: "Quest C (Target)",
+          levelRequired: 10,
+          dependsOn: [{ requiredQuest: { id: "B" } }],
+        },
+        {
+          id: "D",
+          title: "Quest D (Downstream)",
+          levelRequired: 12, // Below player level 20
+          dependsOn: [{ requiredQuest: { id: "C" } }],
+        },
+        {
+          id: "E",
+          title: "Quest E (Downstream)",
+          levelRequired: 15, // Below player level 20
+          dependsOn: [{ requiredQuest: { id: "D" } }],
+        },
+      ];
+      mockQuestFindMany.mockResolvedValue(questsWithDownstream);
+
+      const request = new Request("http://localhost/api/progress/catch-up", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          targetQuests: ["C"],
+          playerLevel: 20,
+        }),
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+
+      // Prerequisites A and B should be completed
+      expect(data.completed).toContain("A");
+      expect(data.completed).toContain("B");
+
+      // Target C should be available (not completed)
+      expect(data.available).toContain("C");
+      expect(data.completed).not.toContain("C");
+
+      // Downstream quests D and E should NOT be in any completion list
+      // They should remain locked until C is completed
+      expect(data.completed).not.toContain("D");
+      expect(data.completed).not.toContain("E");
+      expect(data.levelCompleted).not.toContain("D");
+      expect(data.levelCompleted).not.toContain("E");
+      expect(data.completedBranches).not.toContain("D");
+      expect(data.completedBranches).not.toContain("E");
+    });
+
+    it("excludes entire downstream chain, not just direct dependents", async () => {
+      // Quest graph: Target -> X -> Y -> Z
+      // All of X, Y, Z should be excluded even though they're below player level
+      const questsWithDeepDownstream = [
+        {
+          id: "Target",
+          title: "Target Quest",
+          levelRequired: 5,
+          dependsOn: [],
+        },
+        {
+          id: "X",
+          title: "Downstream X",
+          levelRequired: 6,
+          dependsOn: [{ requiredQuest: { id: "Target" } }],
+        },
+        {
+          id: "Y",
+          title: "Downstream Y",
+          levelRequired: 7,
+          dependsOn: [{ requiredQuest: { id: "X" } }],
+        },
+        {
+          id: "Z",
+          title: "Downstream Z",
+          levelRequired: 8,
+          dependsOn: [{ requiredQuest: { id: "Y" } }],
+        },
+      ];
+      mockQuestFindMany.mockResolvedValue(questsWithDeepDownstream);
+
+      const request = new Request("http://localhost/api/progress/catch-up", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          targetQuests: ["Target"],
+          playerLevel: 20,
+        }),
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+
+      // Target should be available
+      expect(data.available).toContain("Target");
+
+      // Entire downstream chain should NOT be completed
+      expect(data.completed).not.toContain("X");
+      expect(data.completed).not.toContain("Y");
+      expect(data.completed).not.toContain("Z");
+      expect(data.levelCompleted).not.toContain("X");
+      expect(data.levelCompleted).not.toContain("Y");
+      expect(data.levelCompleted).not.toContain("Z");
+    });
+  });
 });

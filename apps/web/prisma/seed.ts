@@ -277,6 +277,7 @@ async function main() {
         kappaRequired: task.kappaRequired ?? false,
         questType: questType,
         factionName: task.factionName || null,
+        location: task.map?.name || null, // null = "any map"
         traderId: traderId,
         objectives: {
           create: (task.objectives || []).map((obj) => ({

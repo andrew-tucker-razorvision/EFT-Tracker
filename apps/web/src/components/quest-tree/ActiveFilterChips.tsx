@@ -71,15 +71,6 @@ export function ActiveFilterChips({
     });
   }
 
-  // Bypass level
-  if (filters.bypassLevelRequirement) {
-    chips.push({
-      key: "bypass",
-      label: "Bypass Level",
-      onRemove: () => onRemoveFilter("bypassLevelRequirement"),
-    });
-  }
-
   // Search is not shown as a chip (it's visible in the input)
 
   if (chips.length === 0) {

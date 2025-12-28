@@ -159,6 +159,33 @@ export async function POST(request: Request) {
     // Remove target quests from branch completion
     targetQuestSet.forEach((id) => branchQuestsToComplete.delete(id));
 
+    // Collect all downstream quests of target quests (these should NOT be completed)
+    // A downstream quest is one that depends ON a target quest (i.e., target is a prerequisite)
+    const downstreamOfTargets = new Set<string>();
+
+    function collectDownstream(questId: string, visited: Set<string>) {
+      if (visited.has(questId)) return;
+      visited.add(questId);
+
+      // Find all quests that have questId as a prerequisite (i.e., depend ON it)
+      // allQuests[].dependsOn[].requiredQuest.id tells us the prerequisites
+      // So we find quests where requiredQuest.id === questId
+      for (const quest of allQuests) {
+        const dependsOnTarget = quest.dependsOn?.some(
+          (dep) => dep.requiredQuest.id === questId
+        );
+        if (dependsOnTarget) {
+          downstreamOfTargets.add(quest.id);
+          collectDownstream(quest.id, visited);
+        }
+      }
+    }
+
+    // Collect downstream for each target quest
+    for (const targetId of targetQuests) {
+      collectDownstream(targetId, new Set());
+    }
+
     // Batch upsert all prerequisites as COMPLETED
     const completedIds: string[] = [];
     const prerequisiteArray = Array.from(prerequisitesToComplete);
@@ -272,6 +299,9 @@ export async function POST(request: Request) {
       // Skip already-marked quests (prerequisites or branches)
       if (prerequisitesToComplete.has(quest.id)) continue;
       if (branchQuestsToComplete.has(quest.id)) continue;
+
+      // Skip downstream quests of targets (they should remain LOCKED until prerequisites done)
+      if (downstreamOfTargets.has(quest.id)) continue;
 
       // Skip quests above player level
       if (quest.levelRequired > playerLevel) continue;
