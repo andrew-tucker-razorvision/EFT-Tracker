@@ -60,6 +60,7 @@ export interface Quest {
   kappaRequired: boolean;
   questType: QuestType;
   factionName: string | null;
+  location: string | null; // null = "any map", otherwise specific map name
   traderId: string;
   trader: Trader;
   objectives: Objective[];

@@ -36,6 +36,7 @@ model Quest {
   kappaRequired Boolean           @default(false)
   questType     QuestType         @default(STANDARD)
   factionName   String? // "Any", "BEAR", "USEC" from API
+  location      String? // null = "any map", otherwise specific map name from API
   traderId      String
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
