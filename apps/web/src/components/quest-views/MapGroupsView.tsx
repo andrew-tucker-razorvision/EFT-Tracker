@@ -37,7 +37,7 @@ export function MapGroupsView({
   onStatusChange,
   onQuestDetails,
 }: MapGroupsViewProps) {
-  // Group quests by map (a quest can appear in multiple maps)
+  // Group quests by map using quest.location (task-level map from API)
   const questsByMap = useMemo(() => {
     const groups = new Map<string, QuestWithProgress[]>();
 
@@ -48,23 +48,13 @@ export function MapGroupsView({
     groups.set(ANY_LOCATION, []);
 
     for (const quest of quests) {
-      // Get unique maps from quest objectives
-      const questMaps = new Set<string>();
-      for (const obj of quest.objectives || []) {
-        if (obj.map) {
-          questMaps.add(obj.map);
-        }
-      }
-
-      if (questMaps.size === 0) {
-        // No map-specific objectives - goes in "Any Location"
+      if (quest.location === null) {
+        // "Any map" quest → Any Location column
         groups.get(ANY_LOCATION)!.push(quest);
       } else {
-        // Add quest to each map where it has objectives
-        for (const map of questMaps) {
-          if (groups.has(map)) {
-            groups.get(map)!.push(quest);
-          }
+        // Specific map quest → that map's column
+        if (groups.has(quest.location)) {
+          groups.get(quest.location)!.push(quest);
         }
       }
     }
