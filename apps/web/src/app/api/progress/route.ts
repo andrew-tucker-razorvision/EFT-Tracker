@@ -154,7 +154,8 @@ async function handleDELETE() {
   }
 }
 
-// Apply rate limiting - authenticated users get higher limits
-export const GET = withRateLimit(handleGET, RATE_LIMITS.API_AUTHENTICATED);
+// Progress GET - no rate limiting (auth-protected, called frequently)
+export const GET = handleGET;
+// Progress writes - keep rate limiting (abuse-prone operations)
 export const POST = withRateLimit(handlePOST, RATE_LIMITS.API_DATA_WRITE);
 export const DELETE = withRateLimit(handleDELETE, RATE_LIMITS.API_DATA_WRITE);

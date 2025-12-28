@@ -58,7 +58,7 @@ function getUpstashRateLimiter(config: RateLimitConfig): Ratelimit | null {
     upstashRateLimiter = new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(config.limit, `${config.window}ms`),
-      analytics: true,
+      analytics: false,
       prefix: "eft-tracker:ratelimit",
     });
 
