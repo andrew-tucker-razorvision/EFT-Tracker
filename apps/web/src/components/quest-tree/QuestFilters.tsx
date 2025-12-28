@@ -61,7 +61,7 @@ export function QuestFilters({
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [filters.playerLevel, updatePrefsMutation]);
+  }, [filters.playerLevel]); // mutation.mutate() is stable and doesn't need to be in deps
 
   // Debounce search input and auto-apply
   useEffect(() => {

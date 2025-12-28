@@ -76,8 +76,9 @@ export function useUpdateUserPrefs() {
       });
     },
     onSuccess: () => {
-      // Re-fetch to ensure fresh data after successful save
-      queryClient.invalidateQueries({ queryKey: ["userPrefs"] });
+      // Optimistic update already handles state - no need to invalidate
+      // Data has staleTime: Infinity so it never needs refetching
+      // Invalidation would cause re-renders that trigger the infinite loop
     },
   });
 }
