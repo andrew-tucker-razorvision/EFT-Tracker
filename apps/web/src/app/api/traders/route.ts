@@ -44,5 +44,6 @@ async function handleGET() {
   }
 }
 
-// Apply rate limiting - data read endpoint
-export const GET = withRateLimit(handleGET, RATE_LIMITS.API_DATA_READ);
+// Note: Rate limiting removed for read-only public data endpoint
+// Public trader information should be freely accessible without limits
+export const GET = handleGET;
