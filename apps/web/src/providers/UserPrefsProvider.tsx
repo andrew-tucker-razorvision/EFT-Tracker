@@ -33,6 +33,7 @@ export function UserPrefsProvider({ children }: UserPrefsProviderProps) {
   };
 
   return (
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore React 19 type compatibility issue with Context.Provider
     <UserPrefsContext.Provider value={value}>
       {children}
