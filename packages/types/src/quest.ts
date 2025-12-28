@@ -6,7 +6,7 @@
 import type { Node, Edge } from "@xyflow/react";
 
 // Quest status enum
-export type QuestStatus = "locked" | "available" | "completed";
+export type QuestStatus = "locked" | "available" | "in_progress" | "completed";
 
 // Quest type enum for categorization
 export type QuestType =
@@ -91,17 +91,16 @@ export interface LevelRange {
 
 // Filter options for quest list/tree
 export interface QuestFilters {
+  traderId: string | null;
   statuses: QuestStatus[]; // Empty array = all statuses (multi-select)
   search: string;
   kappaOnly: boolean;
+  map: string | null;
   playerLevel: number | null;
+  questsPerTree: number | null; // null = show all
   bypassLevelRequirement: boolean; // Show all quests regardless of level
+  questType: QuestType | null; // null = all quest types
   hideReputationQuests: boolean; // Hide Fence reputation quests by default
-  // Optional fields used by other pages (maps page)
-  traderId?: string | null;
-  map?: string | null;
-  questsPerTree?: number | null;
-  questTypes?: QuestType[];
 }
 
 // View mode for quest display

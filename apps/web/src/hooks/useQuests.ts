@@ -48,11 +48,15 @@ interface UseQuestsReturn {
 }
 
 const defaultFilters: QuestFilters = {
+  traderId: null,
   statuses: ["available", "locked"], // Default to showing available and locked quests
   search: "",
   kappaOnly: false,
+  map: null,
   playerLevel: 1, // Default to level 1 for all users
+  questsPerTree: null, // null = show all
   bypassLevelRequirement: false, // Show all quests regardless of level when true
+  questType: null, // null = all quest types
   hideReputationQuests: true, // Hide Fence reputation quests by default
 };
 

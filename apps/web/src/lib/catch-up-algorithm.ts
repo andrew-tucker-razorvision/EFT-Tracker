@@ -158,6 +158,7 @@ export function getPrerequisitesForSelection(
 export function getCompletedBranches(
   targetQuestIds: string[],
   quests: QuestWithProgress[],
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _playerLevel: number
 ): CatchUpSelection[] {
   const questMap = buildQuestMap(quests);

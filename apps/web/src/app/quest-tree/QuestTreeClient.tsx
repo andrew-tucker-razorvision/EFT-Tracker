@@ -24,6 +24,7 @@ import type { QuestStatus, QuestWithProgress } from "@/types";
 const STATUS_CYCLE: Record<QuestStatus, QuestStatus | null> = {
   locked: null, // Can't cycle from locked
   available: "completed",
+  in_progress: "completed", // Treat in_progress same as available
   completed: "available", // Reset
 };
 
