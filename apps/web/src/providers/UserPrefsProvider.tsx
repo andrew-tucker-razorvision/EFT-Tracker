@@ -48,7 +48,9 @@ export function UserPrefsProvider({ children }: UserPrefsProviderProps) {
 export function useUserPrefsContext(): UserPrefsContextValue {
   const context = useContext(UserPrefsContext);
   if (context === undefined) {
-    throw new Error("useUserPrefsContext must be used within UserPrefsProvider");
+    throw new Error(
+      "useUserPrefsContext must be used within UserPrefsProvider"
+    );
   }
   return context;
 }
