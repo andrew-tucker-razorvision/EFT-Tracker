@@ -1,3 +1,4 @@
+import "dotenv/config";
 import * as path from "node:path";
 import { defineConfig } from "prisma/config";
 
