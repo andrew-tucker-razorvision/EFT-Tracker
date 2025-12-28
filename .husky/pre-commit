@@ -1,7 +1,53 @@
 #!/bin/sh
 
+# ============================================================================
+# Branch Validation (prevents wrong-branch commits)
+# ============================================================================
+
+# Get current branch - ALWAYS show to provide context
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+echo "📍 Current branch: $BRANCH"
+echo ""
+
+# HARD BLOCK: Prevent direct commits to master
+if [ "$BRANCH" = "master" ]; then
+  echo "❌ ERROR: Cannot commit directly to master branch"
+  echo ""
+  echo "Protected branch policy:"
+  echo "  • All changes must go through Pull Requests"
+  echo "  • Create a feature branch: git checkout -b feature/your-feature-name"
+  echo ""
+  echo "See: .claude/rules/git/protected-branches.md"
+  exit 1
+fi
+
+# SOFT WARNING: Validate branch naming convention (does not block)
+if ! echo "$BRANCH" | grep -qE '^(feature|fix|bugfix|hotfix|docs|refactor|test|chore)/'; then
+  echo "⚠️  WARNING: Branch name doesn't follow convention"
+  echo ""
+  echo "Current branch: $BRANCH"
+  echo "Expected format: <type>/<description>"
+  echo ""
+  echo "Valid prefixes:"
+  echo "  • feature/  - New features"
+  echo "  • fix/      - Bug fixes"
+  echo "  • bugfix/   - Bug fixes (alternative)"
+  echo "  • hotfix/   - Critical production fixes"
+  echo "  • docs/     - Documentation only"
+  echo "  • refactor/ - Code refactoring"
+  echo "  • test/     - Test additions"
+  echo "  • chore/    - Maintenance tasks"
+  echo ""
+  echo "See: .claude/rules/git/branches.md"
+  echo ""
+  echo "⏩ Continuing anyway (this is just a warning)..."
+  echo ""
+fi
+
+# ============================================================================
 # Run quick validation before every commit
 # This catches formatting, lint, and type errors early
+# ============================================================================
 echo "🔍 Running pre-commit validation..."
 echo ""
 
