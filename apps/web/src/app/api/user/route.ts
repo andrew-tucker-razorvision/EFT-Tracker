@@ -119,6 +119,7 @@ async function handlePATCH(request: Request) {
   }
 }
 
-// Apply rate limiting - authenticated users only
-export const GET = withRateLimit(handleGET, RATE_LIMITS.API_AUTHENTICATED);
+// User preferences GET - no rate limiting (auth-protected, called frequently)
+export const GET = handleGET;
+// User preferences PATCH - keep rate limiting (write operation)
 export const PATCH = withRateLimit(handlePATCH, RATE_LIMITS.API_DATA_WRITE);
