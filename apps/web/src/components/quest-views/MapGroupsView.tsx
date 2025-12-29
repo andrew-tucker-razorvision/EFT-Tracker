@@ -94,8 +94,23 @@ export function MapGroupsView({
     return stats;
   }, [questsByMap]);
 
-  // Get ordered list of maps (standard maps + Any Location at end)
-  const orderedMaps = [...MAPS, ANY_LOCATION];
+  // Sort all maps (including Any Location) by total quest count (descending)
+  const orderedMaps = useMemo(() => {
+    const allMaps = [...MAPS, ANY_LOCATION];
+
+    return allMaps.sort((a, b) => {
+      const aCount = mapStats.get(a)?.total || 0;
+      const bCount = mapStats.get(b)?.total || 0;
+
+      // Primary sort: by quest count (descending)
+      if (bCount !== aCount) {
+        return bCount - aCount;
+      }
+
+      // Tiebreaker: alphabetical order
+      return a.localeCompare(b);
+    });
+  }, [mapStats]);
 
   // Quests for NextUpPanel
   const nextUpQuests = allQuests ?? [];
