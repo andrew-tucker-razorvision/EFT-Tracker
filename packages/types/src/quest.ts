@@ -92,10 +92,17 @@ export interface QuestProgress {
   questId: string;
 }
 
+// Objective progress summary for UI display
+export interface ObjectivesSummary {
+  total: number;
+  completed: number;
+}
+
 // Quest with progress for frontend
 export interface QuestWithProgress extends Quest {
   progress: QuestProgress | null;
   computedStatus: QuestStatus;
+  objectivesSummary?: ObjectivesSummary;
 }
 
 // Level range filter options

@@ -183,6 +183,22 @@ export function LevelQuestCard({
         {quest.title}
       </div>
 
+      {/* Objective progress bar - only show when there are objectives and quest is not locked */}
+      {quest.objectivesSummary &&
+        quest.objectivesSummary.total > 0 &&
+        quest.computedStatus !== "locked" && (
+          <div className="mt-1">
+            <div className="h-1 w-full bg-black/30 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-emerald-500 transition-all duration-300"
+                style={{
+                  width: `${(quest.objectivesSummary.completed / quest.objectivesSummary.total) * 100}%`,
+                }}
+              />
+            </div>
+          </div>
+        )}
+
       {/* Bottom row: trader + level + action buttons */}
       {/* Refactoring UI: Labels tertiary, data primary */}
       <div className="flex items-center justify-between mt-1">
@@ -215,6 +231,18 @@ export function LevelQuestCard({
               {quest.levelRequired}
             </span>
           </span>
+          {/* Objective count badge */}
+          {quest.objectivesSummary &&
+            quest.objectivesSummary.total > 0 &&
+            quest.computedStatus !== "locked" && (
+              <span
+                className="text-[10px]"
+                style={{ color: "var(--text-tertiary)" }}
+              >
+                ({quest.objectivesSummary.completed}/
+                {quest.objectivesSummary.total})
+              </span>
+            )}
         </div>
         {/* Action buttons - info and wiki link */}
         <div className="flex items-center gap-1">

@@ -343,6 +343,63 @@ export function QuestTreeClient() {
     [handleStatusChange]
   );
 
+  // Handle objective checkbox toggle from modal
+  const handleObjectiveToggle = useCallback(
+    async (
+      objectiveId: string,
+      completed: boolean
+    ): Promise<{ questStatusChanged?: boolean; newQuestStatus?: string }> => {
+      if (sessionStatusRef.current !== "authenticated") {
+        toast.error("Sign in Required", {
+          description: "Please sign in to track quest progress.",
+        });
+        return { questStatusChanged: false };
+      }
+
+      try {
+        const response = await fetch(`/api/progress/objective/${objectiveId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ completed }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || "Failed to update objective");
+        }
+
+        const data = await response.json();
+
+        // Refetch quests to get updated objective progress
+        await refetchRef.current();
+
+        // Show toast if quest status changed
+        if (data.quest?.statusChanged) {
+          if (data.quest.status === "COMPLETED") {
+            toast.success("Quest Completed!", {
+              description: `All objectives for ${data.quest.title} are complete.`,
+            });
+          } else if (data.quest.status === "IN_PROGRESS") {
+            toast.info("Quest Started", {
+              description: data.quest.title,
+            });
+          }
+        }
+
+        return {
+          questStatusChanged: data.quest?.statusChanged ?? false,
+          newQuestStatus: data.quest?.status,
+        };
+      } catch (err) {
+        toast.error("Failed to Update Objective", {
+          description: err instanceof Error ? err.message : "Please try again.",
+        });
+        return { questStatusChanged: false };
+      }
+    },
+    []
+  );
+
   // Calculate progress stats
   const stats = useMemo(
     () => ({
@@ -417,6 +474,7 @@ export function QuestTreeClient() {
         open={detailModalOpen}
         onOpenChange={setDetailModalOpen}
         onStatusChange={handleModalStatusChange}
+        onObjectiveToggle={handleObjectiveToggle}
         isSaving={isDetailQuestSaving}
       />
       <QuestFilters

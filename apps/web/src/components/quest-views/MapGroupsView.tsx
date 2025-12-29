@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { LevelQuestCard } from "./LevelQuestCard";
 import { NextUpPanel } from "@/components/next-up";
-import type { QuestWithProgress, QuestStatus } from "@/types";
+import type { QuestWithProgress, QuestStatus, Objective } from "@/types";
 
 // Maps in standard order (matching QuestFilters.tsx)
 const MAPS = [
@@ -22,6 +22,54 @@ const MAPS = [
 // Special category for quests with no map-specific objectives
 const ANY_LOCATION = "Any Location";
 
+/**
+ * Check if an objective is completed
+ */
+function isObjectiveCompleted(objective: Objective): boolean {
+  return objective.progress?.[0]?.completed ?? false;
+}
+
+/**
+ * Get the maps where a quest has incomplete objectives.
+ * If all objectives for a specific map are complete, that map won't be included.
+ * Returns empty array if quest has no map-specific objectives (meaning "Any Location").
+ */
+function getQuestIncompleteMaps(quest: QuestWithProgress): string[] {
+  const incompleteMapSet = new Set<string>();
+  let hasMapSpecificObjectives = false;
+
+  for (const objective of quest.objectives) {
+    // Skip completed objectives
+    if (isObjectiveCompleted(objective)) continue;
+
+    // Check objective maps
+    if (objective.maps && objective.maps.length > 0) {
+      hasMapSpecificObjectives = true;
+      for (const map of objective.maps) {
+        incompleteMapSet.add(map);
+      }
+    }
+  }
+
+  // If no map-specific objectives exist at all, check quest.location as fallback
+  if (!hasMapSpecificObjectives) {
+    // Check if quest has any incomplete objectives
+    const hasIncompleteObjectives = quest.objectives.some(
+      (obj) => !isObjectiveCompleted(obj)
+    );
+
+    if (hasIncompleteObjectives || quest.computedStatus !== "completed") {
+      // Use quest.location if available, otherwise it's "any map"
+      if (quest.location) {
+        return [quest.location];
+      }
+      return []; // Empty = "Any Location"
+    }
+  }
+
+  return Array.from(incompleteMapSet);
+}
+
 interface MapGroupsViewProps {
   quests: QuestWithProgress[];
   allQuests?: QuestWithProgress[];
@@ -37,7 +85,8 @@ export function MapGroupsView({
   onStatusChange,
   onQuestDetails,
 }: MapGroupsViewProps) {
-  // Group quests by map using quest.location (task-level map from API)
+  // Group quests by map using objective-level maps (smart filtering)
+  // Quests only appear in a map column if they have incomplete objectives for that map
   const questsByMap = useMemo(() => {
     const groups = new Map<string, QuestWithProgress[]>();
 
@@ -48,13 +97,19 @@ export function MapGroupsView({
     groups.set(ANY_LOCATION, []);
 
     for (const quest of quests) {
-      if (quest.location === null) {
-        // "Any map" quest → Any Location column
+      // Get maps where this quest has incomplete objectives
+      const incompleteMaps = getQuestIncompleteMaps(quest);
+
+      if (incompleteMaps.length === 0) {
+        // No map-specific incomplete objectives → "Any Location" column
+        // This includes quests with location=null or completed map-specific objectives
         groups.get(ANY_LOCATION)!.push(quest);
       } else {
-        // Specific map quest → that map's column
-        if (groups.has(quest.location)) {
-          groups.get(quest.location)!.push(quest);
+        // Add to each map where it has incomplete objectives
+        for (const map of incompleteMaps) {
+          if (groups.has(map)) {
+            groups.get(map)!.push(quest);
+          }
         }
       }
     }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useCallback } from "react";
 import {
   ExternalLink,
   MapPin,
@@ -12,6 +13,8 @@ import {
   AlertCircle,
   Key,
   CheckCircle,
+  Square,
+  CheckSquare,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useQuestDetails } from "@/hooks/useQuestDetails";
@@ -32,7 +35,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getTraderColor, STATUS_COLORS } from "@/lib/trader-colors";
-import type { QuestWithProgress } from "@/types";
+import type { QuestWithProgress, Objective } from "@/types";
 import type { TarkovQuestDetails, TarkovObjectiveItem } from "@/lib/tarkov-api";
 
 interface QuestDetailModalProps {
@@ -40,6 +43,10 @@ interface QuestDetailModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onStatusChange?: (questId: string) => Promise<void>;
+  onObjectiveToggle?: (
+    objectiveId: string,
+    completed: boolean
+  ) => Promise<{ questStatusChanged?: boolean; newQuestStatus?: string }>;
   isSaving?: boolean;
 }
 
@@ -60,8 +67,28 @@ interface QuestDetailContentProps {
   detailsLoading: boolean;
   detailsError: string | null;
   onStatusChange?: (questId: string) => Promise<void>;
+  onObjectiveToggle?: (
+    objectiveId: string,
+    completed: boolean
+  ) => Promise<{ questStatusChanged?: boolean; newQuestStatus?: string }>;
   isSaving?: boolean;
   onOpenChange?: (open: boolean) => void;
+  objectiveStates: Record<string, boolean>;
+  onLocalObjectiveToggle: (objectiveId: string, completed: boolean) => void;
+  savingObjectives: Set<string>;
+}
+
+// Helper to check if an objective is completed
+function isObjectiveCompleted(
+  objective: Objective,
+  objectiveStates: Record<string, boolean>
+): boolean {
+  // First check local state (optimistic updates)
+  if (objectiveStates[objective.id] !== undefined) {
+    return objectiveStates[objective.id];
+  }
+  // Fall back to server state
+  return objective.progress?.[0]?.completed ?? false;
 }
 
 function QuestDetailContent({
@@ -70,10 +97,22 @@ function QuestDetailContent({
   detailsLoading,
   detailsError,
   onStatusChange,
+  onObjectiveToggle,
   isSaving,
   onOpenChange,
+  objectiveStates,
+  onLocalObjectiveToggle,
+  savingObjectives,
 }: QuestDetailContentProps) {
   const statusColor = STATUS_COLORS[quest.computedStatus];
+  const isLocked = quest.computedStatus === "locked";
+  const canToggleObjectives = !isLocked && !!onObjectiveToggle;
+
+  // Calculate objective progress
+  const completedCount = quest.objectives.filter((obj) =>
+    isObjectiveCompleted(obj, objectiveStates)
+  ).length;
+  const totalCount = quest.objectives.length;
 
   // Group objectives by map
   const objectivesByMap = quest.objectives.reduce(
@@ -217,8 +256,21 @@ function QuestDetailContent({
       <div>
         <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
           <Target className="w-4 h-4" />
-          Objectives ({quest.objectives.length})
+          Objectives ({completedCount}/{totalCount})
         </h3>
+        {/* Progress bar */}
+        {totalCount > 0 && (
+          <div className="mb-3">
+            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+              <div
+                className="h-full bg-primary transition-all duration-300"
+                style={{
+                  width: `${(completedCount / totalCount) * 100}%`,
+                }}
+              />
+            </div>
+          </div>
+        )}
         {quest.objectives.length > 0 ? (
           <div className="space-y-4">
             {maps.map((map) => (
@@ -229,15 +281,61 @@ function QuestDetailContent({
                     {map}
                   </span>
                 </div>
-                <ul className="space-y-2 pl-5">
-                  {objectivesByMap[map].map((obj) => (
-                    <li
-                      key={obj.id}
-                      className="text-sm text-foreground/90 leading-relaxed"
-                    >
-                      {obj.description}
-                    </li>
-                  ))}
+                <ul className="space-y-2">
+                  {objectivesByMap[map].map((obj) => {
+                    const isCompleted = isObjectiveCompleted(
+                      obj,
+                      objectiveStates
+                    );
+                    const isSavingThis = savingObjectives.has(obj.id);
+
+                    return (
+                      <li
+                        key={obj.id}
+                        className={`flex items-start gap-2 text-sm leading-relaxed ${
+                          canToggleObjectives
+                            ? "cursor-pointer hover:bg-muted/50 -mx-2 px-2 py-1 rounded"
+                            : ""
+                        } ${isCompleted ? "text-muted-foreground" : "text-foreground/90"}`}
+                        onClick={
+                          canToggleObjectives && !isSavingThis
+                            ? () => {
+                                const newCompleted = !isCompleted;
+                                onLocalObjectiveToggle(obj.id, newCompleted);
+                                onObjectiveToggle?.(obj.id, newCompleted);
+                              }
+                            : undefined
+                        }
+                      >
+                        {/* Checkbox */}
+                        <span className="shrink-0 mt-0.5">
+                          {isSavingThis ? (
+                            <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                          ) : isCompleted ? (
+                            <CheckSquare
+                              className={`w-4 h-4 ${canToggleObjectives ? "text-primary" : "text-muted-foreground"}`}
+                            />
+                          ) : (
+                            <Square
+                              className={`w-4 h-4 ${canToggleObjectives ? "text-muted-foreground hover:text-primary" : "text-muted-foreground/50"}`}
+                            />
+                          )}
+                        </span>
+                        {/* Description */}
+                        <span className={isCompleted ? "line-through" : ""}>
+                          {obj.description}
+                          {obj.optional && (
+                            <Badge
+                              variant="outline"
+                              className="ml-2 text-xs py-0"
+                            >
+                              Optional
+                            </Badge>
+                          )}
+                        </span>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             ))}
@@ -456,6 +554,7 @@ export function QuestDetailModal({
   open,
   onOpenChange,
   onStatusChange,
+  onObjectiveToggle,
   isSaving,
 }: QuestDetailModalProps) {
   const isMobile = useIsMobile();
@@ -466,6 +565,54 @@ export function QuestDetailModal({
     error: detailsError,
   } = useQuestDetails(open && quest ? quest.id : null);
 
+  // Local state for optimistic updates on objectives
+  const [objectiveStates, setObjectiveStates] = useState<
+    Record<string, boolean>
+  >({});
+  const [savingObjectives, setSavingObjectives] = useState<Set<string>>(
+    new Set()
+  );
+
+  // Reset local state when quest changes or modal closes
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      if (!newOpen) {
+        setObjectiveStates({});
+        setSavingObjectives(new Set());
+      }
+      onOpenChange(newOpen);
+    },
+    [onOpenChange]
+  );
+
+  // Handle local objective toggle with optimistic update
+  const handleLocalObjectiveToggle = useCallback(
+    (objectiveId: string, completed: boolean) => {
+      setObjectiveStates((prev) => ({ ...prev, [objectiveId]: completed }));
+      setSavingObjectives((prev) => new Set(prev).add(objectiveId));
+    },
+    []
+  );
+
+  // Wrap the onObjectiveToggle to handle saving state
+  const handleObjectiveToggle = useCallback(
+    async (objectiveId: string, completed: boolean) => {
+      if (!onObjectiveToggle) return { questStatusChanged: false };
+
+      try {
+        const result = await onObjectiveToggle(objectiveId, completed);
+        return result;
+      } finally {
+        setSavingObjectives((prev) => {
+          const next = new Set(prev);
+          next.delete(objectiveId);
+          return next;
+        });
+      }
+    },
+    [onObjectiveToggle]
+  );
+
   if (!quest) return null;
 
   const traderColor = getTraderColor(quest.traderId);
@@ -473,7 +620,7 @@ export function QuestDetailModal({
   // Use Sheet (drawer) on mobile, Dialog on desktop
   if (isMobile) {
     return (
-      <Sheet open={open} onOpenChange={onOpenChange}>
+      <Sheet open={open} onOpenChange={handleOpenChange}>
         <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto">
           <SheetHeader className="text-left pb-4 border-b">
             <div className="flex items-center gap-2 mb-1">
@@ -497,8 +644,12 @@ export function QuestDetailModal({
               detailsLoading={detailsLoading}
               detailsError={detailsError}
               onStatusChange={onStatusChange}
+              onObjectiveToggle={handleObjectiveToggle}
               isSaving={isSaving}
-              onOpenChange={onOpenChange}
+              onOpenChange={handleOpenChange}
+              objectiveStates={objectiveStates}
+              onLocalObjectiveToggle={handleLocalObjectiveToggle}
+              savingObjectives={savingObjectives}
             />
           </div>
         </SheetContent>
@@ -507,7 +658,7 @@ export function QuestDetailModal({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader className="pb-4 border-b">
           <div className="flex items-center gap-2 mb-1">
@@ -530,8 +681,12 @@ export function QuestDetailModal({
           detailsLoading={detailsLoading}
           detailsError={detailsError}
           onStatusChange={onStatusChange}
+          onObjectiveToggle={handleObjectiveToggle}
           isSaving={isSaving}
-          onOpenChange={onOpenChange}
+          onOpenChange={handleOpenChange}
+          objectiveStates={objectiveStates}
+          onLocalObjectiveToggle={handleLocalObjectiveToggle}
+          savingObjectives={savingObjectives}
         />
       </DialogContent>
     </Dialog>
