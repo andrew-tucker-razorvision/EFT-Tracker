@@ -322,9 +322,7 @@ function QuestDetailContent({
                           )}
                         </span>
                         {/* Description */}
-                        <span
-                          className={isCompleted ? "line-through" : ""}
-                        >
+                        <span className={isCompleted ? "line-through" : ""}>
                           {obj.description}
                           {obj.optional && (
                             <Badge

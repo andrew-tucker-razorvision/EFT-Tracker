@@ -357,14 +357,11 @@ export function QuestTreeClient() {
       }
 
       try {
-        const response = await fetch(
-          `/api/progress/objective/${objectiveId}`,
-          {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ completed }),
-          }
-        );
+        const response = await fetch(`/api/progress/objective/${objectiveId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ completed }),
+        });
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
@@ -395,8 +392,7 @@ export function QuestTreeClient() {
         };
       } catch (err) {
         toast.error("Failed to Update Objective", {
-          description:
-            err instanceof Error ? err.message : "Please try again.",
+          description: err instanceof Error ? err.message : "Please try again.",
         });
         return { questStatusChanged: false };
       }
