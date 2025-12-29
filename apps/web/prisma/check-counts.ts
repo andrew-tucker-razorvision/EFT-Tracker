@@ -45,7 +45,9 @@ async function main() {
 
   console.log("\nSample objectives with counts:");
   samples.forEach((obj) => {
-    console.log(`  - [${obj.type}] count=${obj.count}: ${obj.description.substring(0, 60)}...`);
+    console.log(
+      `  - [${obj.type}] count=${obj.count}: ${obj.description.substring(0, 60)}...`
+    );
   });
 
   // Check ObjectiveProgress current/target
@@ -57,7 +59,9 @@ async function main() {
   console.log("\n--- ObjectiveProgress ---");
   console.log(`Total records: ${totalProgress}`);
   console.log(`With target set: ${progressWithTarget}`);
-  console.log(`Without target (needs backfill): ${totalProgress - progressWithTarget}`);
+  console.log(
+    `Without target (needs backfill): ${totalProgress - progressWithTarget}`
+  );
 }
 
 main()
