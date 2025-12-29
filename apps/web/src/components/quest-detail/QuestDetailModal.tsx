@@ -11,6 +11,7 @@ import {
   Loader2,
   AlertCircle,
   Key,
+  CheckCircle,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useQuestDetails } from "@/hooks/useQuestDetails";
@@ -38,6 +39,8 @@ interface QuestDetailModalProps {
   quest: QuestWithProgress | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onStatusChange?: (questId: string) => Promise<void>;
+  isSaving?: boolean;
 }
 
 // Helper to extract item objectives that require turning in items
@@ -56,6 +59,9 @@ interface QuestDetailContentProps {
   details: TarkovQuestDetails | null;
   detailsLoading: boolean;
   detailsError: string | null;
+  onStatusChange?: (questId: string) => Promise<void>;
+  isSaving?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 function QuestDetailContent({
@@ -63,6 +69,9 @@ function QuestDetailContent({
   details,
   detailsLoading,
   detailsError,
+  onStatusChange,
+  isSaving,
+  onOpenChange,
 }: QuestDetailContentProps) {
   const statusColor = STATUS_COLORS[quest.computedStatus];
 
@@ -377,22 +386,67 @@ function QuestDetailContent({
         </div>
       )}
 
-      {/* Wiki Link */}
-      {quest.wikiLink && (
+      {/* Action Buttons */}
+      {quest.computedStatus !== "locked" && onStatusChange && (
         <div className="pt-2 border-t">
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full"
-            onClick={() =>
-              window.open(quest.wikiLink!, "_blank", "noopener,noreferrer")
-            }
-          >
-            <ExternalLink className="w-4 h-4 mr-2" />
-            View on Tarkov Wiki
-          </Button>
+          <div className="flex gap-2">
+            {/* Complete Quest Button - Left (Primary Action) */}
+            <Button
+              variant="default"
+              size="sm"
+              className="flex-1"
+              disabled={isSaving}
+              onClick={async () => {
+                await onStatusChange(quest.id);
+                onOpenChange?.(false);
+              }}
+            >
+              {isSaving ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <CheckCircle className="w-4 h-4 mr-2" />
+              )}
+              {quest.computedStatus === "completed"
+                ? "Mark Available"
+                : "Complete Quest"}
+            </Button>
+
+            {/* Wiki Link Button - Right */}
+            {quest.wikiLink && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={() =>
+                  window.open(quest.wikiLink!, "_blank", "noopener,noreferrer")
+                }
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                View Wiki
+              </Button>
+            )}
+          </div>
         </div>
       )}
+
+      {/* Fallback: Wiki-only button when no status change handler */}
+      {quest.computedStatus !== "locked" &&
+        !onStatusChange &&
+        quest.wikiLink && (
+          <div className="pt-2 border-t">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={() =>
+                window.open(quest.wikiLink!, "_blank", "noopener,noreferrer")
+              }
+            >
+              <ExternalLink className="w-4 h-4 mr-2" />
+              View on Tarkov Wiki
+            </Button>
+          </div>
+        )}
     </div>
   );
 }
@@ -401,6 +455,8 @@ export function QuestDetailModal({
   quest,
   open,
   onOpenChange,
+  onStatusChange,
+  isSaving,
 }: QuestDetailModalProps) {
   const isMobile = useIsMobile();
   // Fetch extended details from tarkov.dev when modal opens
@@ -440,6 +496,9 @@ export function QuestDetailModal({
               details={details}
               detailsLoading={detailsLoading}
               detailsError={detailsError}
+              onStatusChange={onStatusChange}
+              isSaving={isSaving}
+              onOpenChange={onOpenChange}
             />
           </div>
         </SheetContent>
@@ -470,6 +529,9 @@ export function QuestDetailModal({
           details={details}
           detailsLoading={detailsLoading}
           detailsError={detailsError}
+          onStatusChange={onStatusChange}
+          isSaving={isSaving}
+          onOpenChange={onOpenChange}
         />
       </DialogContent>
     </Dialog>

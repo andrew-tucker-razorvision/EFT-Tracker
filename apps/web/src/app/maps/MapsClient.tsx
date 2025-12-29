@@ -109,6 +109,11 @@ export function MapsClient() {
   );
   const [detailModalOpen, setDetailModalOpen] = useState(false);
 
+  // Check if detail quest is currently saving
+  const isDetailQuestSaving = useMemo(() => {
+    return detailQuest ? savingQuestIds.has(detailQuest.id) : false;
+  }, [detailQuest, savingQuestIds]);
+
   // Refs for stable callback references
   const questsWithProgressRef = useRef<QuestWithProgress[]>([]);
   const sessionStatusRef = useRef(sessionStatus);
@@ -318,6 +323,14 @@ export function MapsClient() {
     }
   }, []);
 
+  // Wrapper for modal - reuses parent's handleStatusChange logic
+  const handleModalStatusChange = useCallback(
+    async (questId: string) => {
+      await handleStatusChange(questId);
+    },
+    [handleStatusChange]
+  );
+
   const stats = useMemo(
     () => ({
       total: questsWithProgress.length,
@@ -389,6 +402,8 @@ export function MapsClient() {
         quest={detailQuest}
         open={detailModalOpen}
         onOpenChange={setDetailModalOpen}
+        onStatusChange={handleModalStatusChange}
+        isSaving={isDetailQuestSaving}
       />
       <MapFilters
         traders={traders}
