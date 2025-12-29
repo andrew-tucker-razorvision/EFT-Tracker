@@ -284,6 +284,23 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
           {quest.title}
         </div>
 
+        {/* Objective progress bar - only show when there are objectives and quest is not locked */}
+        {quest.objectivesSummary &&
+          quest.objectivesSummary.total > 0 &&
+          quest.computedStatus !== "locked" &&
+          !isDimmed && (
+            <div className="mt-1">
+              <div className="h-1 w-full bg-black/30 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-emerald-500 transition-all duration-300"
+                  style={{
+                    width: `${(quest.objectivesSummary.completed / quest.objectivesSummary.total) * 100}%`,
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
         {/* Level badge and action buttons row */}
         {/* Refactoring UI: Labels tertiary, data primary */}
         <div className="flex items-center justify-between mt-1">
@@ -297,6 +314,19 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
             <span className="text-[12px] font-semibold" style={levelBadgeStyle}>
               {quest.levelRequired}
             </span>
+            {/* Objective count badge */}
+            {quest.objectivesSummary &&
+              quest.objectivesSummary.total > 0 &&
+              quest.computedStatus !== "locked" &&
+              !isDimmed && (
+                <span
+                  className="ml-1 text-[10px]"
+                  style={{ color: "var(--text-tertiary)" }}
+                >
+                  ({quest.objectivesSummary.completed}/
+                  {quest.objectivesSummary.total})
+                </span>
+              )}
           </span>
           {/* Action buttons - info and wiki link */}
           {/* Touch targets: 24px visible area with padding for easier clicking */}
