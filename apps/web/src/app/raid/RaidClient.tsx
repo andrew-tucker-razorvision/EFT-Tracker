@@ -12,7 +12,15 @@ import { QuestDetailModal } from "@/components/quest-detail";
 import { CatchUpDialog } from "@/components/catch-up";
 import { useQuests } from "@/hooks/useQuests";
 import { useProgress } from "@/hooks/useProgress";
-import type { QuestWithProgress } from "@/types";
+import type { QuestStatus, QuestWithProgress } from "@/types";
+
+// Status cycle map for click handling (simplified: available <-> completed)
+const STATUS_CYCLE: Record<QuestStatus, QuestStatus | null> = {
+  locked: null, // Can't cycle from locked
+  available: "completed",
+  in_progress: "completed", // Treat in_progress same as available
+  completed: "available", // Reset
+};
 
 export function RaidClient() {
   const { status: sessionStatus } = useSession();
@@ -20,6 +28,7 @@ export function RaidClient() {
   const { allQuests, loading, initialLoading, error, refetch } = useQuests();
   const {
     progress,
+    updateStatus,
     unlockedQuests,
     clearUnlocked,
     error: progressError,
@@ -41,8 +50,16 @@ export function RaidClient() {
   );
   const [detailModalOpen, setDetailModalOpen] = useState(false);
 
+  // Check if detail quest is currently saving
+  const isDetailQuestSaving = useMemo(() => {
+    return detailQuest ? savingQuestIds.has(detailQuest.id) : false;
+  }, [detailQuest, savingQuestIds]);
+
   // Refs for stable callback references
   const allQuestsWithProgressRef = useRef<QuestWithProgress[]>([]);
+  const sessionStatusRef = useRef(sessionStatus);
+  const updateStatusRef = useRef(updateStatus);
+  const refetchRef = useRef(refetch);
 
   // Merge progress into all quests
   const allQuestsWithProgress = useMemo(
@@ -67,6 +84,21 @@ export function RaidClient() {
   useEffect(() => {
     allQuestsWithProgressRef.current = allQuestsWithProgress;
   }, [allQuestsWithProgress]);
+
+  // Keep ref in sync for session status
+  useEffect(() => {
+    sessionStatusRef.current = sessionStatus;
+  }, [sessionStatus]);
+
+  // Keep ref in sync for updateStatus
+  useEffect(() => {
+    updateStatusRef.current = updateStatus;
+  }, [updateStatus]);
+
+  // Keep ref in sync for refetch
+  useEffect(() => {
+    refetchRef.current = refetch;
+  }, [refetch]);
 
   // Show notification when quests are unlocked
   useEffect(() => {
@@ -122,6 +154,62 @@ export function RaidClient() {
       setDetailModalOpen(true);
     }
   }, []);
+
+  // Stable callback reference using refs
+  const handleStatusChange = useCallback(async (questId: string) => {
+    const quest = allQuestsWithProgressRef.current.find(
+      (q) => q.id === questId
+    );
+    if (!quest) return;
+
+    const currentStatus = quest.computedStatus;
+
+    // If locked, don't allow status change
+    if (currentStatus === "locked") {
+      toast.warning("Quest Locked", {
+        description: "Complete prerequisites to unlock this quest.",
+      });
+      return;
+    }
+
+    // If not authenticated, prompt to login
+    if (sessionStatusRef.current !== "authenticated") {
+      toast.warning("Sign In Required", {
+        description: "Please sign in to track your progress.",
+        action: {
+          label: "Sign In",
+          onClick: () => (window.location.href = "/login"),
+        },
+      });
+      return;
+    }
+
+    // Get next status in cycle
+    const nextStatus = STATUS_CYCLE[currentStatus];
+    if (!nextStatus) return;
+
+    const success = await updateStatusRef.current(questId, nextStatus);
+    if (success) {
+      if (nextStatus === "completed") {
+        toast.success("Quest Completed!", {
+          description: quest.title,
+        });
+      }
+      await refetchRef.current();
+    } else {
+      toast.error("Failed to Update", {
+        description: "Could not update quest status. Please try again.",
+      });
+    }
+  }, []);
+
+  // Wrapper for modal - reuses parent's handleStatusChange logic
+  const handleModalStatusChange = useCallback(
+    async (questId: string) => {
+      await handleStatusChange(questId);
+    },
+    [handleStatusChange]
+  );
 
   // Calculate progress stats
   const stats = useMemo(
@@ -187,6 +275,8 @@ export function RaidClient() {
         quest={detailQuest}
         open={detailModalOpen}
         onOpenChange={setDetailModalOpen}
+        onStatusChange={handleModalStatusChange}
+        isSaving={isDetailQuestSaving}
       />
       <div className="flex-1 min-h-0">
         <RaidPlanner
