@@ -6,12 +6,19 @@ import { logger } from "@/lib/logger";
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import {
   shouldAutoCompleteQuest,
+  isObjectiveComplete,
   type ObjectiveWithProgress,
 } from "@/lib/quest-status";
 
-const updateObjectiveSchema = z.object({
-  completed: z.boolean(),
-});
+const updateObjectiveSchema = z
+  .object({
+    completed: z.boolean().optional(),
+    current: z.number().int().min(0).optional(),
+  })
+  .refine(
+    (data) => data.completed !== undefined || data.current !== undefined,
+    { message: "Either 'completed' or 'current' must be provided" }
+  );
 
 /**
  * PATCH /api/progress/objective/[objectiveId]
@@ -52,7 +59,7 @@ export async function PATCH(
 
     const { objectiveId } = await params;
     const body = await request.json();
-    const { completed } = updateObjectiveSchema.parse(body);
+    const parsed = updateObjectiveSchema.parse(body);
 
     // Get objective with its quest and all objectives for that quest
     const objective = await prisma.objective.findUnique({
@@ -94,6 +101,30 @@ export async function PATCH(
     const quest = objective.quest;
     const userId = session.user.id;
 
+    // Determine target from objective.count (for numeric objectives)
+    const target = objective.count;
+    const isNumeric = target !== null && target > 0;
+
+    // Calculate completed and current values based on input
+    let completed: boolean;
+    let current: number | null;
+
+    if (parsed.current !== undefined) {
+      // If current is provided, clamp to target and auto-compute completed
+      current = isNumeric ? Math.min(parsed.current, target) : parsed.current;
+      completed = isNumeric ? current >= target : parsed.current > 0;
+    } else if (parsed.completed !== undefined) {
+      // If only completed is provided, set current based on completed status
+      completed = parsed.completed;
+      current = isNumeric ? (completed ? target : 0) : null;
+    } else {
+      // This shouldn't happen due to schema validation, but handle it
+      return NextResponse.json(
+        { error: "Either 'completed' or 'current' must be provided" },
+        { status: 400 }
+      );
+    }
+
     // Upsert objective progress
     const objectiveProgress = await prisma.objectiveProgress.upsert({
       where: {
@@ -104,12 +135,16 @@ export async function PATCH(
       },
       update: {
         completed,
+        current,
+        target: isNumeric ? target : null,
         syncSource: "WEB",
       },
       create: {
         userId,
         objectiveId,
         completed,
+        current,
+        target: isNumeric ? target : null,
         syncSource: "WEB",
       },
     });
@@ -121,12 +156,16 @@ export async function PATCH(
           return {
             id: obj.id,
             optional: obj.optional,
-            progress: [{ completed }],
+            count: obj.count,
+            progress: [
+              { completed, current, target: isNumeric ? target : null },
+            ],
           };
         }
         return {
           id: obj.id,
           optional: obj.optional,
+          count: obj.count,
           progress: obj.progress,
         };
       }
@@ -167,6 +206,25 @@ export async function PATCH(
         quest.id,
         "COMPLETED"
       );
+    } else if (
+      !shouldComplete &&
+      currentQuestProgress?.status === "COMPLETED"
+    ) {
+      // Quest was COMPLETED but now an objective is incomplete, revert to IN_PROGRESS
+      await prisma.questProgress.update({
+        where: {
+          userId_questId: {
+            userId,
+            questId: quest.id,
+          },
+        },
+        data: {
+          status: "IN_PROGRESS",
+          syncSource: "WEB",
+        },
+      });
+
+      questStatusChanged = true;
     } else if (
       !shouldComplete &&
       completed &&
@@ -215,8 +273,8 @@ export async function PATCH(
 
     // Compute objective progress summary
     const totalObjectives = quest.objectives.length;
-    const completedObjectives = updatedObjectives.filter(
-      (o) => o.progress?.[0]?.completed
+    const completedObjectives = updatedObjectives.filter((o) =>
+      isObjectiveComplete(o.progress?.[0])
     ).length;
 
     return NextResponse.json({

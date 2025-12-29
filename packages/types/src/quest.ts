@@ -45,6 +45,8 @@ export interface ObjectiveProgress {
   userId: string;
   objectiveId: string;
   completed: boolean;
+  current: number | null; // Current progress (e.g., 1 of 2 PMC kills) - null for binary objectives
+  target: number | null; // Target count (copy of Objective.count) - null for binary objectives
   syncSource: "WEB" | "COMPANION";
   updatedAt: Date;
 }

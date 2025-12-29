@@ -90,6 +90,7 @@ interface TarkovDevObjective {
   description: string;
   optional: boolean;
   maps: TarkovDevMap[];
+  count?: number; // Only present for countable objectives (Shoot, Item, Extract, etc.)
 }
 
 interface TarkovDevTask {
@@ -158,6 +159,12 @@ const TARKOV_DEV_QUERY = `
         name
         normalizedName
       }
+      ... on TaskObjectiveShoot { count }
+      ... on TaskObjectiveItem { count }
+      ... on TaskObjectiveExtract { count }
+      ... on TaskObjectiveQuestItem { count }
+      ... on TaskObjectiveExperience { count }
+      ... on TaskObjectiveUseItem { count }
     }
   }
   traders {
@@ -279,6 +286,7 @@ async function main() {
               maps: obj.maps?.map((m) => m.name) || [],
               optional: obj.optional || false,
               type: obj.type || null,
+              count: obj.count ?? null, // Numeric count from API (for countable objectives)
             },
           });
         } else {
@@ -291,6 +299,7 @@ async function main() {
               maps: obj.maps?.map((m) => m.name) || [],
               optional: obj.optional || false,
               type: obj.type || null,
+              count: obj.count ?? null, // Numeric count from API (for countable objectives)
             },
           });
         }
@@ -323,6 +332,7 @@ async function main() {
               maps: obj.maps?.map((m) => m.name) || [], // Store ALL maps
               optional: obj.optional || false,
               type: obj.type || null,
+              count: obj.count ?? null, // Numeric count from API (for countable objectives)
             })),
           },
         },
