@@ -157,7 +157,9 @@ export function RaidClient() {
 
   // Stable callback reference using refs
   const handleStatusChange = useCallback(async (questId: string) => {
-    const quest = allQuestsWithProgressRef.current.find((q) => q.id === questId);
+    const quest = allQuestsWithProgressRef.current.find(
+      (q) => q.id === questId
+    );
     if (!quest) return;
 
     const currentStatus = quest.computedStatus;
@@ -202,9 +204,12 @@ export function RaidClient() {
   }, []);
 
   // Wrapper for modal - reuses parent's handleStatusChange logic
-  const handleModalStatusChange = useCallback(async (questId: string) => {
-    await handleStatusChange(questId);
-  }, [handleStatusChange]);
+  const handleModalStatusChange = useCallback(
+    async (questId: string) => {
+      await handleStatusChange(questId);
+    },
+    [handleStatusChange]
+  );
 
   // Calculate progress stats
   const stats = useMemo(

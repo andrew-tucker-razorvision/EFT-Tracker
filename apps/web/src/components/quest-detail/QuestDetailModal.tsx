@@ -430,21 +430,23 @@ function QuestDetailContent({
       )}
 
       {/* Fallback: Wiki-only button when no status change handler */}
-      {quest.computedStatus !== "locked" && !onStatusChange && quest.wikiLink && (
-        <div className="pt-2 border-t">
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full"
-            onClick={() =>
-              window.open(quest.wikiLink!, "_blank", "noopener,noreferrer")
-            }
-          >
-            <ExternalLink className="w-4 h-4 mr-2" />
-            View on Tarkov Wiki
-          </Button>
-        </div>
-      )}
+      {quest.computedStatus !== "locked" &&
+        !onStatusChange &&
+        quest.wikiLink && (
+          <div className="pt-2 border-t">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={() =>
+                window.open(quest.wikiLink!, "_blank", "noopener,noreferrer")
+              }
+            >
+              <ExternalLink className="w-4 h-4 mr-2" />
+              View on Tarkov Wiki
+            </Button>
+          </div>
+        )}
     </div>
   );
 }

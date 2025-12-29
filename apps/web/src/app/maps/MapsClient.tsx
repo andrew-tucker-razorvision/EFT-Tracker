@@ -324,9 +324,12 @@ export function MapsClient() {
   }, []);
 
   // Wrapper for modal - reuses parent's handleStatusChange logic
-  const handleModalStatusChange = useCallback(async (questId: string) => {
-    await handleStatusChange(questId);
-  }, [handleStatusChange]);
+  const handleModalStatusChange = useCallback(
+    async (questId: string) => {
+      await handleStatusChange(questId);
+    },
+    [handleStatusChange]
+  );
 
   const stats = useMemo(
     () => ({
