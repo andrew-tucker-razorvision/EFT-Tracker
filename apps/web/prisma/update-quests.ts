@@ -253,19 +253,54 @@ async function main() {
         },
       });
 
-      // Update objectives - delete and recreate
-      await prisma.objective.deleteMany({ where: { questId } });
+      // Update objectives - use upsert to preserve ObjectiveProgress relations
+      // First, get existing objective IDs for this quest
+      const existingObjectives = await prisma.objective.findMany({
+        where: { questId },
+        select: { id: true, description: true },
+      });
+      const existingByDesc = new Map(
+        existingObjectives.map((o) => [o.description, o.id])
+      );
+
+      // Track which objectives we've seen
+      const seenDescriptions = new Set<string>();
+
       for (const obj of task.objectives || []) {
-        await prisma.objective.create({
-          data: {
-            questId,
-            description: obj.description,
-            map: obj.maps?.[0]?.name || null, // Deprecated, kept for backward compat
-            maps: obj.maps?.map((m) => m.name) || [], // Store ALL maps
-            optional: obj.optional || false,
-            type: obj.type || null,
-          },
-        });
+        seenDescriptions.add(obj.description);
+        const existingId = existingByDesc.get(obj.description);
+
+        if (existingId) {
+          // Update existing objective (preserves ObjectiveProgress)
+          await prisma.objective.update({
+            where: { id: existingId },
+            data: {
+              map: obj.maps?.[0]?.name || null,
+              maps: obj.maps?.map((m) => m.name) || [],
+              optional: obj.optional || false,
+              type: obj.type || null,
+            },
+          });
+        } else {
+          // Create new objective
+          await prisma.objective.create({
+            data: {
+              questId,
+              description: obj.description,
+              map: obj.maps?.[0]?.name || null,
+              maps: obj.maps?.map((m) => m.name) || [],
+              optional: obj.optional || false,
+              type: obj.type || null,
+            },
+          });
+        }
+      }
+
+      // Delete objectives that no longer exist in API (rare, but possible)
+      for (const existing of existingObjectives) {
+        if (!seenDescriptions.has(existing.description)) {
+          await prisma.objective.delete({ where: { id: existing.id } });
+        }
       }
       updated++;
     } else {
