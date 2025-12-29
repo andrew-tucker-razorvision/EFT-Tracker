@@ -35,7 +35,10 @@ export function ObjectiveCounter({
   const showCompleteButton = current < target && !disabled && !isLoading;
 
   return (
-    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="flex items-center gap-1.5"
+      onClick={(e) => e.stopPropagation()}
+    >
       {/* Decrement button */}
       <button
         type="button"
@@ -46,9 +49,10 @@ export function ObjectiveCounter({
         disabled={!canDecrement}
         className={`
           w-8 h-8 flex items-center justify-center rounded border-2 transition-all
-          ${canDecrement
-            ? "border-muted-foreground/30 hover:border-primary hover:bg-primary/10 text-muted-foreground hover:text-primary"
-            : "border-muted/30 text-muted/30 cursor-not-allowed"
+          ${
+            canDecrement
+              ? "border-muted-foreground/30 hover:border-primary hover:bg-primary/10 text-muted-foreground hover:text-primary"
+              : "border-muted/30 text-muted/30 cursor-not-allowed"
           }
         `}
         aria-label="Decrement progress"
@@ -60,9 +64,10 @@ export function ObjectiveCounter({
       <div
         className={`
           text-sm font-medium min-w-[48px] text-center px-2 py-1 rounded
-          ${isComplete
-            ? "bg-primary/20 text-primary"
-            : "bg-muted/50 text-foreground/80"
+          ${
+            isComplete
+              ? "bg-primary/20 text-primary"
+              : "bg-muted/50 text-foreground/80"
           }
         `}
         role="spinbutton"
@@ -88,9 +93,10 @@ export function ObjectiveCounter({
         disabled={!canIncrement}
         className={`
           w-8 h-8 flex items-center justify-center rounded border-2 transition-all
-          ${canIncrement
-            ? "border-muted-foreground/30 hover:border-primary hover:bg-primary/10 text-muted-foreground hover:text-primary"
-            : "border-muted/30 text-muted/30 cursor-not-allowed"
+          ${
+            canIncrement
+              ? "border-muted-foreground/30 hover:border-primary hover:bg-primary/10 text-muted-foreground hover:text-primary"
+              : "border-muted/30 text-muted/30 cursor-not-allowed"
           }
         `}
         aria-label="Increment progress"

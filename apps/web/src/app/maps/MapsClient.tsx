@@ -346,9 +346,10 @@ export function MapsClient() {
 
       try {
         // Build request body based on update type
-        const body = typeof update === "boolean"
-          ? { completed: update }
-          : { current: update.current };
+        const body =
+          typeof update === "boolean"
+            ? { completed: update }
+            : { current: update.current };
 
         const response = await fetch(`/api/progress/objective/${objectiveId}`, {
           method: "PATCH",

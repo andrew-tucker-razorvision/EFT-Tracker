@@ -103,7 +103,11 @@ function isObjectiveCompleted(
     }
     // Fall back to server state
     const progress = objective.progress?.[0];
-    if (progress?.target !== null && progress?.target !== undefined && progress.target > 0) {
+    if (
+      progress?.target !== null &&
+      progress?.target !== undefined &&
+      progress.target > 0
+    ) {
       return (progress.current ?? 0) >= progress.target;
     }
     return progress?.completed ?? false;
@@ -341,11 +345,15 @@ function QuestDetailContent({
                         <li
                           key={obj.id}
                           className={`flex items-start gap-2 text-sm leading-relaxed py-1 -mx-2 px-2 rounded ${
-                            isCompleted ? "text-muted-foreground" : "text-foreground/90"
+                            isCompleted
+                              ? "text-muted-foreground"
+                              : "text-foreground/90"
                           }`}
                         >
                           {/* Description first for numeric */}
-                          <span className={`flex-1 ${isCompleted ? "line-through" : ""}`}>
+                          <span
+                            className={`flex-1 ${isCompleted ? "line-through" : ""}`}
+                          >
                             {obj.description}
                             {obj.optional && (
                               <Badge
@@ -364,20 +372,29 @@ function QuestDetailContent({
                             isLoading={isSavingThis}
                             onIncrement={() => {
                               if (!canToggleObjectives || isSavingThis) return;
-                              const newValue = Math.min(currentProgress + 1, obj.count!);
+                              const newValue = Math.min(
+                                currentProgress + 1,
+                                obj.count!
+                              );
                               onLocalNumericUpdate(obj.id, newValue);
-                              onObjectiveToggle?.(obj.id, { current: newValue });
+                              onObjectiveToggle?.(obj.id, {
+                                current: newValue,
+                              });
                             }}
                             onDecrement={() => {
                               if (!canToggleObjectives || isSavingThis) return;
                               const newValue = Math.max(currentProgress - 1, 0);
                               onLocalNumericUpdate(obj.id, newValue);
-                              onObjectiveToggle?.(obj.id, { current: newValue });
+                              onObjectiveToggle?.(obj.id, {
+                                current: newValue,
+                              });
                             }}
                             onComplete={() => {
                               if (!canToggleObjectives || isSavingThis) return;
                               onLocalNumericUpdate(obj.id, obj.count!);
-                              onObjectiveToggle?.(obj.id, { current: obj.count! });
+                              onObjectiveToggle?.(obj.id, {
+                                current: obj.count!,
+                              });
                             }}
                           />
                         </li>
@@ -666,9 +683,8 @@ export function QuestDetailModal({
     Record<string, boolean>
   >({});
   // Local state for numeric objectives
-  const [numericObjectiveStates, setNumericObjectiveStates] = useState<
-    NumericObjectiveStates
-  >({});
+  const [numericObjectiveStates, setNumericObjectiveStates] =
+    useState<NumericObjectiveStates>({});
   const [savingObjectives, setSavingObjectives] = useState<Set<string>>(
     new Set()
   );
@@ -698,7 +714,10 @@ export function QuestDetailModal({
   // Handle local numeric update with optimistic update
   const handleLocalNumericUpdate = useCallback(
     (objectiveId: string, current: number) => {
-      setNumericObjectiveStates((prev) => ({ ...prev, [objectiveId]: current }));
+      setNumericObjectiveStates((prev) => ({
+        ...prev,
+        [objectiveId]: current,
+      }));
       setSavingObjectives((prev) => new Set(prev).add(objectiveId));
     },
     []

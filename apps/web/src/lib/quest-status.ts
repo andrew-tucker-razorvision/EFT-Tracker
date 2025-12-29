@@ -11,7 +11,9 @@ export interface ObjectiveWithProgress {
   id: string;
   optional: boolean;
   count?: number | null; // Target count from Objective (for numeric objectives)
-  progress?: { completed: boolean; current?: number | null; target?: number | null }[] | null;
+  progress?:
+    | { completed: boolean; current?: number | null; target?: number | null }[]
+    | null;
 }
 
 export interface ObjectiveProgressSummary {
@@ -27,12 +29,19 @@ export interface ObjectiveProgressSummary {
  * For binary objectives, checks the completed flag.
  */
 export function isObjectiveComplete(
-  progress: { completed: boolean; current?: number | null; target?: number | null } | null | undefined
+  progress:
+    | { completed: boolean; current?: number | null; target?: number | null }
+    | null
+    | undefined
 ): boolean {
   if (!progress) return false;
 
   // For numeric objectives, check current >= target
-  if (progress.target !== null && progress.target !== undefined && progress.target > 0) {
+  if (
+    progress.target !== null &&
+    progress.target !== undefined &&
+    progress.target > 0
+  ) {
     const current = progress.current ?? 0;
     return current >= progress.target;
   }
@@ -162,11 +171,13 @@ export function wouldObjectiveChangeQuestStatus(
     if (obj.id === objectiveId) {
       return {
         ...obj,
-        progress: [{
-          completed: newCompletedValue,
-          current: newCurrent ?? null,
-          target: newTarget ?? null,
-        }],
+        progress: [
+          {
+            completed: newCompletedValue,
+            current: newCurrent ?? null,
+            target: newTarget ?? null,
+          },
+        ],
       };
     }
     return obj;

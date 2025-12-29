@@ -37,14 +37,18 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log("Migrating ObjectiveProgress records to include numeric progress...\n");
+  console.log(
+    "Migrating ObjectiveProgress records to include numeric progress...\n"
+  );
 
   // First, let's see how many objectives have counts
   const objectivesWithCount = await prisma.objective.count({
     where: { count: { not: null } },
   });
   const totalObjectives = await prisma.objective.count();
-  console.log(`Objectives with count: ${objectivesWithCount} / ${totalObjectives}`);
+  console.log(
+    `Objectives with count: ${objectivesWithCount} / ${totalObjectives}`
+  );
 
   // Get all existing ObjectiveProgress records with their objective data
   const progressRecords = await prisma.objectiveProgress.findMany({
@@ -59,7 +63,9 @@ async function main() {
     },
   });
 
-  console.log(`Found ${progressRecords.length} ObjectiveProgress records to migrate\n`);
+  console.log(
+    `Found ${progressRecords.length} ObjectiveProgress records to migrate\n`
+  );
 
   let updated = 0;
   let skippedBinary = 0;
@@ -100,14 +106,18 @@ async function main() {
 
   console.log(`\nMigration complete:`);
   console.log(`  - Updated: ${updated} records with numeric progress`);
-  console.log(`  - Skipped (binary): ${skippedBinary} records (no count on objective)`);
+  console.log(
+    `  - Skipped (binary): ${skippedBinary} records (no count on objective)`
+  );
   console.log(`  - Skipped (already set): ${skippedAlreadySet} records`);
 
   // Summary stats
   const withNumericProgress = await prisma.objectiveProgress.count({
     where: { target: { not: null } },
   });
-  console.log(`\nTotal ObjectiveProgress with numeric tracking: ${withNumericProgress}`);
+  console.log(
+    `\nTotal ObjectiveProgress with numeric tracking: ${withNumericProgress}`
+  );
 }
 
 main()

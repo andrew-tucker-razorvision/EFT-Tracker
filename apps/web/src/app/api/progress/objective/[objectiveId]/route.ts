@@ -10,13 +10,15 @@ import {
   type ObjectiveWithProgress,
 } from "@/lib/quest-status";
 
-const updateObjectiveSchema = z.object({
-  completed: z.boolean().optional(),
-  current: z.number().int().min(0).optional(),
-}).refine(
-  (data) => data.completed !== undefined || data.current !== undefined,
-  { message: "Either 'completed' or 'current' must be provided" }
-);
+const updateObjectiveSchema = z
+  .object({
+    completed: z.boolean().optional(),
+    current: z.number().int().min(0).optional(),
+  })
+  .refine(
+    (data) => data.completed !== undefined || data.current !== undefined,
+    { message: "Either 'completed' or 'current' must be provided" }
+  );
 
 /**
  * PATCH /api/progress/objective/[objectiveId]
@@ -155,7 +157,9 @@ export async function PATCH(
             id: obj.id,
             optional: obj.optional,
             count: obj.count,
-            progress: [{ completed, current, target: isNumeric ? target : null }],
+            progress: [
+              { completed, current, target: isNumeric ? target : null },
+            ],
           };
         }
         return {
@@ -269,8 +273,8 @@ export async function PATCH(
 
     // Compute objective progress summary
     const totalObjectives = quest.objectives.length;
-    const completedObjectives = updatedObjectives.filter(
-      (o) => isObjectiveComplete(o.progress?.[0])
+    const completedObjectives = updatedObjectives.filter((o) =>
+      isObjectiveComplete(o.progress?.[0])
     ).length;
 
     return NextResponse.json({
