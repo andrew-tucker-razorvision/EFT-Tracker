@@ -815,6 +815,7 @@ describe("/api/progress/objective/[objectiveId]", () => {
     description: "Kill 5 PMCs",
     optional: false,
     questId: "quest-1",
+    count: null, // Binary objective (no count)
     quest: {
       id: "quest-1",
       title: "Debut",
@@ -822,11 +823,13 @@ describe("/api/progress/objective/[objectiveId]", () => {
         {
           id: "obj-1",
           optional: false,
+          count: null,
           progress: [],
         },
         {
           id: "obj-2",
           optional: false,
+          count: null,
           progress: [],
         },
       ],
@@ -943,12 +946,16 @@ describe("/api/progress/objective/[objectiveId]", () => {
         },
         update: {
           completed: true,
+          current: null, // Binary objective, no numeric progress
+          target: null,
           syncSource: "WEB",
         },
         create: {
           userId: "user-123",
           objectiveId: "obj-1",
           completed: true,
+          current: null, // Binary objective, no numeric progress
+          target: null,
           syncSource: "WEB",
         },
       });

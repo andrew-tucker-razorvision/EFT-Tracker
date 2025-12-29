@@ -8,6 +8,7 @@ import {
   computeObjectiveProgress,
   shouldAutoCompleteQuest,
   wouldObjectiveChangeQuestStatus,
+  isObjectiveComplete,
   type ObjectiveWithProgress,
 } from "../../apps/web/src/lib/quest-status";
 
@@ -253,5 +254,91 @@ describe("wouldObjectiveChangeQuestStatus", () => {
     );
     expect(result.wouldChange).toBe(false);
     expect(result.newStatus).toBe("LOCKED");
+  });
+});
+
+describe("isObjectiveComplete", () => {
+  it("returns false for null progress", () => {
+    expect(isObjectiveComplete(null)).toBe(false);
+    expect(isObjectiveComplete(undefined)).toBe(false);
+  });
+
+  it("uses completed flag for binary objectives (no target)", () => {
+    expect(isObjectiveComplete({ completed: true })).toBe(true);
+    expect(isObjectiveComplete({ completed: false })).toBe(false);
+    expect(isObjectiveComplete({ completed: true, target: null })).toBe(true);
+    expect(isObjectiveComplete({ completed: false, target: null })).toBe(false);
+  });
+
+  it("uses current >= target for numeric objectives", () => {
+    // Not complete: 1/2
+    expect(isObjectiveComplete({ completed: false, current: 1, target: 2 })).toBe(false);
+    // Complete: 2/2
+    expect(isObjectiveComplete({ completed: false, current: 2, target: 2 })).toBe(true);
+    // Over-complete: 3/2 (edge case, should still be complete)
+    expect(isObjectiveComplete({ completed: false, current: 3, target: 2 })).toBe(true);
+    // Zero progress: 0/5
+    expect(isObjectiveComplete({ completed: false, current: 0, target: 5 })).toBe(false);
+    // Full progress: 5/5
+    expect(isObjectiveComplete({ completed: true, current: 5, target: 5 })).toBe(true);
+  });
+
+  it("defaults current to 0 when null for numeric objectives", () => {
+    expect(isObjectiveComplete({ completed: false, current: null, target: 2 })).toBe(false);
+  });
+
+  it("ignores target=0 (treats as binary)", () => {
+    // target=0 means binary objective
+    expect(isObjectiveComplete({ completed: true, current: 0, target: 0 })).toBe(true);
+    expect(isObjectiveComplete({ completed: false, current: 0, target: 0 })).toBe(false);
+  });
+});
+
+describe("numeric progress in computeObjectiveProgress", () => {
+  it("counts numeric objectives as complete when current >= target", () => {
+    const objectives: ObjectiveWithProgress[] = [
+      { id: "1", optional: false, progress: [{ completed: true, current: 2, target: 2 }] },
+      { id: "2", optional: false, progress: [{ completed: false, current: 1, target: 2 }] },
+    ];
+    const result = computeObjectiveProgress(objectives);
+    expect(result.completed).toBe(1);
+    expect(result.requiredCompleted).toBe(1);
+  });
+
+  it("works with mixed binary and numeric objectives", () => {
+    const objectives: ObjectiveWithProgress[] = [
+      { id: "1", optional: false, progress: [{ completed: true }] }, // Binary, complete
+      { id: "2", optional: false, progress: [{ completed: false, current: 3, target: 3 }] }, // Numeric, complete
+      { id: "3", optional: false, progress: [{ completed: false, current: 1, target: 5 }] }, // Numeric, incomplete
+    ];
+    const result = computeObjectiveProgress(objectives);
+    expect(result.completed).toBe(2);
+    expect(result.requiredCompleted).toBe(2);
+  });
+});
+
+describe("numeric progress in shouldAutoCompleteQuest", () => {
+  it("auto-completes when all numeric objectives reach target", () => {
+    const objectives: ObjectiveWithProgress[] = [
+      { id: "1", optional: false, progress: [{ completed: true, current: 5, target: 5 }] },
+      { id: "2", optional: false, progress: [{ completed: true, current: 2, target: 2 }] },
+    ];
+    expect(shouldAutoCompleteQuest(objectives)).toBe(true);
+  });
+
+  it("does not auto-complete when numeric objectives incomplete", () => {
+    const objectives: ObjectiveWithProgress[] = [
+      { id: "1", optional: false, progress: [{ completed: true, current: 5, target: 5 }] },
+      { id: "2", optional: false, progress: [{ completed: false, current: 1, target: 2 }] },
+    ];
+    expect(shouldAutoCompleteQuest(objectives)).toBe(false);
+  });
+
+  it("auto-completes with mixed binary and numeric objectives", () => {
+    const objectives: ObjectiveWithProgress[] = [
+      { id: "1", optional: false, progress: [{ completed: true }] }, // Binary, complete
+      { id: "2", optional: false, progress: [{ completed: true, current: 10, target: 10 }] }, // Numeric, complete
+    ];
+    expect(shouldAutoCompleteQuest(objectives)).toBe(true);
   });
 });
