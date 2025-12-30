@@ -284,7 +284,6 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
           {quest.title}
         </div>
 
-
         {/* Level badge and action buttons row */}
         {/* Refactoring UI: Labels tertiary, data primary */}
         <div className="flex items-center justify-between mt-1">
