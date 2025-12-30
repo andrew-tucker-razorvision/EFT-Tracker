@@ -96,8 +96,8 @@ function isObjectiveCompleted(
   const progress = objective.progress?.[0];
   const isNumeric = progress?.target !== null && progress?.target !== undefined && progress.target > 0;
 
-  if (isNumeric) {
-    const target = progress?.target!; // Already validated non-null by isNumeric check
+  if (isNumeric && progress) {
+    const target = progress.target; // Already validated non-null by isNumeric check
     // Check local numeric state first
     if (numericObjectiveStates[objective.id] !== undefined) {
       return numericObjectiveStates[objective.id] >= target;
@@ -334,7 +334,7 @@ function QuestDetailContent({
                       : 0;
 
                     // For numeric objectives, render counter instead of checkbox
-                    if (isNumeric) {
+                    if (isNumeric && objProgress) {
                       return (
                         <li
                           key={obj.id}
@@ -353,14 +353,14 @@ function QuestDetailContent({
                           {/* Counter */}
                           <ObjectiveCounter
                             current={currentProgress}
-                            target={objProgress?.target!}
+                            target={objProgress.target}
                             disabled={!canToggleObjectives}
                             isLoading={isSavingThis}
                             onIncrement={() => {
-                              if (!canToggleObjectives || isSavingThis) return;
+                              if (!canToggleObjectives || isSavingThis || !objProgress) return;
                               const newValue = Math.min(
                                 currentProgress + 1,
-                                objProgress?.target!
+                                objProgress.target
                               );
                               onLocalNumericUpdate(obj.id, newValue);
                               onObjectiveToggle?.(obj.id, {
