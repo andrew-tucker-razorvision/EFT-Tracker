@@ -110,7 +110,7 @@ Now that you're set up, learn more about:
 
 - Check the [FAQ](faq.md) for common questions
 - Review [Troubleshooting](troubleshooting.md) for technical issues
-- Report bugs on [GitHub Issues](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues)
+- Report bugs on [GitHub Issues](https://github.com/tuckerandrew21/EFT-Tracker/issues)
 
 ---
 

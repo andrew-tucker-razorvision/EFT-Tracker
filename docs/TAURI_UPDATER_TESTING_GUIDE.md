@@ -100,7 +100,7 @@ gh run watch <RUN_ID>
 
 **Option B: Via Web Browser**
 
-1. Go to: https://github.com/andrew-tucker-razorvision/EFT-Tracker/actions
+1. Go to: https://github.com/tuckerandrew21/EFT-Tracker/actions
 2. Click on "Release Tauri App" workflow
 3. Watch the build progress
 
@@ -120,7 +120,7 @@ gh run watch <RUN_ID>
 
 Once the build completes:
 
-1. Go to: https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases
+1. Go to: https://github.com/tuckerandrew21/EFT-Tracker/releases
 2. Click on the **draft release** for `tauri-v0.1.0`
 3. Review the assets (should include):
    - `EFT-Quest-Tracker_0.1.0_x64_en-US.msi`
@@ -534,8 +534,8 @@ Once all tests pass, you're ready for production releases:
 
 **Monitoring:**
 
-- GitHub Actions: https://github.com/andrew-tucker-razorvision/EFT-Tracker/actions
-- Releases: https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases
+- GitHub Actions: https://github.com/tuckerandrew21/EFT-Tracker/actions
+- Releases: https://github.com/tuckerandrew21/EFT-Tracker/releases
 
 ---
 

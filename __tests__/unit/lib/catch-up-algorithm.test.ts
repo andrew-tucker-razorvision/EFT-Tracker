@@ -159,19 +159,19 @@ describe("getPrerequisitesForSelection", () => {
 describe("getCompletedBranches", () => {
   it("returns terminal sibling branches", () => {
     // If user is on D, C is a sibling terminal branch
-    const branches = getCompletedBranches(["D"], mockQuests, 20);
+    const branches = getCompletedBranches(["D"], mockQuests);
     expect(branches.length).toBe(1);
     expect(branches[0].questId).toBe("C");
   });
 
   it("does not include descendants of target as siblings", () => {
     // If user is on D, E is a descendant, not a sibling
-    const branches = getCompletedBranches(["D"], mockQuests, 20);
+    const branches = getCompletedBranches(["D"], mockQuests);
     expect(branches.map((b) => b.questId)).not.toContain("E");
   });
 
   it("does not include ancestors of target", () => {
-    const branches = getCompletedBranches(["E"], mockQuests, 20);
+    const branches = getCompletedBranches(["E"], mockQuests);
     expect(branches.map((b) => b.questId)).not.toContain("A");
     expect(branches.map((b) => b.questId)).not.toContain("B");
     expect(branches.map((b) => b.questId)).not.toContain("D");
@@ -179,26 +179,26 @@ describe("getCompletedBranches", () => {
 
   it("returns sibling terminal for deepest quest", () => {
     // If user is on E, C is a sibling terminal branch
-    const branches = getCompletedBranches(["E"], mockQuests, 20);
+    const branches = getCompletedBranches(["E"], mockQuests);
     expect(branches.length).toBe(1);
     expect(branches[0].questId).toBe("C");
   });
 
   it("returns empty for root quest with no siblings", () => {
-    const branches = getCompletedBranches(["A"], mockQuests, 20);
+    const branches = getCompletedBranches(["A"], mockQuests);
     expect(branches.length).toBe(0);
   });
 });
 
 describe("calculateCatchUp", () => {
   it("returns both prerequisites and completed branches", () => {
-    const result = calculateCatchUp(["D"], mockQuests, 20);
+    const result = calculateCatchUp(["D"], mockQuests);
     expect(result.prerequisites.length).toBe(2); // A, B
     expect(result.completedBranches.length).toBe(1); // C
   });
 
   it("handles multiple target quests", () => {
-    const result = calculateCatchUp(["C", "E"], mockQuests, 20);
+    const result = calculateCatchUp(["C", "E"], mockQuests);
     // Prerequisites should include A, B, D (union of both chains)
     expect(result.prerequisites.map((p) => p.questId)).toContain("A");
     expect(result.prerequisites.map((p) => p.questId)).toContain("B");

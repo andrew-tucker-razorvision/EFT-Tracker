@@ -6,22 +6,22 @@
 # More info: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
 # Default owner for everything in the repo
-* @andrew-tucker-razorvision
+* @tuckerandrew21
 
 # GitHub Actions workflows and CI/CD configuration
-/.github/ @andrew-tucker-razorvision
+/.github/ @tuckerandrew21
 
 # Database schema and migrations
-/prisma/ @andrew-tucker-razorvision
+/prisma/ @tuckerandrew21
 
 # Environment configuration
-/.env.example @andrew-tucker-razorvision
-/.env.template @andrew-tucker-razorvision
+/.env.example @tuckerandrew21
+/.env.template @tuckerandrew21
 
 # Security and authentication
-/src/lib/auth.ts @andrew-tucker-razorvision
-/src/lib/rate-limit.ts @andrew-tucker-razorvision
+/src/lib/auth.ts @tuckerandrew21
+/src/lib/rate-limit.ts @tuckerandrew21
 
 # Documentation
-/docs/ @andrew-tucker-razorvision
-*.md @andrew-tucker-razorvision
+/docs/ @tuckerandrew21
+*.md @tuckerandrew21

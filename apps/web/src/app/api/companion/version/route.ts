@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 const COMPANION_VERSION = {
   latestVersion: "0.1.5",
   downloadUrl:
-    "https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases/tag/tauri-v0.1.5",
+    "https://github.com/tuckerandrew21/EFT-Tracker/releases/tag/tauri-v0.1.5",
   releaseNotes:
     "Improved stability and bug fixes. Auto-updates now fully functional.",
   releaseDate: "2025-12-16",

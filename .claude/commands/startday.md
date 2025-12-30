@@ -41,7 +41,7 @@ Report:
 SHA=$(git rev-parse origin/master)
 
 # Check GitHub Actions status
-curl -s "https://api.github.com/repos/andrew-tucker-razorvision/EFT-Tracker/commits/$SHA/check-runs" | jq -r '.check_runs[] | "\(.status) \(.conclusion // "pending") - \(.name)"'
+curl -s "https://api.github.com/repos/tuckerandrew21/EFT-Tracker/commits/$SHA/check-runs" | jq -r '.check_runs[] | "\(.status) \(.conclusion // "pending") - \(.name)"'
 ```
 
 #### Quick test run

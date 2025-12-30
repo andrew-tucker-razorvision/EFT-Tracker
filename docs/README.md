@@ -141,4 +141,4 @@ docs/
 
 ---
 
-**Need help?** Check the main [README.md](../README.md) or open an [issue](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues)
+**Need help?** Check the main [README.md](../README.md) or open an [issue](https://github.com/tuckerandrew21/EFT-Tracker/issues)

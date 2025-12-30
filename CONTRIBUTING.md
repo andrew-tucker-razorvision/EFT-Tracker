@@ -44,7 +44,7 @@ Before contributing, ensure you have:
 3. **Add upstream remote**:
 
    ```bash
-   git remote add upstream https://github.com/andrew-tucker-razorvision/EFT-Tracker.git
+   git remote add upstream https://github.com/tuckerandrew21/EFT-Tracker.git
    ```
 
 4. **Install dependencies** (monorepo workspaces):
@@ -81,9 +81,9 @@ We welcome various types of contributions:
 
 ### Finding Something to Work On
 
-- Browse [open issues](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues)
+- Browse [open issues](https://github.com/tuckerandrew21/EFT-Tracker/issues)
 - Look for issues labeled `good first issue` or `help wanted`
-- Check the [GitHub project](https://github.com/users/andrew-tucker-razorvision/projects/1) for planned work
+- Check the [GitHub project](https://github.com/users/tuckerandrew21/projects/1) for planned work
 - Propose new ideas by opening an issue first
 
 ## Monorepo Workflow
@@ -434,8 +434,8 @@ See [docs/guides/DOCUMENTATION_GUIDELINES.md](docs/guides/DOCUMENTATION_GUIDELIN
 
 - **Setup problems:** Check [QUICKSTART.md](QUICKSTART.md) first
 - **Development questions:** See [MONOREPO.md](MONOREPO.md)
-- **General questions:** [Open a discussion](https://github.com/andrew-tucker-razorvision/EFT-Tracker/discussions)
-- **Bugs or issues:** [Open an issue](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues)
+- **General questions:** [Open a discussion](https://github.com/tuckerandrew21/EFT-Tracker/discussions)
+- **Bugs or issues:** [Open an issue](https://github.com/tuckerandrew21/EFT-Tracker/issues)
 - **Security issues:** See [docs/security/SECURITY.md](docs/security/SECURITY.md)
 
 ### Communication

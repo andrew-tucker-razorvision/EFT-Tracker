@@ -200,7 +200,7 @@ export default nextConfig;
     "updater": {
       "active": true,
       "endpoints": [
-        "https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases/latest/download/latest.json"
+        "https://github.com/tuckerandrew21/EFT-Tracker/releases/latest/download/latest.json"
       ],
       "dialog": true,
       "pubkey": "TO_BE_GENERATED"
@@ -304,7 +304,7 @@ version = "1.0.0"
 description = "EFT Quest Tracker Companion App"
 authors = ["Tucker Blackwell"]
 license = "MIT"
-repository = "https://github.com/andrew-tucker-razorvision/EFT-Tracker"
+repository = "https://github.com/tuckerandrew21/EFT-Tracker"
 edition = "2021"
 
 [build-dependencies]

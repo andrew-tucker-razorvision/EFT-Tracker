@@ -139,7 +139,7 @@ The current implementation uses in-memory storage, which means:
 - Limits don't scale across multiple servers
 - Limits reset on server restart
 
-**Future Improvement**: Migrate to Redis-based rate limiting for distributed systems (See [Issue #228](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues/228))
+**Future Improvement**: Migrate to Redis-based rate limiting for distributed systems (See [Issue #228](https://github.com/tuckerandrew21/EFT-Tracker/issues/228))
 
 ### IP Detection
 
@@ -174,7 +174,7 @@ it("should enforce rate limits", async () => {
 
 ## Future Improvements
 
-1. **Redis-based rate limiting** ([#228](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues/228)) - For multi-server scaling
-2. **Cloudflare integration** ([#229](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues/229)) - DDoS protection at CDN level
-3. **CAPTCHA for auth** ([#230](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues/230)) - Additional bot protection
-4. **Load testing** ([#232](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues/232)) - Validate limits under load
+1. **Redis-based rate limiting** ([#228](https://github.com/tuckerandrew21/EFT-Tracker/issues/228)) - For multi-server scaling
+2. **Cloudflare integration** ([#229](https://github.com/tuckerandrew21/EFT-Tracker/issues/229)) - DDoS protection at CDN level
+3. **CAPTCHA for auth** ([#230](https://github.com/tuckerandrew21/EFT-Tracker/issues/230)) - Additional bot protection
+4. **Load testing** ([#232](https://github.com/tuckerandrew21/EFT-Tracker/issues/232)) - Validate limits under load

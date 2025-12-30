@@ -36,7 +36,7 @@ Edit `apps/companion/src-tauri/tauri.conf.json`:
     "updater": {
       "active": true,
       "endpoints": [
-        "https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases/latest/download/latest.json"
+        "https://github.com/tuckerandrew21/EFT-Tracker/releases/latest/download/latest.json"
       ],
       "dialog": true,
       "pubkey": "YOUR_PUBLIC_KEY_HERE"
@@ -73,7 +73,7 @@ To verify everything is configured correctly:
    ```
 
 2. Check GitHub Actions:
-   - Go to: https://github.com/andrew-tucker-razorvision/EFT-Tracker/actions
+   - Go to: https://github.com/tuckerandrew21/EFT-Tracker/actions
    - Verify the "Release Tauri App" workflow runs
    - Check that it builds MSI and NSIS installers
    - Verify a draft release is created
@@ -152,7 +152,7 @@ The push will trigger GitHub Actions to:
 
 ### 4. Publish Release
 
-1. Go to: https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases
+1. Go to: https://github.com/tuckerandrew21/EFT-Tracker/releases
 2. Find the draft release
 3. Review the release notes
 4. Click "Publish release"
@@ -208,7 +208,7 @@ rustup update stable
 
 2. Verify endpoint URL returns valid JSON:
    ```bash
-   curl https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases/latest/download/latest.json
+   curl https://github.com/tuckerandrew21/EFT-Tracker/releases/latest/download/latest.json
    ```
 
 ### MSI installer blocked by Windows Defender

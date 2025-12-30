@@ -41,7 +41,7 @@ New to EFT Quest Tracker? Check out our comprehensive guides:
 
 ```bash
 # Clone the repository
-git clone https://github.com/andrew-tucker-razorvision/EFT-Tracker.git
+git clone https://github.com/tuckerandrew21/EFT-Tracker.git
 cd EFT-Tracker
 
 # Install pnpm (if not already installed)
@@ -318,4 +318,4 @@ MIT
 ---
 
 **Created by:** Andrew Tucker
-**Project Board:** [GitHub Project](https://github.com/users/andrew-tucker-razorvision/projects/4/views/1)
+**Project Board:** [GitHub Project](https://github.com/users/tuckerandrew21/projects/4/views/1)

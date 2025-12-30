@@ -24,7 +24,7 @@ This checklist verifies the complete auto-update workflow is working correctly.
    - [ ] Build succeeds on Windows platform
 
 2. **Release Assets**
-   - [ ] Go to: https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases
+   - [ ] Go to: https://github.com/tuckerandrew21/EFT-Tracker/releases
    - [ ] Find `tauri-v0.1.0` release
    - [ ] Files present:
      - [ ] `EFT-Tracker-Companion_0.1.0_x64_en-US.msi`
@@ -34,7 +34,7 @@ This checklist verifies the complete auto-update workflow is working correctly.
 3. **Verify latest.json**
 
    ```bash
-   curl -L https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases/download/tauri-v0.1.0/latest.json
+   curl -L https://github.com/tuckerandrew21/EFT-Tracker/releases/download/tauri-v0.1.0/latest.json
    ```
 
    Should contain:

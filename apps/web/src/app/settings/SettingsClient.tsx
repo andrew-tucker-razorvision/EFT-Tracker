@@ -291,7 +291,7 @@ export function SettingsClient() {
               <h2 className="text-lg font-semibold">Companion App</h2>
             </div>
             <a
-              href="https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases"
+              href="https://github.com/tuckerandrew21/EFT-Tracker/releases"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-[#d4a574] hover:text-[#d4a574]/80 flex items-center gap-1"

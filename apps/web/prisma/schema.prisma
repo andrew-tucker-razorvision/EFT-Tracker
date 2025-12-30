@@ -78,6 +78,8 @@ model ObjectiveProgress {
   userId      String
   objectiveId String
   completed   Boolean    @default(false)
+  current     Int?       @default(0)  // Current progress (e.g., 1 of 2 PMC kills)
+  target      Int?                    // Target count (copy of Objective.count for historical tracking)
   syncSource  SyncSource @default(WEB)
   updatedAt   DateTime   @updatedAt
 

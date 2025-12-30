@@ -70,8 +70,7 @@ export function CatchUpDialog({
     if (selectedQuests.length === 0 || playerLevel === null) return null;
     return calculateCatchUp(
       selectedQuests.map((q) => q.id),
-      quests,
-      playerLevel
+      quests
     );
   }, [selectedQuests, quests, playerLevel]);
 

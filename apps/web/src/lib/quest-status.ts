@@ -10,7 +10,10 @@ import type { QuestStatus } from "@prisma/client";
 export interface ObjectiveWithProgress {
   id: string;
   optional: boolean;
-  progress?: { completed: boolean }[] | null;
+  count?: number | null; // Target count from Objective (for numeric objectives)
+  progress?:
+    | { completed: boolean; current?: number | null; target?: number | null }[]
+    | null;
 }
 
 export interface ObjectiveProgressSummary {
@@ -18,6 +21,33 @@ export interface ObjectiveProgressSummary {
   completed: number;
   requiredTotal: number;
   requiredCompleted: number;
+}
+
+/**
+ * Check if an objective is complete.
+ * For numeric objectives (with target), checks if current >= target.
+ * For binary objectives, checks the completed flag.
+ */
+export function isObjectiveComplete(
+  progress:
+    | { completed: boolean; current?: number | null; target?: number | null }
+    | null
+    | undefined
+): boolean {
+  if (!progress) return false;
+
+  // For numeric objectives, check current >= target
+  if (
+    progress.target !== null &&
+    progress.target !== undefined &&
+    progress.target > 0
+  ) {
+    const current = progress.current ?? 0;
+    return current >= progress.target;
+  }
+
+  // For binary objectives, use the completed flag
+  return progress.completed === true;
 }
 
 /**
@@ -34,7 +64,7 @@ export function computeObjectiveProgress(
 
   for (const obj of objectives) {
     total++;
-    const isComplete = obj.progress?.[0]?.completed ?? false;
+    const isComplete = isObjectiveComplete(obj.progress?.[0]);
 
     if (isComplete) {
       completed++;
@@ -87,7 +117,7 @@ export function computeQuestStatus(
   const effectiveCompleted =
     requiredTotal > 0
       ? requiredCompleted
-      : objectives.filter((o) => o.progress?.[0]?.completed).length;
+      : objectives.filter((o) => isObjectiveComplete(o.progress?.[0])).length;
 
   // All required objectives complete -> COMPLETED
   if (effectiveCompleted >= effectiveTotal && effectiveTotal > 0) {
@@ -106,6 +136,7 @@ export function computeQuestStatus(
 /**
  * Check if a quest should auto-complete based on objective progress.
  * Returns true if all required objectives are marked as complete.
+ * For numeric objectives, checks if current >= target.
  */
 export function shouldAutoCompleteQuest(
   objectives: ObjectiveWithProgress[]
@@ -120,7 +151,7 @@ export function shouldAutoCompleteQuest(
   const targetObjectives =
     requiredObjectives.length > 0 ? requiredObjectives : objectives;
 
-  return targetObjectives.every((o) => o.progress?.[0]?.completed === true);
+  return targetObjectives.every((o) => isObjectiveComplete(o.progress?.[0]));
 }
 
 /**
@@ -131,14 +162,22 @@ export function wouldObjectiveChangeQuestStatus(
   currentStatus: QuestStatus,
   objectives: ObjectiveWithProgress[],
   objectiveId: string,
-  newCompletedValue: boolean
+  newCompletedValue: boolean,
+  newCurrent?: number | null,
+  newTarget?: number | null
 ): { wouldChange: boolean; newStatus: QuestStatus } {
   // Create a copy of objectives with the updated progress
   const updatedObjectives = objectives.map((obj) => {
     if (obj.id === objectiveId) {
       return {
         ...obj,
-        progress: [{ completed: newCompletedValue }],
+        progress: [
+          {
+            completed: newCompletedValue,
+            current: newCurrent ?? null,
+            target: newTarget ?? null,
+          },
+        ],
       };
     }
     return obj;

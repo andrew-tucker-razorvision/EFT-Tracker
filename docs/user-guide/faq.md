@@ -86,7 +86,7 @@ Absolutely not. We will never sell, rent, or share your data with third parties 
 
 ### Can I export my progress?
 
-Export feature is planned but not yet implemented. You can manually review your progress in the tracker. Feature request: [Issue #XXX](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues)
+Export feature is planned but not yet implemented. You can manually review your progress in the tracker. Feature request: [Issue #XXX](https://github.com/tuckerandrew21/EFT-Tracker/issues)
 
 ---
 
@@ -109,7 +109,7 @@ Yes! The web tracker is fully functional on its own. The companion app (when rel
 
 Quest data is sourced from tarkov.dev, which is maintained by the community and regularly updated. If you notice outdated or incorrect information:
 
-- Report it on [GitHub Issues](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues)
+- Report it on [GitHub Issues](https://github.com/tuckerandrew21/EFT-Tracker/issues)
 - Or report to tarkov.dev directly
 
 ### What does "Next Up" mean?
@@ -135,11 +135,11 @@ Toggle it on to focus your progression toward Kappa.
 
 ### Can I track hideout upgrades?
 
-Not yet. The tracker currently focuses on quests only. Hideout tracking is a planned feature. Vote for it: [Issue #XXX](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues)
+Not yet. The tracker currently focuses on quests only. Hideout tracking is a planned feature. Vote for it: [Issue #XXX](https://github.com/tuckerandrew21/EFT-Tracker/issues)
 
 ### Can I share my progress with friends?
 
-Profile sharing is planned but not yet implemented. You can manually show your progress by screenshotting or streaming. Feature request: [Issue #XXX](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues)
+Profile sharing is planned but not yet implemented. You can manually show your progress by screenshotting or streaming. Feature request: [Issue #XXX](https://github.com/tuckerandrew21/EFT-Tracker/issues)
 
 ### How do I reset my progress for a new wipe?
 
@@ -298,7 +298,7 @@ See [Contributing Guide](../CONTRIBUTING.md) for details.
 
 ### How do I report a bug?
 
-1. Check if it's already reported: [Open Issues](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues)
+1. Check if it's already reported: [Open Issues](https://github.com/tuckerandrew21/EFT-Tracker/issues)
 2. If not, create a new issue
 3. Include:
    - Browser and version
@@ -309,7 +309,7 @@ See [Contributing Guide](../CONTRIBUTING.md) for details.
 
 ### How do I request a feature?
 
-1. Check if it's already requested: [GitHub Issues](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues)
+1. Check if it's already requested: [GitHub Issues](https://github.com/tuckerandrew21/EFT-Tracker/issues)
 2. If not, create a feature request issue
 3. Describe:
    - What you want
@@ -321,8 +321,8 @@ See [Contributing Guide](../CONTRIBUTING.md) for details.
 
 Yes! See the project milestones and issues on GitHub:
 
-- [Project Roadmap](https://github.com/andrew-tucker-razorvision/EFT-Tracker/milestones)
-- [Epic Issues](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues?q=label%3Aepic)
+- [Project Roadmap](https://github.com/tuckerandrew21/EFT-Tracker/milestones)
+- [Epic Issues](https://github.com/tuckerandrew21/EFT-Tracker/issues?q=label%3Aepic)
 
 ### How can I support the project?
 
@@ -338,7 +338,7 @@ No donations accepted - this is a passion project.
 
 ### Who maintains this?
 
-The project is maintained by [andrew-tucker-razorvision](https://github.com/andrew-tucker-razorvision) with contributions from the community. It's a side project built for the Tarkov community.
+The project is maintained by [tuckerandrew21](https://github.com/tuckerandrew21) with contributions from the community. It's a side project built for the Tarkov community.
 
 ---
 
@@ -404,11 +404,11 @@ If your question isn't answered here:
    - [Companion App](companion-app.md)
 
 2. Search GitHub Issues:
-   - [All Issues](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues)
+   - [All Issues](https://github.com/tuckerandrew21/EFT-Tracker/issues)
    - Someone may have already asked
 
 3. Create a new issue:
-   - [Ask a question](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues/new)
+   - [Ask a question](https://github.com/tuckerandrew21/EFT-Tracker/issues/new)
    - Maintainers and community will respond
 
 ---

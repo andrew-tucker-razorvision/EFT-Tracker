@@ -319,7 +319,7 @@ export function SettingsPanel({
             <p>EFT Tracker Companion v0.1.0</p>
             <p>
               <a
-                href="https://github.com/andrew-tucker-razorvision/EFT-Tracker"
+                href="https://github.com/tuckerandrew21/EFT-Tracker"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-tarkov-accent hover:underline"

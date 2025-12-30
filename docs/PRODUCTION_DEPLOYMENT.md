@@ -240,7 +240,7 @@ Coolify is a self-hosted Platform-as-a-Service (PaaS) that simplifies deployment
 2. **Create New Resource**
    - Click "New Resource" → "Application"
    - Select "Public Repository" or connect your GitHub account
-   - Enter repository: `https://github.com/andrew-tucker-razorvision/EFT-Tracker`
+   - Enter repository: `https://github.com/tuckerandrew21/EFT-Tracker`
    - Branch: `master`
    - Build pack: `Dockerfile`
 

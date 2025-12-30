@@ -6,7 +6,7 @@ After creating a PR, automatically monitor CI status using the GitHub check-runs
 
 ```bash
 # Get PR head SHA first, then check runs
-curl -s "https://api.github.com/repos/andrew-tucker-razorvision/EFT-Tracker/commits/{SHA}/check-runs" | jq -r '.check_runs[] | "\(.status) \(.conclusion // "pending") - \(.name)"'
+curl -s "https://api.github.com/repos/tuckerandrew21/EFT-Tracker/commits/{SHA}/check-runs" | jq -r '.check_runs[] | "\(.status) \(.conclusion // "pending") - \(.name)"'
 ```
 
 1. Get the PR's head commit SHA from `mcp__github__get_pull_request`

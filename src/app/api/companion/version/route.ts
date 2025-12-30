@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 const COMPANION_VERSION = {
   latestVersion: "0.1.0",
   downloadUrl:
-    "https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases",
+    "https://github.com/tuckerandrew21/EFT-Tracker/releases",
   releaseNotes: "Initial release of EFT Tracker Companion",
   releaseDate: "2025-12-09",
 };

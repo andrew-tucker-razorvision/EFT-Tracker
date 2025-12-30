@@ -170,8 +170,8 @@ To enable OneDrive sync, update `.mcp.json`:
 
 ## Project Links
 
-- **Repo:** https://github.com/andrew-tucker-razorvision/EFT-Tracker
-- **Project Board:** https://github.com/users/andrew-tucker-razorvision/projects/4/views/1
+- **Repo:** https://github.com/tuckerandrew21/EFT-Tracker
+- **Project Board:** https://github.com/users/tuckerandrew21/projects/4/views/1
 - **Data Source:** https://escapefromtarkov.fandom.com/wiki/Quests
 
 ## Current Status
@@ -232,4 +232,4 @@ To enable OneDrive sync, update `.mcp.json`:
 - Linux environment (WSL2 in devcontainer)
 - Using GitHub MCP for issue management
 - Quest data sourced from Tarkov Wiki API
-- Repository: https://github.com/andrew-tucker-razorvision/EFT-Tracker
+- Repository: https://github.com/tuckerandrew21/EFT-Tracker

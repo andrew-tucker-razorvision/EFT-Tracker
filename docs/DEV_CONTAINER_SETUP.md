@@ -104,7 +104,7 @@ git --version
 cd ~/projects  # or C:\Users\YourName\projects on Windows
 
 # Clone the repository
-git clone https://github.com/andrew-tucker-razorvision/EFT-Tracker.git
+git clone https://github.com/tuckerandrew21/EFT-Tracker.git
 cd EFT-Tracker
 ```
 

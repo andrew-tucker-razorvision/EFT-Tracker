@@ -17,7 +17,7 @@ Phase 6 is the final step of the monorepo migration. It involves:
 ## Phase 5 PR Status
 
 **PR #312:** docs: Phase 5 - Documentation & Final Polish
-- URL: https://github.com/andrew-tucker-razorvision/EFT-Tracker/pull/312
+- URL: https://github.com/tuckerandrew21/EFT-Tracker/pull/312
 - Base: master
 - Changes: Documentation only (QUICKSTART.md, CONTRIBUTING.md, docs/README.md, architecture docs)
 
@@ -58,7 +58,7 @@ Monitor PR #312:
 gh pr view 312
 
 # Watch in browser
-open https://github.com/andrew-tucker-razorvision/EFT-Tracker/pull/312
+open https://github.com/tuckerandrew21/EFT-Tracker/pull/312
 ```
 
 Expected: All checks should pass ✅
@@ -120,11 +120,11 @@ curl https://learntotarkov.com/api/health
 
 ### 5. Verify New Documentation
 
-- ✅ [QUICKSTART.md](https://github.com/andrew-tucker-razorvision/EFT-Tracker/blob/master/QUICKSTART.md)
-- ✅ [CONTRIBUTING.md](https://github.com/andrew-tucker-razorvision/EFT-Tracker/blob/master/CONTRIBUTING.md)
-- ✅ [docs/README.md](https://github.com/andrew-tucker-razorvision/EFT-Tracker/blob/master/docs/README.md)
-- ✅ [docs/architecture/monorepo.md](https://github.com/andrew-tucker-razorvision/EFT-Tracker/blob/master/docs/architecture/monorepo.md)
-- ✅ [docs/architecture/migration-guide.md](https://github.com/andrew-tucker-razorvision/EFT-Tracker/blob/master/docs/architecture/migration-guide.md)
+- ✅ [QUICKSTART.md](https://github.com/tuckerandrew21/EFT-Tracker/blob/master/QUICKSTART.md)
+- ✅ [CONTRIBUTING.md](https://github.com/tuckerandrew21/EFT-Tracker/blob/master/CONTRIBUTING.md)
+- ✅ [docs/README.md](https://github.com/tuckerandrew21/EFT-Tracker/blob/master/docs/README.md)
+- ✅ [docs/architecture/monorepo.md](https://github.com/tuckerandrew21/EFT-Tracker/blob/master/docs/architecture/monorepo.md)
+- ✅ [docs/architecture/migration-guide.md](https://github.com/tuckerandrew21/EFT-Tracker/blob/master/docs/architecture/migration-guide.md)
 
 ## Monitoring Commands
 

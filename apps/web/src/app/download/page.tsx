@@ -89,7 +89,7 @@ export default function DownloadPage() {
 
               <div className="space-y-3 mb-8">
                 <a
-                  href={`https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases/download/tauri-v${versionInfo.latestVersion}/EFT.Tracker.Companion_${versionInfo.latestVersion}_x64_en-US.msi`}
+                  href={`https://github.com/tuckerandrew21/EFT-Tracker/releases/download/tauri-v${versionInfo.latestVersion}/EFT.Tracker.Companion_${versionInfo.latestVersion}_x64_en-US.msi`}
                   className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition"
                 >
                   <Download className="w-5 h-5 text-blue-600" />
@@ -105,7 +105,7 @@ export default function DownloadPage() {
                 </a>
 
                 <a
-                  href={`https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases/download/tauri-v${versionInfo.latestVersion}/EFT.Tracker.Companion_${versionInfo.latestVersion}_x64-setup.exe`}
+                  href={`https://github.com/tuckerandrew21/EFT-Tracker/releases/download/tauri-v${versionInfo.latestVersion}/EFT.Tracker.Companion_${versionInfo.latestVersion}_x64-setup.exe`}
                   className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition"
                 >
                   <Download className="w-5 h-5 text-slate-600" />
@@ -320,7 +320,7 @@ export default function DownloadPage() {
                 </Link>{" "}
                 or{" "}
                 <a
-                  href="https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues"
+                  href="https://github.com/tuckerandrew21/EFT-Tracker/issues"
                   className="text-blue-600 hover:text-blue-700 font-medium"
                 >
                   open an issue on GitHub

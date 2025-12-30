@@ -16,6 +16,7 @@ import {
   Square,
   CheckSquare,
 } from "lucide-react";
+import { ObjectiveCounter } from "./ObjectiveCounter";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useQuestDetails } from "@/hooks/useQuestDetails";
 import {
@@ -38,6 +39,9 @@ import { getTraderColor, STATUS_COLORS } from "@/lib/trader-colors";
 import type { QuestWithProgress, Objective } from "@/types";
 import type { TarkovQuestDetails, TarkovObjectiveItem } from "@/lib/tarkov-api";
 
+// Objective update can be either a boolean (binary toggle) or numeric progress
+type ObjectiveUpdate = boolean | { current: number };
+
 interface QuestDetailModalProps {
   quest: QuestWithProgress | null;
   open: boolean;
@@ -45,7 +49,7 @@ interface QuestDetailModalProps {
   onStatusChange?: (questId: string) => Promise<void>;
   onObjectiveToggle?: (
     objectiveId: string,
-    completed: boolean
+    update: ObjectiveUpdate
   ) => Promise<{ questStatusChanged?: boolean; newQuestStatus?: string }>;
   isSaving?: boolean;
 }
@@ -61,6 +65,9 @@ function getItemObjectives(
   );
 }
 
+// Local state for numeric objectives: objectiveId -> current count
+type NumericObjectiveStates = Record<string, number>;
+
 interface QuestDetailContentProps {
   quest: QuestWithProgress;
   details: TarkovQuestDetails | null;
@@ -69,26 +76,62 @@ interface QuestDetailContentProps {
   onStatusChange?: (questId: string) => Promise<void>;
   onObjectiveToggle?: (
     objectiveId: string,
-    completed: boolean
+    update: ObjectiveUpdate
   ) => Promise<{ questStatusChanged?: boolean; newQuestStatus?: string }>;
   isSaving?: boolean;
   onOpenChange?: (open: boolean) => void;
   objectiveStates: Record<string, boolean>;
+  numericObjectiveStates: NumericObjectiveStates;
   onLocalObjectiveToggle: (objectiveId: string, completed: boolean) => void;
+  onLocalNumericUpdate: (objectiveId: string, current: number) => void;
   savingObjectives: Set<string>;
 }
 
-// Helper to check if an objective is completed
+// Helper to check if an objective is completed (supports both binary and numeric)
 function isObjectiveCompleted(
   objective: Objective,
-  objectiveStates: Record<string, boolean>
+  objectiveStates: Record<string, boolean>,
+  numericObjectiveStates: NumericObjectiveStates
 ): boolean {
-  // First check local state (optimistic updates)
+  const isNumeric = objective.count !== null && objective.count > 0;
+
+  if (isNumeric) {
+    const target = objective.count!; // Already validated non-null by isNumeric check
+    // Check local numeric state first
+    if (numericObjectiveStates[objective.id] !== undefined) {
+      return numericObjectiveStates[objective.id] >= target;
+    }
+    // Fall back to server state
+    const progress = objective.progress?.[0];
+    if (
+      progress?.target !== null &&
+      progress?.target !== undefined &&
+      progress.target > 0
+    ) {
+      return (progress.current ?? 0) >= progress.target;
+    }
+    return progress?.completed ?? false;
+  }
+
+  // Binary objective: check local state first
   if (objectiveStates[objective.id] !== undefined) {
     return objectiveStates[objective.id];
   }
   // Fall back to server state
   return objective.progress?.[0]?.completed ?? false;
+}
+
+// Helper to get current numeric progress
+function getNumericProgress(
+  objective: Objective,
+  numericObjectiveStates: NumericObjectiveStates
+): number {
+  // Check local state first (optimistic updates)
+  if (numericObjectiveStates[objective.id] !== undefined) {
+    return numericObjectiveStates[objective.id];
+  }
+  // Fall back to server state
+  return objective.progress?.[0]?.current ?? 0;
 }
 
 function QuestDetailContent({
@@ -101,7 +144,9 @@ function QuestDetailContent({
   isSaving,
   onOpenChange,
   objectiveStates,
+  numericObjectiveStates,
   onLocalObjectiveToggle,
+  onLocalNumericUpdate,
   savingObjectives,
 }: QuestDetailContentProps) {
   const statusColor = STATUS_COLORS[quest.computedStatus];
@@ -110,7 +155,7 @@ function QuestDetailContent({
 
   // Calculate objective progress
   const completedCount = quest.objectives.filter((obj) =>
-    isObjectiveCompleted(obj, objectiveStates)
+    isObjectiveCompleted(obj, objectiveStates, numericObjectiveStates)
   ).length;
   const totalCount = quest.objectives.length;
 
@@ -285,10 +330,78 @@ function QuestDetailContent({
                   {objectivesByMap[map].map((obj) => {
                     const isCompleted = isObjectiveCompleted(
                       obj,
-                      objectiveStates
+                      objectiveStates,
+                      numericObjectiveStates
                     );
                     const isSavingThis = savingObjectives.has(obj.id);
+                    const isNumeric = obj.count !== null && obj.count > 0;
+                    const currentProgress = isNumeric
+                      ? getNumericProgress(obj, numericObjectiveStates)
+                      : 0;
 
+                    // For numeric objectives, render counter instead of checkbox
+                    if (isNumeric) {
+                      return (
+                        <li
+                          key={obj.id}
+                          className={`flex items-start gap-2 text-sm leading-relaxed py-1 -mx-2 px-2 rounded ${
+                            isCompleted
+                              ? "text-muted-foreground"
+                              : "text-foreground/90"
+                          }`}
+                        >
+                          {/* Description first for numeric */}
+                          <span
+                            className={`flex-1 ${isCompleted ? "line-through" : ""}`}
+                          >
+                            {obj.description}
+                            {obj.optional && (
+                              <Badge
+                                variant="outline"
+                                className="ml-2 text-xs py-0"
+                              >
+                                Optional
+                              </Badge>
+                            )}
+                          </span>
+                          {/* Counter */}
+                          <ObjectiveCounter
+                            current={currentProgress}
+                            target={obj.count!}
+                            disabled={!canToggleObjectives}
+                            isLoading={isSavingThis}
+                            onIncrement={() => {
+                              if (!canToggleObjectives || isSavingThis) return;
+                              const newValue = Math.min(
+                                currentProgress + 1,
+                                obj.count!
+                              );
+                              onLocalNumericUpdate(obj.id, newValue);
+                              onObjectiveToggle?.(obj.id, {
+                                current: newValue,
+                              });
+                            }}
+                            onDecrement={() => {
+                              if (!canToggleObjectives || isSavingThis) return;
+                              const newValue = Math.max(currentProgress - 1, 0);
+                              onLocalNumericUpdate(obj.id, newValue);
+                              onObjectiveToggle?.(obj.id, {
+                                current: newValue,
+                              });
+                            }}
+                            onComplete={() => {
+                              if (!canToggleObjectives || isSavingThis) return;
+                              onLocalNumericUpdate(obj.id, obj.count!);
+                              onObjectiveToggle?.(obj.id, {
+                                current: obj.count!,
+                              });
+                            }}
+                          />
+                        </li>
+                      );
+                    }
+
+                    // Binary objective - render checkbox
                     return (
                       <li
                         key={obj.id}
@@ -565,10 +678,13 @@ export function QuestDetailModal({
     error: detailsError,
   } = useQuestDetails(open && quest ? quest.id : null);
 
-  // Local state for optimistic updates on objectives
+  // Local state for optimistic updates on objectives (binary)
   const [objectiveStates, setObjectiveStates] = useState<
     Record<string, boolean>
   >({});
+  // Local state for numeric objectives
+  const [numericObjectiveStates, setNumericObjectiveStates] =
+    useState<NumericObjectiveStates>({});
   const [savingObjectives, setSavingObjectives] = useState<Set<string>>(
     new Set()
   );
@@ -578,6 +694,7 @@ export function QuestDetailModal({
     (newOpen: boolean) => {
       if (!newOpen) {
         setObjectiveStates({});
+        setNumericObjectiveStates({});
         setSavingObjectives(new Set());
       }
       onOpenChange(newOpen);
@@ -585,7 +702,7 @@ export function QuestDetailModal({
     [onOpenChange]
   );
 
-  // Handle local objective toggle with optimistic update
+  // Handle local objective toggle with optimistic update (binary)
   const handleLocalObjectiveToggle = useCallback(
     (objectiveId: string, completed: boolean) => {
       setObjectiveStates((prev) => ({ ...prev, [objectiveId]: completed }));
@@ -594,13 +711,25 @@ export function QuestDetailModal({
     []
   );
 
+  // Handle local numeric update with optimistic update
+  const handleLocalNumericUpdate = useCallback(
+    (objectiveId: string, current: number) => {
+      setNumericObjectiveStates((prev) => ({
+        ...prev,
+        [objectiveId]: current,
+      }));
+      setSavingObjectives((prev) => new Set(prev).add(objectiveId));
+    },
+    []
+  );
+
   // Wrap the onObjectiveToggle to handle saving state
   const handleObjectiveToggle = useCallback(
-    async (objectiveId: string, completed: boolean) => {
+    async (objectiveId: string, update: ObjectiveUpdate) => {
       if (!onObjectiveToggle) return { questStatusChanged: false };
 
       try {
-        const result = await onObjectiveToggle(objectiveId, completed);
+        const result = await onObjectiveToggle(objectiveId, update);
         return result;
       } finally {
         setSavingObjectives((prev) => {
@@ -648,7 +777,9 @@ export function QuestDetailModal({
               isSaving={isSaving}
               onOpenChange={handleOpenChange}
               objectiveStates={objectiveStates}
+              numericObjectiveStates={numericObjectiveStates}
               onLocalObjectiveToggle={handleLocalObjectiveToggle}
+              onLocalNumericUpdate={handleLocalNumericUpdate}
               savingObjectives={savingObjectives}
             />
           </div>
@@ -685,7 +816,9 @@ export function QuestDetailModal({
           isSaving={isSaving}
           onOpenChange={handleOpenChange}
           objectiveStates={objectiveStates}
+          numericObjectiveStates={numericObjectiveStates}
           onLocalObjectiveToggle={handleLocalObjectiveToggle}
+          onLocalNumericUpdate={handleLocalNumericUpdate}
           savingObjectives={savingObjectives}
         />
       </DialogContent>

@@ -157,9 +157,7 @@ export function getPrerequisitesForSelection(
  */
 export function getCompletedBranches(
   targetQuestIds: string[],
-  quests: QuestWithProgress[],
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _playerLevel: number
+  quests: QuestWithProgress[]
 ): CatchUpSelection[] {
   const questMap = buildQuestMap(quests);
   const targetSet = new Set(targetQuestIds);
@@ -230,16 +228,11 @@ export function getCompletedBranches(
  */
 export function calculateCatchUp(
   targetQuestIds: string[],
-  quests: QuestWithProgress[],
-  playerLevel: number
+  quests: QuestWithProgress[]
 ): CatchUpCalculation {
   return {
     prerequisites: getPrerequisitesForSelection(targetQuestIds, quests),
-    completedBranches: getCompletedBranches(
-      targetQuestIds,
-      quests,
-      playerLevel
-    ),
+    completedBranches: getCompletedBranches(targetQuestIds, quests),
   };
 }
 

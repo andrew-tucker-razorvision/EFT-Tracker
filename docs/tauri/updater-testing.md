@@ -11,7 +11,7 @@
 **tauri.conf.json Updater Settings:**
 
 - `active`: true ✅
-- `endpoints`: https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases/latest/download/latest.json ✅
+- `endpoints`: https://github.com/tuckerandrew21/EFT-Tracker/releases/latest/download/latest.json ✅
 - `dialog`: true ✅ (Shows update dialog automatically)
 - `pubkey`: Configured with correct signing key ✅
 
@@ -27,7 +27,7 @@
 **latest.json Accessibility:**
 
 ```
-URL: https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases/latest/download/latest.json
+URL: https://github.com/tuckerandrew21/EFT-Tracker/releases/latest/download/latest.json
 HTTP Status: 302 (Redirect) → 200 (OK with -L flag)
 Version: 0.1.5
 Platform: windows-x86_64
@@ -43,7 +43,7 @@ Platform: windows-x86_64
   "platforms": {
     "windows-x86_64": {
       "signature": "",
-      "url": "https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases/download/tauri-v0.1.5/EFT.Tracker.Companion_0.1.5_x64_en-US.msi"
+      "url": "https://github.com/tuckerandrew21/EFT-Tracker/releases/download/tauri-v0.1.5/EFT.Tracker.Companion_0.1.5_x64_en-US.msi"
     }
   }
 }
@@ -59,7 +59,7 @@ Platform: windows-x86_64
 **MSI File Accessibility:**
 
 ```
-URL: https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases/download/tauri-v0.1.5/EFT.Tracker.Companion_0.1.5_x64_en-US.msi
+URL: https://github.com/tuckerandrew21/EFT-Tracker/releases/download/tauri-v0.1.5/EFT.Tracker.Companion_0.1.5_x64_en-US.msi
 Size: 2,752,512 bytes (2.7 MB)
 HTTP Status: 302 (GitHub redirect to blob storage)
 Downloadable: ✅ Yes

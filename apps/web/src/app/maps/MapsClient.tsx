@@ -331,11 +331,11 @@ export function MapsClient() {
     [handleStatusChange]
   );
 
-  // Handle objective checkbox toggle from modal
+  // Handle objective toggle from modal (supports both binary and numeric)
   const handleObjectiveToggle = useCallback(
     async (
       objectiveId: string,
-      completed: boolean
+      update: boolean | { current: number }
     ): Promise<{ questStatusChanged?: boolean; newQuestStatus?: string }> => {
       if (sessionStatusRef.current !== "authenticated") {
         toast.error("Sign in Required", {
@@ -345,10 +345,16 @@ export function MapsClient() {
       }
 
       try {
+        // Build request body based on update type
+        const body =
+          typeof update === "boolean"
+            ? { completed: update }
+            : { current: update.current };
+
         const response = await fetch(`/api/progress/objective/${objectiveId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ completed }),
+          body: JSON.stringify(body),
         });
 
         if (!response.ok) {

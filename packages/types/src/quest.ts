@@ -32,6 +32,19 @@ export interface Objective {
   description: string;
   map: string | null;
   questId: string;
+  progress?: ObjectiveProgress[]; // User's progress on this objective
+}
+
+// Objective progress from database
+export interface ObjectiveProgress {
+  id: string;
+  userId: string;
+  objectiveId: string;
+  completed: boolean;
+  current: number | null; // Current progress (e.g., 1 of 2 PMC kills) - null for binary objectives
+  target: number | null; // Target count (copy of Objective.count) - null for binary objectives
+  syncSource: "WEB" | "COMPANION";
+  updatedAt: Date;
 }
 
 // Requirement status types from tarkov.dev API

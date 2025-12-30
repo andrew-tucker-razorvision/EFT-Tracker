@@ -1,7 +1,7 @@
 /**
  * Quest Tree Integration Tests
  * Vitest tests for quest tree component interactions
- * Issue #134: https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues/134
+ * Issue #134: https://github.com/tuckerandrew21/EFT-Tracker/issues/134
  *
  * Tests cover:
  * 1. Quest Completion - Status changes, saving indicators, checkmarks

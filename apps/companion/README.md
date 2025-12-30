@@ -30,7 +30,7 @@ EFT Tracker Companion is a lightweight Windows desktop application that automati
 
 ### Installation
 
-1. Download the latest installer from [GitHub Releases](https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases)
+1. Download the latest installer from [GitHub Releases](https://github.com/tuckerandrew21/EFT-Tracker/releases)
 2. Run the `.msi` or `.nsis` installer
 3. Launch from Start Menu or system tray
 4. Link your Learn to Tarkov account (first run)
@@ -351,7 +351,7 @@ Settings → Apps → Startup → EFT Tracker Companion (toggle ON)
 ### Getting Help
 
 1. Check app logs: `%APPDATA%\eft-tracker-companion\logs\app.log`
-2. Search existing [GitHub Issues](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues)
+2. Search existing [GitHub Issues](https://github.com/tuckerandrew21/EFT-Tracker/issues)
 3. File a new issue with:
    - Windows version
    - Error message or unexpected behavior
@@ -447,15 +447,15 @@ See: `docs/tauri/e2e-autoupdate-verification.md`
 
 ### GitHub Links
 
-- [Main Repository](https://github.com/andrew-tucker-razorvision/EFT-Tracker)
-- [Releases Page](https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases)
-- [Issues & Discussions](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues)
+- [Main Repository](https://github.com/tuckerandrew21/EFT-Tracker)
+- [Releases Page](https://github.com/tuckerandrew21/EFT-Tracker/releases)
+- [Issues & Discussions](https://github.com/tuckerandrew21/EFT-Tracker/issues)
 
 ## Support
 
 ### Reporting Bugs
 
-Found an issue? [Open a GitHub Issue](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues/new) with:
+Found an issue? [Open a GitHub Issue](https://github.com/tuckerandrew21/EFT-Tracker/issues/new) with:
 
 1. **Title**: Clear, one-line description
 2. **Description**: What happened vs. what you expected
@@ -465,7 +465,7 @@ Found an issue? [Open a GitHub Issue](https://github.com/andrew-tucker-razorvisi
 
 ### Feature Requests
 
-Have an idea? [Open a GitHub Discussion](https://github.com/andrew-tucker-razorvision/EFT-Tracker/discussions) or file an issue with label `enhancement`.
+Have an idea? [Open a GitHub Discussion](https://github.com/tuckerandrew21/EFT-Tracker/discussions) or file an issue with label `enhancement`.
 
 ## Contributing
 

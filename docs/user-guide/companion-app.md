@@ -127,13 +127,13 @@ It's equivalent to having a second monitor or using your phone - just more conve
 Want to know when the companion app releases?
 
 1. **Star the GitHub repository** - Get notified of releases
-   - [github.com/andrew-tucker-razorvision/EFT-Tracker](https://github.com/andrew-tucker-razorvision/EFT-Tracker)
+   - [github.com/tuckerandrew21/EFT-Tracker](https://github.com/tuckerandrew21/EFT-Tracker)
 
 2. **Check the website** - Announcement will be on homepage
    - [https://learntotarkov.com](https://learntotarkov.com)
 
 3. **Follow development** - Track progress on GitHub
-   - [Issue #209: Companion App Distribution](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues/209)
+   - [Issue #209: Companion App Distribution](https://github.com/tuckerandrew21/EFT-Tracker/issues/209)
 
 ## Frequently Asked Questions
 

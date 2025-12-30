@@ -162,7 +162,7 @@ Common issues and solutions for EFT Quest Tracker.
 3. **Contact support**
    - If progress is truly lost, report on GitHub
    - Include: email used, approximate completion %, last login date
-   - [Report issue here](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues)
+   - [Report issue here](https://github.com/tuckerandrew21/EFT-Tracker/issues)
 
 ---
 
@@ -441,10 +441,10 @@ If you accidentally created multiple accounts:
 If your issue isn't covered here:
 
 1. **Check GitHub Issues** - Your issue may already be reported
-   - [View open issues](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues)
+   - [View open issues](https://github.com/tuckerandrew21/EFT-Tracker/issues)
 
 2. **Create a new issue**
-   - [Report a bug](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues/new)
+   - [Report a bug](https://github.com/tuckerandrew21/EFT-Tracker/issues/new)
    - Include:
      - Browser and version
      - Operating system

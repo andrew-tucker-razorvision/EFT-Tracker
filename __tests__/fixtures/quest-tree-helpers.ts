@@ -1,7 +1,7 @@
 /**
  * Quest Tree Test Helpers
  * Shared utilities for E2E and integration tests
- * Issue #132: https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues/132
+ * Issue #132: https://github.com/tuckerandrew21/EFT-Tracker/issues/132
  */
 
 import type {

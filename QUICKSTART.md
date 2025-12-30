@@ -12,7 +12,7 @@ Get the EFT Quest Tracker running locally in **5 minutes**.
 ## Step 1: Clone Repository (1 minute)
 
 ```bash
-git clone https://github.com/andrew-tucker-razorvision/EFT-Tracker.git
+git clone https://github.com/tuckerandrew21/EFT-Tracker.git
 cd EFT-Tracker
 ```
 
@@ -250,4 +250,4 @@ gh pr create --base master
 
 **Total Setup Time:** 5 minutes ⚡
 
-**Need help?** See [CONTRIBUTING.md](CONTRIBUTING.md) or open an issue on [GitHub](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues)
+**Need help?** See [CONTRIBUTING.md](CONTRIBUTING.md) or open an issue on [GitHub](https://github.com/tuckerandrew21/EFT-Tracker/issues)

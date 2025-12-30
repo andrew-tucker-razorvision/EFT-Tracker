@@ -2,7 +2,7 @@
 
 **Status:** ✅ Phases 1-4 Complete (80% done)
 **Time Invested:** ~6-7 hours of 8-10 hour estimate
-**PR:** [#257](https://github.com/andrew-tucker-razorvision/EFT-Tracker/pull/257)
+**PR:** [#257](https://github.com/tuckerandrew21/EFT-Tracker/pull/257)
 
 ---
 
@@ -253,7 +253,7 @@ Push triggers workflow:
 
 ### 5. Publish Release
 
-1. Go to: https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases
+1. Go to: https://github.com/tuckerandrew21/EFT-Tracker/releases
 2. Find draft release
 3. Review release notes
 4. Click "Publish release"
@@ -386,16 +386,16 @@ After publishing:
 
 **Pull Request:**
 
-- [PR #257](https://github.com/andrew-tucker-razorvision/EFT-Tracker/pull/257) - Phases 1-4 implementation
+- [PR #257](https://github.com/tuckerandrew21/EFT-Tracker/pull/257) - Phases 1-4 implementation
 
 **GitHub Issues:**
 
-- [#252](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues/252) - Phase 1: Setup ✅
-- [#253](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues/253) - Phase 2: Rust Backend ✅
-- [#254](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues/254) - Phase 3: Frontend ✅
-- [#255](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues/255) - Phase 4: Auto-Updater ✅
-- [#256](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues/256) - Phase 5: Testing 🔜
-- [#209](https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues/209) - Overall Companion App
+- [#252](https://github.com/tuckerandrew21/EFT-Tracker/issues/252) - Phase 1: Setup ✅
+- [#253](https://github.com/tuckerandrew21/EFT-Tracker/issues/253) - Phase 2: Rust Backend ✅
+- [#254](https://github.com/tuckerandrew21/EFT-Tracker/issues/254) - Phase 3: Frontend ✅
+- [#255](https://github.com/tuckerandrew21/EFT-Tracker/issues/255) - Phase 4: Auto-Updater ✅
+- [#256](https://github.com/tuckerandrew21/EFT-Tracker/issues/256) - Phase 5: Testing 🔜
+- [#209](https://github.com/tuckerandrew21/EFT-Tracker/issues/209) - Overall Companion App
 
 **External Resources:**
 

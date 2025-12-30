@@ -393,13 +393,13 @@ curl https://learntotarkov.com/api/health
 - Coolify: https://panel.razorvision.com
 - Neon Console: https://console.neon.tech
 - Sentry: https://sentry.io
-- GitHub: https://github.com/andrew-tucker-razorvision/EFT-Tracker
+- GitHub: https://github.com/tuckerandrew21/EFT-Tracker
 
 **Support:**
 
 - Neon Support: support@neon.tech
 - Coolify Discord: https://discord.gg/coolify
-- GitHub Issues: https://github.com/andrew-tucker-razorvision/EFT-Tracker/issues
+- GitHub Issues: https://github.com/tuckerandrew21/EFT-Tracker/issues
 
 ## Related Documentation
 

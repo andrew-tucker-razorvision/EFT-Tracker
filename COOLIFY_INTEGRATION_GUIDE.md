@@ -193,6 +193,6 @@ Potential improvements for future implementation:
 ---
 
 **Implementation Date:** 2025-12-16
-**Merged By:** andrew-tucker-razorvision
+**Merged By:** tuckerandrew21
 **PR:** #283
 **Status:** Production (running:healthy)

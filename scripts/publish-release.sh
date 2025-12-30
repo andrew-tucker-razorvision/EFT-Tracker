@@ -29,7 +29,7 @@ fi
 gh release edit "$TAG" --draft=false
 
 echo "✅ Release ${TAG} published!"
-echo "🔗 View at: https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases/tag/${TAG}"
+echo "🔗 View at: https://github.com/tuckerandrew21/EFT-Tracker/releases/tag/${TAG}"
 echo ""
 echo "📥 Download installer:"
 echo "gh release download ${TAG} --pattern '*.msi'"

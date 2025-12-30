@@ -45,7 +45,7 @@ echo "src-tauri/tauri.key" >> .gitignore
 
 ## Step 2: Add GitHub Secrets
 
-Navigate to: `https://github.com/andrew-tucker-razorvision/EFT-Tracker/settings/secrets/actions`
+Navigate to: `https://github.com/tuckerandrew21/EFT-Tracker/settings/secrets/actions`
 
 ### Add two secrets:
 
@@ -80,7 +80,7 @@ Edit `src-tauri/tauri.conf.json` and add the public key to the updater section:
     "updater": {
       "active": true,
       "endpoints": [
-        "https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases/latest/download/latest.json"
+        "https://github.com/tuckerandrew21/EFT-Tracker/releases/latest/download/latest.json"
       ],
       "dialog": false,
       "pubkey": "YOUR_PUBLIC_KEY_HERE"
@@ -167,7 +167,7 @@ git push origin tauri-v0.1.0
 gh run watch
 ```
 
-Or visit: `https://github.com/andrew-tucker-razorvision/EFT-Tracker/actions`
+Or visit: `https://github.com/tuckerandrew21/EFT-Tracker/actions`
 
 **Build time:** ~3-5 minutes
 
@@ -186,7 +186,7 @@ Or visit: `https://github.com/andrew-tucker-razorvision/EFT-Tracker/actions`
 
 ## Step 7: Publish the Release
 
-1. Go to: `https://github.com/andrew-tucker-razorvision/EFT-Tracker/releases`
+1. Go to: `https://github.com/tuckerandrew21/EFT-Tracker/releases`
 2. Find the draft release for `tauri-v0.1.0`
 3. Review the release notes
 4. Click **"Publish release"**
