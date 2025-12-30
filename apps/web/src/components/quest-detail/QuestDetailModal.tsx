@@ -388,10 +388,15 @@ function QuestDetailContent({
                               });
                             }}
                             onComplete={() => {
-                              if (!canToggleObjectives || isSavingThis) return;
-                              onLocalNumericUpdate(obj.id, obj.count!);
+                              if (
+                                !canToggleObjectives ||
+                                isSavingThis ||
+                                objProgress?.target === null
+                              )
+                                return;
+                              onLocalNumericUpdate(obj.id, objProgress.target);
                               onObjectiveToggle?.(obj.id, {
-                                current: obj.count!,
+                                current: objProgress.target,
                               });
                             }}
                           />
@@ -435,14 +440,6 @@ function QuestDetailContent({
                         {/* Description */}
                         <span className={isCompleted ? "line-through" : ""}>
                           {obj.description}
-                          {obj.optional && (
-                            <Badge
-                              variant="outline"
-                              className="ml-2 text-xs py-0"
-                            >
-                              Optional
-                            </Badge>
-                          )}
                         </span>
                       </li>
                     );
