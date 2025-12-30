@@ -31,6 +31,7 @@ export default defineConfig({
     include: ["__tests__/**/*.{test,spec}.{ts,tsx}"],
     exclude: [
       "node_modules/**/*",
+      "__tests__/e2e/**/*",
     ],
     coverage: {
       provider: "v8",
