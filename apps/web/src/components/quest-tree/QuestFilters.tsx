@@ -1,7 +1,7 @@
 // @ts-nocheck - React 19 Input component type compatibility
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { Filter } from "lucide-react";
 import { ProgressStats } from "@/components/progress-stats";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useUpdateUserPrefs } from "@/hooks/useUserPrefs";
 import { StatusMultiSelect } from "./StatusMultiSelect";
 import { ActiveFilterChips } from "./ActiveFilterChips";
@@ -106,6 +113,7 @@ export function QuestFilters({
       search: "",
       kappaOnly: false,
       playerLevel: 1,
+      map: null,
     });
     setTimeout(() => onApplyFiltersRef.current(), 0);
   };
@@ -144,14 +152,32 @@ export function QuestFilters({
       handleFilterChange({ kappaOnly: false });
     } else if (key === "playerLevel") {
       handleFilterChange({ playerLevel: 1 });
+    } else if (key === "map") {
+      handleFilterChange({ map: null });
     }
   };
+
+  // Get unique maps from all quest objectives
+  const availableMaps = useMemo(() => {
+    const mapSet = new Set<string>();
+    for (const quest of quests) {
+      if (quest.objectives) {
+        for (const obj of quest.objectives) {
+          if (obj.map) {
+            mapSet.add(obj.map);
+          }
+        }
+      }
+    }
+    return Array.from(mapSet).sort();
+  }, [quests]);
 
   // Count all active filters (for chips and mobile badge)
   const activeFilterCount = [
     filters.statuses.length > 0 ? filters.statuses : null,
     filters.kappaOnly,
     filters.playerLevel !== 1 ? filters.playerLevel : null,
+    filters.map,
   ].filter(Boolean).length;
 
   return (
@@ -237,6 +263,31 @@ export function QuestFilters({
                     }}
                     className="h-9 w-20"
                   />
+                </div>
+
+                {/* Map Filter */}
+                <div className="space-y-2">
+                  <Label className="text-sm">Map</Label>
+                  <Select
+                    value={filters.map ?? "all"}
+                    onValueChange={(value) =>
+                      handleFilterChange({
+                        map: value === "all" ? null : value,
+                      })
+                    }
+                  >
+                    <SelectTrigger className="h-9 w-full">
+                      <SelectValue placeholder="All maps" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All maps</SelectItem>
+                      {availableMaps.map((map) => (
+                        <SelectItem key={map} value={map}>
+                          {map}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Reset button */}
@@ -326,6 +377,29 @@ export function QuestFilters({
                 }}
                 className="h-9 w-16"
               />
+            </div>
+
+            {/* Map Filter */}
+            <div className="flex items-center gap-2">
+              <Label className="text-sm whitespace-nowrap">Map:</Label>
+              <Select
+                value={filters.map ?? "all"}
+                onValueChange={(value) =>
+                  handleFilterChange({ map: value === "all" ? null : value })
+                }
+              >
+                <SelectTrigger className="h-9 w-[140px]">
+                  <SelectValue placeholder="All maps" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All maps</SelectItem>
+                  {availableMaps.map((map) => (
+                    <SelectItem key={map} value={map}>
+                      {map}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
