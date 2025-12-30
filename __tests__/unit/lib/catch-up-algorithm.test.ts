@@ -191,20 +191,20 @@ describe("getCompletedBranches", () => {
 });
 
 describe("calculateCatchUp", () => {
-  it("returns ancestors and sibling branches", () => {
+  it("returns prerequisites and completed branches", () => {
     const result = calculateCatchUp(["D"], mockQuests);
-    expect(result.ancestors.length).toBe(2); // A, B
-    expect(result.siblingBranches.length).toBe(1); // C
+    expect(result.prerequisites.length).toBe(2); // A, B
+    expect(result.completedBranches.length).toBe(1); // C
   });
 
   it("handles multiple target quests", () => {
     const result = calculateCatchUp(["C", "E"], mockQuests);
-    // Ancestors should include A, B, D (union of both chains)
-    expect(result.ancestors.map((p) => p.questId)).toContain("A");
-    expect(result.ancestors.map((p) => p.questId)).toContain("B");
-    expect(result.ancestors.map((p) => p.questId)).toContain("D");
-    // No sibling branches since both terminal quests are selected
-    expect(result.siblingBranches.length).toBe(0);
+    // Prerequisites should include A, B, D (union of both chains)
+    expect(result.prerequisites.map((p) => p.questId)).toContain("A");
+    expect(result.prerequisites.map((p) => p.questId)).toContain("B");
+    expect(result.prerequisites.map((p) => p.questId)).toContain("D");
+    // No completed branches since both terminal quests are selected
+    expect(result.completedBranches.length).toBe(0);
   });
 });
 

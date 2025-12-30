@@ -378,9 +378,9 @@ describe("Level Highlighting", () => {
     const props = createNodeProps(availableQuest, { playerLevel: 5 });
     renderWithReactFlow(<QuestNode {...props} />);
 
-    // Level badge should be present
-    const levelBadge = screen.getByText(`Lv.${availableQuest.levelRequired}`);
-    expect(levelBadge).toBeInTheDocument();
+    // Level badge rendered across two elements: "Lv" label + number value
+    expect(screen.getByText("Lv")).toBeInTheDocument();
+    expect(screen.getByText(String(availableQuest.levelRequired))).toBeInTheDocument();
   });
 });
 

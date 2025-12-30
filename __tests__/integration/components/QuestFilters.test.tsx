@@ -10,6 +10,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SessionProvider } from "next-auth/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { mockQuestsWithProgress } from "../../fixtures/quests";
 import { mockTraders } from "../../fixtures/traders";
 import { QuestFilters } from "@/components/quest-tree/QuestFilters";
@@ -39,28 +40,43 @@ describe("QuestFilters Integration Tests", () => {
     hasPendingChanges: false,
   };
 
+  let queryClient: QueryClient;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    // Create fresh QueryClient for each test
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+      },
+    });
   });
+
+  // Helper function to render with QueryClient and SessionProvider
+  const renderWithProviders = (
+    ui: React.ReactElement,
+    options?: Parameters<typeof render>[1]
+  ) => {
+    return render(ui, {
+      ...options,
+      wrapper: ({ children }) => (
+        <QueryClientProvider client={queryClient}>
+          <SessionProvider session={mockSession}>{children}</SessionProvider>
+        </QueryClientProvider>
+      ),
+    });
+  };
 
   describe("Component Rendering", () => {
     it("should render without crashing", () => {
-      render(<QuestFilters {...defaultProps} />, {
-        wrapper: ({ children }) => (
-          <SessionProvider session={mockSession}>{children}</SessionProvider>
-        ),
-      });
+      renderWithProviders(<QuestFilters {...defaultProps} />);
 
       // Component renders both mobile and desktop layouts
       expect(screen.getByText("Filters")).toBeInTheDocument();
     });
 
     it("should render search inputs (mobile and desktop)", () => {
-      render(<QuestFilters {...defaultProps} />, {
-        wrapper: ({ children }) => (
-          <SessionProvider session={mockSession}>{children}</SessionProvider>
-        ),
-      });
+      renderWithProviders(<QuestFilters {...defaultProps} />);
 
       // Component renders both mobile and desktop layouts
       const searchInputs = screen.getAllByPlaceholderText(/search quests/i);
@@ -72,11 +88,7 @@ describe("QuestFilters Integration Tests", () => {
     it("should update local state immediately when typing", async () => {
       const user = userEvent.setup();
 
-      render(<QuestFilters {...defaultProps} />, {
-        wrapper: ({ children }) => (
-          <SessionProvider session={mockSession}>{children}</SessionProvider>
-        ),
-      });
+      renderWithProviders(<QuestFilters {...defaultProps} />);
 
       const searchInput = screen.getAllByPlaceholderText(
         /search quests/i
@@ -92,13 +104,8 @@ describe("QuestFilters Integration Tests", () => {
     it("should call onFilterChange after typing (debounced)", async () => {
       const onFilterChange = vi.fn();
 
-      render(
-        <QuestFilters {...defaultProps} onFilterChange={onFilterChange} />,
-        {
-          wrapper: ({ children }) => (
-            <SessionProvider session={mockSession}>{children}</SessionProvider>
-          ),
-        }
+      renderWithProviders(
+        <QuestFilters {...defaultProps} onFilterChange={onFilterChange} />
       );
 
       const searchInput = screen.getAllByPlaceholderText(/search quests/i)[0];
@@ -114,11 +121,9 @@ describe("QuestFilters Integration Tests", () => {
 
   describe("Apply Button", () => {
     it("should show Apply button when there are pending changes", () => {
-      render(<QuestFilters {...defaultProps} hasPendingChanges={true} />, {
-        wrapper: ({ children }) => (
-          <SessionProvider session={mockSession}>{children}</SessionProvider>
-        ),
-      });
+      renderWithProviders(
+        <QuestFilters {...defaultProps} hasPendingChanges={true} />
+      );
 
       const applyButtons = screen.getAllByRole("button", { name: /apply/i });
       expect(applyButtons.length).toBeGreaterThan(0);
@@ -128,17 +133,12 @@ describe("QuestFilters Integration Tests", () => {
       const onApplyFilters = vi.fn();
       const user = userEvent.setup();
 
-      render(
+      renderWithProviders(
         <QuestFilters
           {...defaultProps}
           hasPendingChanges={true}
           onApplyFilters={onApplyFilters}
-        />,
-        {
-          wrapper: ({ children }) => (
-            <SessionProvider session={mockSession}>{children}</SessionProvider>
-          ),
-        }
+        />
       );
 
       const applyButton = screen.getAllByRole("button", { name: /apply/i })[0];
@@ -148,11 +148,9 @@ describe("QuestFilters Integration Tests", () => {
     });
 
     it("should disable Apply button when no pending changes", () => {
-      render(<QuestFilters {...defaultProps} hasPendingChanges={false} />, {
-        wrapper: ({ children }) => (
-          <SessionProvider session={mockSession}>{children}</SessionProvider>
-        ),
-      });
+      renderWithProviders(
+        <QuestFilters {...defaultProps} hasPendingChanges={false} />
+      );
 
       const applyButtons = screen.getAllByRole("button", { name: /apply/i });
       // Button exists but should be disabled when no pending changes
@@ -162,33 +160,27 @@ describe("QuestFilters Integration Tests", () => {
 
   describe("Hidden Quests Banner", () => {
     it("should show banner when quests are hidden by level", () => {
-      render(<QuestFilters {...defaultProps} hiddenByLevelCount={5} />, {
-        wrapper: ({ children }) => (
-          <SessionProvider session={mockSession}>{children}</SessionProvider>
-        ),
-      });
+      renderWithProviders(
+        <QuestFilters {...defaultProps} hiddenByLevelCount={5} />
+      );
 
       const banner = screen.getByText(/5 quests hidden/i);
       expect(banner).toBeInTheDocument();
     });
 
     it("should not show banner when no quests are hidden", () => {
-      render(<QuestFilters {...defaultProps} hiddenByLevelCount={0} />, {
-        wrapper: ({ children }) => (
-          <SessionProvider session={mockSession}>{children}</SessionProvider>
-        ),
-      });
+      renderWithProviders(
+        <QuestFilters {...defaultProps} hiddenByLevelCount={0} />
+      );
 
       const banner = screen.queryByText(/quests hidden/i);
       expect(banner).not.toBeInTheDocument();
     });
 
     it("should show Show All button when quests are hidden", () => {
-      render(<QuestFilters {...defaultProps} hiddenByLevelCount={5} />, {
-        wrapper: ({ children }) => (
-          <SessionProvider session={mockSession}>{children}</SessionProvider>
-        ),
-      });
+      renderWithProviders(
+        <QuestFilters {...defaultProps} hiddenByLevelCount={5} />
+      );
 
       const showAllButton = screen.getByRole("button", { name: /show all/i });
       expect(showAllButton).toBeInTheDocument();
@@ -198,17 +190,12 @@ describe("QuestFilters Integration Tests", () => {
       const onFilterChange = vi.fn();
       const user = userEvent.setup();
 
-      render(
+      renderWithProviders(
         <QuestFilters
           {...defaultProps}
           hiddenByLevelCount={5}
           onFilterChange={onFilterChange}
-        />,
-        {
-          wrapper: ({ children }) => (
-            <SessionProvider session={mockSession}>{children}</SessionProvider>
-          ),
-        }
+        />
       );
 
       const showAllButton = screen.getByRole("button", { name: /show all/i });
@@ -222,11 +209,7 @@ describe("QuestFilters Integration Tests", () => {
 
   describe("View Mode Toggle", () => {
     it("should render view mode toggle buttons", () => {
-      render(<QuestFilters {...defaultProps} />, {
-        wrapper: ({ children }) => (
-          <SessionProvider session={mockSession}>{children}</SessionProvider>
-        ),
-      });
+      renderWithProviders(<QuestFilters {...defaultProps} />);
 
       // Tree view button should be present
       const treeButtons = screen.getAllByTitle(
@@ -239,13 +222,8 @@ describe("QuestFilters Integration Tests", () => {
       const onViewModeChange = vi.fn();
       const user = userEvent.setup();
 
-      render(
-        <QuestFilters {...defaultProps} onViewModeChange={onViewModeChange} />,
-        {
-          wrapper: ({ children }) => (
-            <SessionProvider session={mockSession}>{children}</SessionProvider>
-          ),
-        }
+      renderWithProviders(
+        <QuestFilters {...defaultProps} onViewModeChange={onViewModeChange} />
       );
 
       // Click level view button (alternative view mode)
@@ -273,11 +251,9 @@ describe("QuestFilters Integration Tests", () => {
         playerLevel: 20,
       };
 
-      render(<QuestFilters {...defaultProps} filters={filtersWithValues} />, {
-        wrapper: ({ children }) => (
-          <SessionProvider session={mockSession}>{children}</SessionProvider>
-        ),
-      });
+      renderWithProviders(
+        <QuestFilters {...defaultProps} filters={filtersWithValues} />
+      );
 
       // Search input should show current value
       const searchInputs = screen.getAllByPlaceholderText(
@@ -287,22 +263,18 @@ describe("QuestFilters Integration Tests", () => {
     });
 
     it("should handle empty quest list", () => {
-      render(<QuestFilters {...defaultProps} quests={[]} />, {
-        wrapper: ({ children }) => (
-          <SessionProvider session={mockSession}>{children}</SessionProvider>
-        ),
-      });
+      renderWithProviders(
+        <QuestFilters {...defaultProps} quests={[]} />
+      );
 
       // Should render without errors
       expect(screen.getByText("Filters")).toBeInTheDocument();
     });
 
     it("should handle empty trader list", () => {
-      render(<QuestFilters {...defaultProps} traders={[]} />, {
-        wrapper: ({ children }) => (
-          <SessionProvider session={mockSession}>{children}</SessionProvider>
-        ),
-      });
+      renderWithProviders(
+        <QuestFilters {...defaultProps} traders={[]} />
+      );
 
       // Should render without errors
       expect(screen.getByText("Filters")).toBeInTheDocument();

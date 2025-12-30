@@ -87,8 +87,9 @@ describe("QuestNode", () => {
 
       renderWithReactFlow(<QuestNode {...props} />);
 
-      // Compact format: "Lv.X" (no space)
-      expect(screen.getByText(`Lv.${quest.levelRequired}`)).toBeInTheDocument();
+      // Level badge rendered across two elements: "Lv" label + number value
+      expect(screen.getByText("Lv")).toBeInTheDocument();
+      expect(screen.getByText(String(quest.levelRequired))).toBeInTheDocument();
     });
 
     it("should have trader color styling (trader name not shown in compact design)", () => {

@@ -1,12 +1,13 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
+import tsconfigPaths from "vite-tsconfig-paths";
 import path from "path";
 
 // Skip environment validation in tests
 process.env.SKIP_ENV_VALIDATION = "1";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tsconfigPaths()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./apps/web/src"),
@@ -17,12 +18,17 @@ export default defineConfig({
       "@eft-tracker/hooks": path.resolve(__dirname, "./packages/hooks/src"),
       "@upstash/redis": path.resolve(__dirname, "./__tests__/setup/stubs/upstash-redis.ts"),
       "@upstash/ratelimit": path.resolve(__dirname, "./__tests__/setup/stubs/upstash-ratelimit.ts"),
-      // Fix for Vite 7.3.0 + React JSX runtime resolution (pnpm uses .pnpm directory)
-      "react/jsx-dev-runtime": path.resolve(__dirname, "./node_modules/.pnpm/react@19.2.0/node_modules/react/jsx-dev-runtime.js"),
-      "react/jsx-runtime": path.resolve(__dirname, "./node_modules/.pnpm/react@19.2.0/node_modules/react/jsx-runtime.js"),
-      "react": path.resolve(__dirname, "./node_modules/.pnpm/react@19.2.0/node_modules/react"),
-      "react-dom": path.resolve(__dirname, "./node_modules/.pnpm/react-dom@19.2.0_react@19.2.0/node_modules/react-dom"),
+      // Resolve React and dependencies from apps/web/node_modules where pnpm symlinks them
+      "react": path.resolve(__dirname, "./apps/web/node_modules/react"),
+      "react-dom": path.resolve(__dirname, "./apps/web/node_modules/react-dom"),
+      "react/jsx-runtime": path.resolve(__dirname, "./apps/web/node_modules/react/jsx-runtime"),
+      "react/jsx-dev-runtime": path.resolve(__dirname, "./apps/web/node_modules/react/jsx-dev-runtime"),
+      "next-auth": path.resolve(__dirname, "./apps/web/node_modules/next-auth"),
+      "@xyflow/react": path.resolve(__dirname, "./apps/web/node_modules/@xyflow/react"),
+      "bcryptjs": path.resolve(__dirname, "./apps/web/node_modules/bcryptjs"),
+      "@tanstack/react-query": path.resolve(__dirname, "./apps/web/node_modules/@tanstack/react-query"),
     },
+    dedupe: ["react", "react-dom", "next-auth", "@xyflow/react", "@tanstack/react-query"],
   },
   test: {
     globals: true,

@@ -51,5 +51,11 @@
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": "eslint --fix",
     "*.{ts,tsx,js,jsx,json,md,yml,yaml}": "prettier --write"
+  },
+  "pnpm": {
+    "overrides": {
+      "react": "19.2.0",
+      "react-dom": "19.2.0"
+    }
   }
 }

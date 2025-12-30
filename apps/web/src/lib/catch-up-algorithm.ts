@@ -235,10 +235,8 @@ export function calculateCatchUp(
   quests: QuestWithProgress[]
 ): CatchUpCalculation {
   return {
-    targetQuests: [], // TODO: Calculate target quests with their status
-    siblingBranches: getCompletedBranches(targetQuestIds, quests),
-    ancestors: getPrerequisitesForSelection(targetQuestIds, quests),
-    blockedQuests: [], // TODO: Calculate blocked quests
+    prerequisites: getPrerequisitesForSelection(targetQuestIds, quests),
+    completedBranches: getCompletedBranches(targetQuestIds, quests),
   };
 }
 
