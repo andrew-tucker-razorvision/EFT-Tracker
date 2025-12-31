@@ -30,7 +30,8 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
   const {
     quest,
     // nodeHeight - dynamic height is passed but we use fixed dimensions for now
-    // onClick - available for selection, but status change is handled by parent
+    // onClick - available for selection
+    onStatusChange,
     onDetails,
     isRoot,
     isLeaf,
@@ -38,6 +39,7 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
     isInFocusChain,
     hasFocusMode,
     playerLevel,
+    mapFilter,
     isSaving,
     isKeyboardSelected,
   } = data;
@@ -113,11 +115,89 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
     [isLevelAppropriate, isUpcoming]
   );
 
+  // Compute smart progress display based on map filter
+  const progressDisplay = useMemo(() => {
+    if (!quest.objectives || quest.objectives.length === 0) return null;
+
+    // Get relevant objectives based on map filter
+    const objectives = mapFilter
+      ? quest.objectives.filter((obj) => obj.map === mapFilter)
+      : quest.objectives;
+
+    if (objectives.length === 0) return null;
+
+    // Check if this is a single numeric objective quest (like Insomnia)
+    if (
+      quest.objectives.length === 1 &&
+      quest.objectives[0].progress?.[0]?.target
+    ) {
+      const obj = quest.objectives[0];
+      const progress = obj.progress?.[0];
+      if (progress?.target) {
+        return {
+          type: "single" as const,
+          current: progress.current ?? 0,
+          target: progress.target,
+        };
+      }
+    }
+
+    // If map filter is active, show map-specific progress
+    if (mapFilter && objectives.length > 0) {
+      // Sum up current/target for all objectives on this map
+      let totalCurrent = 0;
+      let totalTarget = 0;
+
+      for (const obj of objectives) {
+        const progress = obj.progress?.[0];
+        if (progress?.target) {
+          totalCurrent += progress.current ?? 0;
+          totalTarget += progress.target;
+        } else if (progress) {
+          // Binary objective - count as 0/1 or 1/1
+          totalCurrent += progress.completed ? 1 : 0;
+          totalTarget += 1;
+        }
+      }
+
+      if (totalTarget > 0) {
+        return {
+          type: "map" as const,
+          current: totalCurrent,
+          target: totalTarget,
+          mapName: mapFilter,
+        };
+      }
+    }
+
+    // No map filter - show aggregate objective count
+    let completed = 0;
+    const total = quest.objectives.length;
+
+    for (const obj of quest.objectives) {
+      const progress = obj.progress?.[0];
+      if (progress) {
+        if (progress.target !== null && progress.current !== null) {
+          // Numeric objective - complete if current >= target
+          if (progress.current >= progress.target) completed++;
+        } else if (progress.completed) {
+          completed++;
+        }
+      }
+    }
+
+    return {
+      type: "aggregate" as const,
+      completed,
+      total,
+    };
+  }, [quest.objectives, mapFilter]);
+
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
-    // Right-click to open quest details
-    if (onDetails) {
-      onDetails(quest.id);
+    // Right-click to cycle quest status
+    if (onStatusChange) {
+      onStatusChange(quest.id, quest.computedStatus);
     }
   };
 
@@ -146,12 +226,12 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
     e.stopPropagation(); // Prevent React Flow from intercepting
   };
 
-  // Long-press handler for mobile (alternative to right-click context menu)
+  // Long-press handler for mobile (alternative to right-click - cycles quest status)
   const longPressHandlers = useLongPress({
     threshold: 500,
     onLongPress: () => {
-      if (onDetails && !isDimmed) {
-        onDetails(quest.id);
+      if (onStatusChange && !isDimmed) {
+        onStatusChange(quest.id, quest.computedStatus);
       }
     },
   });
@@ -287,17 +367,54 @@ function QuestNodeComponent({ data, selected }: NodeProps<QuestNodeType>) {
         {/* Level badge and action buttons row */}
         {/* Refactoring UI: Labels tertiary, data primary */}
         <div className="flex items-center justify-between mt-1">
-          <span className="flex items-center gap-0.5">
-            <span
-              className="text-[10px] uppercase tracking-wide"
-              style={{ color: "var(--text-tertiary)" }}
-            >
-              Lv
+          <span className="flex items-center gap-1.5">
+            <span className="flex items-center gap-0.5">
+              <span
+                className="text-[10px] uppercase tracking-wide"
+                style={{ color: "var(--text-tertiary)" }}
+              >
+                Lv
+              </span>
+              <span
+                className="text-[12px] font-semibold"
+                style={levelBadgeStyle}
+              >
+                {quest.levelRequired}
+              </span>
             </span>
-            <span className="text-[12px] font-semibold" style={levelBadgeStyle}>
-              {quest.levelRequired}
-            </span>
-            {/* Objective count badge */}
+            {/* Objective progress badge */}
+            {progressDisplay && !isDimmed && (
+              <span
+                className="text-[10px] px-1 py-0.5 rounded"
+                style={{
+                  backgroundColor: "rgba(0,0,0,0.3)",
+                  color:
+                    progressDisplay.type === "aggregate"
+                      ? progressDisplay.completed === progressDisplay.total
+                        ? STATUS_COLORS.completed.primary
+                        : "var(--text-secondary)"
+                      : progressDisplay.current === progressDisplay.target
+                        ? STATUS_COLORS.completed.primary
+                        : "var(--text-secondary)",
+                }}
+              >
+                {progressDisplay.type === "single" && (
+                  <>
+                    {progressDisplay.current}/{progressDisplay.target}
+                  </>
+                )}
+                {progressDisplay.type === "map" && (
+                  <>
+                    {progressDisplay.current}/{progressDisplay.target}
+                  </>
+                )}
+                {progressDisplay.type === "aggregate" && (
+                  <>
+                    {progressDisplay.completed}/{progressDisplay.total}
+                  </>
+                )}
+              </span>
+            )}
           </span>
           {/* Action buttons - info and wiki link */}
           {/* Touch targets: 24px visible area with padding for easier clicking */}

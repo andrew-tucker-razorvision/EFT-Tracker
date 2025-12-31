@@ -118,24 +118,61 @@ export function QuestTreeClient() {
   const updateStatusRef = useRef(updateStatus);
   const refetchRef = useRef(refetch);
 
-  // Merge progress into quests (memoized to prevent infinite re-renders)
-  const questsWithProgress = useMemo(
-    () =>
-      quests.map((quest) => {
-        if (quest.computedStatus === "locked") {
-          return {
-            ...quest,
-            computedStatus: "locked" as const,
-          };
+  // Helper to check if all objectives for a specific map are complete
+  const areAllMapObjectivesComplete = useCallback(
+    (quest: QuestWithProgress, mapName: string): boolean => {
+      if (!quest.objectives) return false;
+
+      // Get objectives for this specific map
+      const mapObjectives = quest.objectives.filter(
+        (obj) => obj.map === mapName
+      );
+
+      // If no objectives for this map, don't filter out
+      if (mapObjectives.length === 0) return false;
+
+      // Check if ALL objectives for this map are complete
+      return mapObjectives.every((obj) => {
+        const objProgress = obj.progress?.[0];
+        if (!objProgress) return false;
+
+        // For numeric objectives, check current >= target
+        if (objProgress.target !== null && objProgress.current !== null) {
+          return objProgress.current >= objProgress.target;
         }
-        const userStatus = progress.get(quest.id);
+
+        // For binary objectives, check completed flag
+        return objProgress.completed;
+      });
+    },
+    []
+  );
+
+  // Merge progress into quests (memoized to prevent infinite re-renders)
+  const questsWithProgress = useMemo(() => {
+    let result = quests.map((quest) => {
+      if (quest.computedStatus === "locked") {
         return {
           ...quest,
-          computedStatus: userStatus || quest.computedStatus,
+          computedStatus: "locked" as const,
         };
-      }),
-    [quests, progress]
-  );
+      }
+      const userStatus = progress.get(quest.id);
+      return {
+        ...quest,
+        computedStatus: userStatus || quest.computedStatus,
+      };
+    });
+
+    // Apply map filter: hide quests where ALL objectives for the selected map are complete
+    if (filters.map) {
+      result = result.filter(
+        (quest) => !areAllMapObjectivesComplete(quest, filters.map!)
+      );
+    }
+
+    return result;
+  }, [quests, progress, filters.map, areAllMapObjectivesComplete]);
 
   // Merge progress into all quests (for accurate depth calculation)
   const allQuestsWithProgress = useMemo(
@@ -499,6 +536,7 @@ export function QuestTreeClient() {
             traders={traders}
             selectedQuestId={selectedQuestId}
             playerLevel={filters.playerLevel}
+            mapFilter={filters.map}
             maxColumns={null}
             savingQuestIds={savingQuestIds}
             onQuestSelect={handleQuestSelect}

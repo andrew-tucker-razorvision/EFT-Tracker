@@ -78,6 +78,7 @@ interface BuildQuestGraphOptions {
   focusedQuestId?: string | null;
   focusChain?: Set<string>;
   playerLevel?: number | null;
+  mapFilter?: string | null; // Currently selected map filter for smart progress display
   maxColumns?: number | null; // Limit number of columns (depth) shown per trader - null = show all
   savingQuestIds?: Set<string>; // Set of quest IDs currently being saved
   keyboardSelectedId?: string | null; // Currently keyboard-selected quest for navigation
@@ -186,6 +187,7 @@ export function buildQuestGraph(
     focusedQuestId,
     focusChain,
     playerLevel,
+    mapFilter,
     savingQuestIds,
     keyboardSelectedId,
   } = options;
@@ -308,6 +310,7 @@ export function buildQuestGraph(
         isInFocusChain,
         hasFocusMode,
         playerLevel: playerLevel ?? null,
+        mapFilter: mapFilter ?? null,
         isSaving: savingQuestIds?.has(quest.id) ?? false,
         isKeyboardSelected: quest.id === keyboardSelectedId,
         onStatusChange,
@@ -645,6 +648,7 @@ export function layoutTraderLane(
     focusedQuestId,
     focusChain,
     playerLevel,
+    mapFilter,
     savingQuestIds,
     keyboardSelectedId,
   } = options;
@@ -877,6 +881,7 @@ export function layoutTraderLane(
         isInFocusChain,
         hasFocusMode,
         playerLevel: playerLevel ?? null,
+        mapFilter: mapFilter ?? null,
         isSaving: savingQuestIds?.has(quest.id) ?? false,
         isKeyboardSelected: quest.id === keyboardSelectedId,
         onStatusChange,

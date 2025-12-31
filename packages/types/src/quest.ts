@@ -135,6 +135,7 @@ export interface QuestNodeData extends Record<string, unknown> {
   isInFocusChain: boolean; // Part of focused quest's dependency chain
   hasFocusMode: boolean; // Whether any quest is focused (for dimming)
   playerLevel: number | null; // User's current PMC level for highlighting
+  mapFilter: string | null; // Currently selected map filter for smart progress display
   isSaving: boolean; // Whether quest is currently being saved
   isKeyboardSelected?: boolean; // Currently selected via keyboard navigation
   onStatusChange: (questId: string, status: QuestStatus) => void;
