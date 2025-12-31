@@ -203,8 +203,6 @@ export interface CatchUpSelection {
 }
 
 export interface CatchUpCalculation {
-  targetQuests: CatchUpSelection[];
-  siblingBranches: CatchUpSelection[];
-  ancestors: CatchUpSelection[];
-  blockedQuests: CatchUpSelection[];
+  prerequisites: CatchUpSelection[];
+  completedBranches: CatchUpSelection[];
 }
