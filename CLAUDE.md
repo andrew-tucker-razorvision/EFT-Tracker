@@ -854,6 +854,12 @@ Before shipping any Haiku work:
   Closes #102
   ```
   NOT: `Closes #101, #102` (comma-separated won't auto-close)
+- **Epic linking:** Link to the specific sub-issue, NOT the epic itself:
+  ```
+  Closes #404         ← The specific phase/sub-issue
+  Part of #400        ← Reference to the epic (doesn't auto-close)
+  ```
+  This ensures sub-issues close automatically when PRs merge. The epic stays open until all sub-issues are closed.
 
 ## Testing Philosophy
 

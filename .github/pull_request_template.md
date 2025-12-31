@@ -12,7 +12,12 @@
 
 ## Related Issues
 
+<!-- Link to the SPECIFIC issue this PR completes (not the epic) -->
+<!-- Each "Closes #" line auto-closes that issue when PR merges -->
 Closes #
+
+<!-- If this is part of an epic, reference it separately (doesn't auto-close) -->
+<!-- Part of #XXX (epic name) -->
 
 ## Changes Made
 
