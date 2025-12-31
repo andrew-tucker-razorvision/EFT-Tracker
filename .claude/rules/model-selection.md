@@ -1,39 +1,41 @@
-# Model Selection (Cost Optimization)
+# Model Selection (Quality-First Approach)
 
-**Goal:** Reduce Claude API costs by 35% while maintaining code quality.
+**Goal:** Prioritize code quality and correctness. Use Sonnet by default; only use Haiku for truly straightforward tasks.
+
+**Rationale:** Haiku was causing frequent bugs. Sonnet's improved reasoning catches edge cases and produces more reliable code. Cost is secondary to shipping quality.
 
 ## Quick Decision Framework
 
 Before starting any task:
 
 ```
-□ Is it security/auth/database schema? → SONNET
-□ Is it >500 LOC or >3 files? → SONNET
-□ Is error message clear OR scope well-defined? → HAIKU
-□ Otherwise → Default to HAIKU, escalate if needed
+□ Is it simple/mechanical (file ops, git, clear-scope fixes)? → HAIKU
+□ Otherwise → Default to SONNET
 ```
 
-## Use Haiku (Target: 75-80% of tasks)
+## Use Sonnet (Target: 80%+ of tasks) — DEFAULT
 
-- Bug fixes with clear error messages
-- Unit test writing
-- Integration test writing
-- File operations (search, read, edit)
-- Documentation updates
-- Simple features (<300 LOC)
-- Git operations
-- Code review (<500 lines)
-- Single-file refactoring
-
-## Use Sonnet (Target: 20-25% of tasks)
-
+- Bug fixes (all types, even with clear messages)
+- Complex or ambiguous features
 - Security-critical code (auth, rate limiting, validation)
 - Database schema changes
-- Complex features (>500 LOC)
+- Features >300 LOC
 - Architectural decisions
 - E2E test debugging
 - Performance optimization
-- Ambiguous problem analysis
+- Multi-file changes
+- Code requiring careful reasoning
+- Test writing (unit, integration)
+
+## Use Haiku (Target: 20%- of tasks) — EXCEPTIONS ONLY
+
+**Only use Haiku for:**
+
+- File operations (search, read, edit single files)
+- Git operations (commit, branch, push)
+- Running specific tests/validation commands
+- Simple documentation updates
+- Mechanical refactoring (rename, extract, move)
 
 ## Quality Gates
 
