@@ -47,6 +47,7 @@ interface QuestTreeProps {
   traders: Trader[];
   selectedQuestId?: string | null;
   playerLevel?: number | null;
+  mapFilter?: string | null; // Currently selected map filter for smart progress display
   maxColumns?: number | null; // Limit number of columns (depth) shown per trader
   savingQuestIds?: Set<string>; // Set of quest IDs currently being saved
   onQuestSelect: (questId: string) => void;
@@ -60,6 +61,7 @@ function QuestTreeInner({
   traders,
   selectedQuestId,
   playerLevel,
+  mapFilter,
   maxColumns,
   savingQuestIds,
   onQuestSelect,
@@ -110,6 +112,7 @@ function QuestTreeInner({
       focusedQuestId,
       focusChain,
       playerLevel,
+      mapFilter,
       maxColumns,
       savingQuestIds,
       keyboardSelectedId,
@@ -124,6 +127,7 @@ function QuestTreeInner({
     traders,
     selectedQuestId,
     playerLevel,
+    mapFilter,
     maxColumns,
     savingQuestIds,
     focusedQuestId,
@@ -268,19 +272,19 @@ function QuestTreeInner({
       const data = selectedNode?.data as QuestNodeData | undefined;
       if (!data?.quest) return;
 
-      // Enter: Toggle quest status
+      // Enter: Open quest details modal
       if (e.key === "Enter") {
-        e.preventDefault();
-        onStatusChange(data.quest.id, data.quest.computedStatus);
-        return;
-      }
-
-      // Space: Open quest details
-      if (e.key === " ") {
         e.preventDefault();
         if (onQuestDetails) {
           onQuestDetails(data.quest.id);
         }
+        return;
+      }
+
+      // Space: Toggle quest status
+      if (e.key === " ") {
+        e.preventDefault();
+        onStatusChange(data.quest.id, data.quest.computedStatus);
         return;
       }
 
@@ -413,18 +417,17 @@ function QuestTreeInner({
     }
   }, [focusedQuestId]);
 
-  // Handle node click for status change
+  // Handle node click for opening quest details modal
   const handleNodeClick = useCallback(
     (_event: React.MouseEvent, node: { data?: unknown }) => {
       // Only handle quest nodes, not trader nodes
       const data = node.data as QuestNodeData | undefined;
-      if (data?.quest) {
-        const quest = data.quest;
-        // Call status change handler
-        onStatusChange(quest.id, quest.computedStatus);
+      if (data?.quest && onQuestDetails) {
+        // Left-click opens quest details modal
+        onQuestDetails(data.quest.id);
       }
     },
-    [onStatusChange]
+    [onQuestDetails]
   );
 
   // Handle node double-click for focus mode
