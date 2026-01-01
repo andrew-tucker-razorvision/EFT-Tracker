@@ -1,5 +1,18 @@
 {
-  // Disable Edge Tools inline styles warning
-  // React often requires inline styles for dynamic values (progress bars, animations, etc.)
-  "edge-devtools.style.no-inline-styles": "off"
+  // ============================================
+  // Edge Tools / Webhint Settings
+  // ============================================
+  // Disable inline styles warning - React/Tailwind often requires inline styles for dynamic values
+  "webhint.enableTelemetry": "off",
+
+  // ============================================
+  // GitHub Actions Extension Settings
+  // ============================================
+  // Disable remote action validation (causes false "Unable to resolve action" errors)
+  "github-actions.workflows.pinned.refresh.enabled": false,
+
+  // ============================================
+  // TypeScript/JavaScript
+  // ============================================
+  "typescript.preferences.importModuleSpecifier": "relative"
 }
