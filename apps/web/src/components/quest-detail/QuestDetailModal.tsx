@@ -331,20 +331,17 @@ function QuestDetailContent({
                     );
                     const isSavingThis = savingObjectives.has(obj.id);
                     const objProgress = obj.progress?.[0];
+                    // Check progress.target first (for users with existing progress),
+                    // fall back to obj.count (for new/incomplete objectives)
+                    const target = objProgress?.target ?? obj.count ?? null;
                     const isNumeric =
-                      objProgress?.target !== null &&
-                      objProgress?.target !== undefined &&
-                      objProgress.target > 0;
+                      target !== null && target !== undefined && target > 0;
                     const currentProgress = isNumeric
                       ? getNumericProgress(obj, numericObjectiveStates)
                       : 0;
 
                     // For numeric objectives, render counter instead of checkbox
-                    if (
-                      isNumeric &&
-                      objProgress &&
-                      objProgress.target !== null
-                    ) {
+                    if (isNumeric && target !== null) {
                       return (
                         <li
                           key={obj.id}
@@ -363,20 +360,19 @@ function QuestDetailContent({
                           {/* Counter */}
                           <ObjectiveCounter
                             current={currentProgress}
-                            target={objProgress.target}
+                            target={target}
                             disabled={!canToggleObjectives}
                             isLoading={isSavingThis}
                             onIncrement={() => {
                               if (
                                 !canToggleObjectives ||
                                 isSavingThis ||
-                                !objProgress ||
-                                objProgress.target === null
+                                target === null
                               )
                                 return;
                               const newValue = Math.min(
                                 currentProgress + 1,
-                                objProgress.target
+                                target
                               );
                               onLocalNumericUpdate(obj.id, newValue);
                               onObjectiveToggle?.(obj.id, {
@@ -395,12 +391,12 @@ function QuestDetailContent({
                               if (
                                 !canToggleObjectives ||
                                 isSavingThis ||
-                                objProgress?.target === null
+                                target === null
                               )
                                 return;
-                              onLocalNumericUpdate(obj.id, objProgress.target);
+                              onLocalNumericUpdate(obj.id, target);
                               onObjectiveToggle?.(obj.id, {
-                                current: objProgress.target,
+                                current: target,
                               });
                             }}
                           />

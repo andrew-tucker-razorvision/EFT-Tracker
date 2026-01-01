@@ -32,6 +32,7 @@ export interface Objective {
   description: string;
   map: string | null;
   questId: string;
+  count?: number | null; // Target count for numeric objectives (e.g., 5 PMC kills)
   progress?: ObjectiveProgress[]; // User's progress on this objective
 }
 
