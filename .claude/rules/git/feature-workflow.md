@@ -62,6 +62,41 @@ git checkout previous-branch
 git stash pop
 ```
 
+## Parallel Work with Git Worktrees
+
+**When working on multiple features simultaneously**, use worktrees instead of stashing:
+
+```bash
+# Create a worktree for a second feature (from master)
+git worktree add ../EFT-Tracker-feature-name feature/feature-name
+
+# Or create worktree with new branch in one command
+git worktree add -b fix/bug-name ../EFT-Tracker-bug-name master
+
+# List active worktrees
+git worktree list
+
+# Remove worktree when done (after merging PR)
+git worktree remove ../EFT-Tracker-feature-name
+```
+
+**Workflow:**
+
+1. Keep main repo on your primary feature branch
+2. Create worktree for secondary work: `git worktree add ../EFT-Tracker-<name> <branch>`
+3. Open each folder in its own VS Code window
+4. Work independently - no stashing, no conflicts
+5. After PR merges, clean up: `git worktree remove ../EFT-Tracker-<name>`
+
+**Naming convention:** `../EFT-Tracker-<short-description>` keeps worktrees adjacent to main repo.
+
+**Why worktrees over stashing:**
+
+- No risk of applying stash to wrong branch
+- Both features visible simultaneously
+- Independent Claude Code sessions per worktree
+- Clean separation of concerns
+
 ## Edge Cases
 
 **Already on a feature branch with unrelated uncommitted work:**
