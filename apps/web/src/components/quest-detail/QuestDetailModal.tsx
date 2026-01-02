@@ -711,13 +711,13 @@ export function QuestDetailModal({
   );
 
   // Handle local numeric update with optimistic update
+  // Note: Don't show spinner here - number updates instantly, spinner shows only when API call fires
   const handleLocalNumericUpdate = useCallback(
     (objectiveId: string, current: number) => {
       setNumericObjectiveStates((prev) => ({
         ...prev,
         [objectiveId]: current,
       }));
-      setSavingObjectives((prev) => new Set(prev).add(objectiveId));
     },
     []
   );
@@ -726,6 +726,9 @@ export function QuestDetailModal({
   const handleObjectiveToggle = useCallback(
     async (objectiveId: string, update: ObjectiveUpdate) => {
       if (!onObjectiveToggle) return { questStatusChanged: false };
+
+      // Show spinner when API call actually starts (after debounce for numeric objectives)
+      setSavingObjectives((prev) => new Set(prev).add(objectiveId));
 
       try {
         const result = await onObjectiveToggle(objectiveId, update);
