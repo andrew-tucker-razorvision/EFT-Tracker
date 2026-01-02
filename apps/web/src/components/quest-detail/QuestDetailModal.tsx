@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useDebouncedCallback } from "use-debounce";
 import {
   ExternalLink,
   MapPin,
@@ -146,6 +147,15 @@ function QuestDetailContent({
   savingObjectives,
 }: QuestDetailContentProps) {
   const statusColor = STATUS_COLORS[quest.computedStatus];
+
+  // Debounce numeric objective updates to prevent rate limiting
+  // Rapid +/- clicks will only trigger one API call after 500ms of no activity
+  const debouncedNumericUpdate = useDebouncedCallback(
+    (objectiveId: string, current: number) => {
+      onObjectiveToggle?.(objectiveId, { current });
+    },
+    500
+  );
   const isLocked = quest.computedStatus === "locked";
   const canToggleObjectives = !isLocked && !!onObjectiveToggle;
 
@@ -375,17 +385,13 @@ function QuestDetailContent({
                                 target
                               );
                               onLocalNumericUpdate(obj.id, newValue);
-                              onObjectiveToggle?.(obj.id, {
-                                current: newValue,
-                              });
+                              debouncedNumericUpdate(obj.id, newValue);
                             }}
                             onDecrement={() => {
                               if (!canToggleObjectives || isSavingThis) return;
                               const newValue = Math.max(currentProgress - 1, 0);
                               onLocalNumericUpdate(obj.id, newValue);
-                              onObjectiveToggle?.(obj.id, {
-                                current: newValue,
-                              });
+                              debouncedNumericUpdate(obj.id, newValue);
                             }}
                             onComplete={() => {
                               if (
@@ -395,9 +401,7 @@ function QuestDetailContent({
                               )
                                 return;
                               onLocalNumericUpdate(obj.id, target);
-                              onObjectiveToggle?.(obj.id, {
-                                current: target,
-                              });
+                              debouncedNumericUpdate(obj.id, target);
                             }}
                           />
                         </li>
