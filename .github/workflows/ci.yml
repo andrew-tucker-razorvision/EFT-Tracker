@@ -15,6 +15,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Required permissions for dorny/paths-filter to access PR files
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   # Job 1: Lint and Format Check
   lint:
@@ -375,6 +380,9 @@ jobs:
           if [ "${{ needs.build-companion.result }}" == "failure" ]; then
             echo "Companion build failed"
             exit 1
+          elif [ "${{ needs.changes.result }}" == "failure" ]; then
+            echo "Changes detection failed"
+            exit 1
           elif [ "${{ needs.lint.result }}" == "failure" ] || \
                [ "${{ needs.test.result }}" == "failure" ] || \
                [ "${{ needs.build.result }}" == "failure" ]; then
@@ -386,6 +394,6 @@ jobs:
             echo "One or more required jobs were cancelled"
             exit 1
           else
-            echo "All required jobs succeeded (companion: ${{ needs.build-companion.result }})"
+            echo "All required jobs succeeded (companion: ${{ needs.build-companion.result }}, changes: ${{ needs.changes.result }})"
             exit 0
           fi
