@@ -8,24 +8,41 @@ import type {
   QuestStatus,
 } from "@/types";
 
-// Simple request deduplication - tracks in-flight requests
-const inflightRequests = new Map<string, Promise<Response>>();
+// Simple request deduplication - caches response data (not Response objects)
+// This avoids the "body stream already read" error when multiple callers share a response
+const inflightRequests = new Map<
+  string,
+  Promise<{ ok: boolean; status: number; data: unknown }>
+>();
 
 async function fetchWithDedup(url: string): Promise<Response> {
   // Check if there's already an in-flight request for this URL
   const existing = inflightRequests.get(url);
   if (existing) {
-    return existing;
+    // Return a synthetic Response from cached data
+    const cached = await existing;
+    return new Response(JSON.stringify(cached.data), {
+      status: cached.status,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
-  // Create new request
-  const request = fetch(url);
+  // Create new request and cache the parsed result (not the Response)
+  const request = (async () => {
+    const response = await fetch(url);
+    const data = await response.json();
+    return { ok: response.ok, status: response.status, data };
+  })();
+
   inflightRequests.set(url, request);
 
   try {
-    const response = await request;
-    // Return a clone so the original can still be consumed
-    return response.clone();
+    const result = await request;
+    // Return a fresh Response object that can be consumed
+    return new Response(JSON.stringify(result.data), {
+      status: result.status,
+      headers: { "Content-Type": "application/json" },
+    });
   } finally {
     // Clean up after request completes (success or failure)
     inflightRequests.delete(url);

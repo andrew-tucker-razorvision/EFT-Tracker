@@ -39,6 +39,7 @@ interface QuestFiltersProps {
   onFilterChange: (filters: Partial<Filters>) => void;
   onApplyFilters: () => void;
   hasPendingChanges: boolean;
+  prefsLoaded?: boolean; // Indicates user prefs have loaded (prevents saving on initial load)
 }
 
 export function QuestFilters({
@@ -47,6 +48,7 @@ export function QuestFilters({
   filters,
   onFilterChange,
   onApplyFilters,
+  prefsLoaded = false,
 }: QuestFiltersProps) {
   const updatePrefsMutation = useUpdateUserPrefs();
   const [searchValue, setSearchValue] = useState(filters.search);
@@ -59,8 +61,21 @@ export function QuestFilters({
     onApplyFiltersRef.current = onApplyFilters;
   });
 
+  // Track if initial prefs have been applied (to prevent overwriting saved prefs on load)
+  const prefsApplied = useRef(false);
+
   // Auto-save player level when it changes (debounced)
+  // Skip on initial load to avoid overwriting saved prefs before they load
   useEffect(() => {
+    // Don't save until prefs have loaded
+    if (!prefsLoaded) return;
+
+    // Skip the first change after prefs load (that's the load itself, not user action)
+    if (!prefsApplied.current) {
+      prefsApplied.current = true;
+      return;
+    }
+
     const timer = setTimeout(() => {
       if (filters.playerLevel !== undefined && filters.playerLevel !== null) {
         updatePrefsMutation.mutate({ playerLevel: filters.playerLevel });
@@ -68,7 +83,7 @@ export function QuestFilters({
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [filters.playerLevel]); // mutation.mutate() is stable and doesn't need to be in deps
+  }, [filters.playerLevel, prefsLoaded]); // mutation.mutate() is stable and doesn't need to be in deps
 
   // Debounce search input and auto-apply
   useEffect(() => {

@@ -475,6 +475,7 @@ export function MapsClient() {
         filters={filters}
         onFilterChange={setFilters}
         onApplyFilters={applyFilters}
+        prefsLoaded={!prefsLoading}
       />
       <div className="flex-1 min-h-0">
         {questsWithProgress.length > 0 ? (

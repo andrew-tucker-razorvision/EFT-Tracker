@@ -527,6 +527,7 @@ export function QuestTreeClient() {
         onFilterChange={setFilters}
         onApplyFilters={applyFilters}
         hasPendingChanges={hasPendingChanges}
+        prefsLoaded={!prefsLoading}
       />
       <div className="flex-1 min-h-0">
         {questsWithProgress.length > 0 ? (

@@ -25,6 +25,7 @@ interface MapFiltersProps {
   filters: Filters;
   onFilterChange: (filters: Partial<Filters>) => void;
   onApplyFilters: () => void;
+  prefsLoaded?: boolean; // Indicates user prefs have loaded (prevents saving on initial load)
 }
 
 export function MapFilters({
@@ -33,6 +34,7 @@ export function MapFilters({
   filters,
   onFilterChange,
   onApplyFilters,
+  prefsLoaded = false,
 }: MapFiltersProps) {
   const updatePrefsMutation = useUpdateUserPrefs();
 
@@ -42,8 +44,21 @@ export function MapFilters({
     onApplyFiltersRef.current = onApplyFilters;
   });
 
+  // Track if initial prefs have been applied (to prevent overwriting saved prefs on load)
+  const prefsApplied = useRef(false);
+
   // Auto-save player level when it changes (debounced)
+  // Skip on initial load to avoid overwriting saved prefs before they load
   useEffect(() => {
+    // Don't save until prefs have loaded
+    if (!prefsLoaded) return;
+
+    // Skip the first change after prefs load (that's the load itself, not user action)
+    if (!prefsApplied.current) {
+      prefsApplied.current = true;
+      return;
+    }
+
     const timer = setTimeout(() => {
       if (filters.playerLevel !== undefined && filters.playerLevel !== null) {
         updatePrefsMutation.mutate({ playerLevel: filters.playerLevel });
@@ -51,7 +66,7 @@ export function MapFilters({
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [filters.playerLevel]); // mutation.mutate() is stable and doesn't need to be in deps
+  }, [filters.playerLevel, prefsLoaded]); // mutation.mutate() is stable and doesn't need to be in deps
 
   // Auto-apply filter change
   const handleFilterChange = useCallback(
