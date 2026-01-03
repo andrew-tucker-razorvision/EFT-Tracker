@@ -30,9 +30,11 @@ export function ObjectiveCounter({
   isLoading = false,
 }: ObjectiveCounterProps) {
   const isComplete = current >= target;
-  const canDecrement = current > 0 && !disabled && !isLoading;
-  const canIncrement = current < target && !disabled && !isLoading;
-  const showCompleteButton = current < target && !disabled && !isLoading;
+  // Note: We don't check isLoading here because optimistic updates already
+  // show the correct state. Checking isLoading causes UI flickering.
+  const canDecrement = current > 0 && !disabled;
+  const canIncrement = current < target && !disabled;
+  const showCompleteButton = current < target && !disabled;
 
   return (
     <div
@@ -121,7 +123,7 @@ export function ObjectiveCounter({
       )}
 
       {/* Completed indicator */}
-      {isComplete && !isLoading && (
+      {isComplete && (
         <Check className="w-4 h-4 text-primary ml-1" aria-label="Completed" />
       )}
     </div>
