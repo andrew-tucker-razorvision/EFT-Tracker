@@ -1,6 +1,6 @@
 "use client";
 
-import { Minus, Plus, Check, Loader2 } from "lucide-react";
+import { Minus, Plus, Check } from "lucide-react";
 
 interface ObjectiveCounterProps {
   current: number;
@@ -76,11 +76,7 @@ export function ObjectiveCounter({
         aria-valuemax={target}
         aria-label={`Progress: ${current} of ${target}`}
       >
-        {isLoading ? (
-          <Loader2 className="w-4 h-4 animate-spin mx-auto" />
-        ) : (
-          `${current}/${target}`
-        )}
+        {`${current}/${target}`}
       </div>
 
       {/* Increment button */}
