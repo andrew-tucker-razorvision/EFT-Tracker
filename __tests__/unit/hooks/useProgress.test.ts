@@ -4,6 +4,8 @@ import { useProgress } from "@/hooks/useProgress";
 import { server } from "../../setup/msw-server";
 import { http, HttpResponse } from "msw";
 import { useSession } from "next-auth/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createElement, type ReactNode } from "react";
 
 // Mock next-auth
 vi.mock("next-auth/react", () => ({
@@ -12,10 +14,20 @@ vi.mock("next-auth/react", () => ({
 
 const mockUseSession = vi.mocked(useSession);
 
-// NOTE: All tests in this file are skipped due to React context initialization issues
-// in the vitest+jsdom environment with renderHook(). These tests don't affect production
-// but block CI with false failures. See issue #438 for reimplementation plan.
-describe.skip("useProgress", () => {
+// Create wrapper with providers for renderHook (using createElement to avoid JSX in .ts file)
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+  });
+
+  return function Wrapper({ children }: { children: ReactNode }) {
+    return createElement(QueryClientProvider, { client: queryClient }, children);
+  };
+};
+
+describe("useProgress", () => {
   beforeEach(() => {
     server.resetHandlers();
     vi.clearAllMocks();
@@ -31,7 +43,7 @@ describe.skip("useProgress", () => {
     });
 
     it("should return empty progress when not authenticated", async () => {
-      const { result } = renderHook(() => useProgress());
+      const { result } = renderHook(() => useProgress(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -49,7 +61,7 @@ describe.skip("useProgress", () => {
         })
       );
 
-      const { result } = renderHook(() => useProgress());
+      const { result } = renderHook(() => useProgress(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -60,7 +72,7 @@ describe.skip("useProgress", () => {
     });
 
     it("should set error when trying to update without auth", async () => {
-      const { result } = renderHook(() => useProgress());
+      const { result } = renderHook(() => useProgress(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -108,7 +120,7 @@ describe.skip("useProgress", () => {
         })
       );
 
-      const { result } = renderHook(() => useProgress());
+      const { result } = renderHook(() => useProgress(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -116,7 +128,7 @@ describe.skip("useProgress", () => {
 
       expect(result.current.progress.size).toBe(2);
       expect(result.current.progress.get("quest_1")).toBe("completed");
-      expect(result.current.progress.get("quest_2")).toBe("available");
+      expect(result.current.progress.get("quest_2")).toBe("in_progress");
     });
 
     it("should handle fetch errors", async () => {
@@ -126,7 +138,7 @@ describe.skip("useProgress", () => {
         })
       );
 
-      const { result } = renderHook(() => useProgress());
+      const { result } = renderHook(() => useProgress(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -142,7 +154,7 @@ describe.skip("useProgress", () => {
         })
       );
 
-      const { result } = renderHook(() => useProgress());
+      const { result } = renderHook(() => useProgress(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -177,7 +189,7 @@ describe.skip("useProgress", () => {
         })
       );
 
-      const { result } = renderHook(() => useProgress());
+      const { result } = renderHook(() => useProgress(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -210,7 +222,7 @@ describe.skip("useProgress", () => {
         })
       );
 
-      const { result } = renderHook(() => useProgress());
+      const { result } = renderHook(() => useProgress(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -242,7 +254,7 @@ describe.skip("useProgress", () => {
         })
       );
 
-      const { result } = renderHook(() => useProgress());
+      const { result } = renderHook(() => useProgress(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -286,7 +298,7 @@ describe.skip("useProgress", () => {
         })
       );
 
-      const { result } = renderHook(() => useProgress());
+      const { result } = renderHook(() => useProgress(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -302,7 +314,7 @@ describe.skip("useProgress", () => {
         })
       );
 
-      const { result } = renderHook(() => useProgress());
+      const { result } = renderHook(() => useProgress(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -337,7 +349,7 @@ describe.skip("useProgress", () => {
         })
       );
 
-      const { result } = renderHook(() => useProgress());
+      const { result } = renderHook(() => useProgress(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);

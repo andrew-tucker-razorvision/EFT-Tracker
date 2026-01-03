@@ -5,6 +5,21 @@ import { server } from "../../setup/msw-server";
 import { http, HttpResponse } from "msw";
 import { mockQuestsWithProgress } from "../../fixtures/quests";
 import { mockTraders } from "../../fixtures/traders";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createElement, type ReactNode } from "react";
+
+// Create wrapper with providers for renderHook (using createElement to avoid JSX in .ts file)
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+  });
+
+  return function Wrapper({ children }: { children: ReactNode }) {
+    return createElement(QueryClientProvider, { client: queryClient }, children);
+  };
+};
 
 // Helper to set up default handlers
 const setupDefaultHandlers = () => {
@@ -21,23 +36,20 @@ const setupDefaultHandlers = () => {
   );
 };
 
-// NOTE: All tests in this file are skipped due to React context initialization issues
-// in the vitest+jsdom environment with renderHook(). These tests don't affect production
-// but block CI with false failures. See issue #438 for reimplementation plan.
-describe.skip("useQuests", () => {
+describe("useQuests", () => {
   describe("initial state", () => {
     it("should start with loading true", () => {
-      const { result } = renderHook(() => useQuests());
+      const { result } = renderHook(() => useQuests(), { wrapper: createWrapper() });
       expect(result.current.loading).toBe(true);
     });
 
     it("should have empty quests initially", () => {
-      const { result } = renderHook(() => useQuests());
+      const { result } = renderHook(() => useQuests(), { wrapper: createWrapper() });
       expect(result.current.quests).toEqual([]);
     });
 
     it("should have default filters", () => {
-      const { result } = renderHook(() => useQuests());
+      const { result } = renderHook(() => useQuests(), { wrapper: createWrapper() });
       expect(result.current.filters).toEqual({
         traderId: null,
         statuses: ["available", "locked"], // Default to showing available and locked quests
@@ -57,7 +69,7 @@ describe.skip("useQuests", () => {
     it("should fetch quests and traders on mount", async () => {
       setupDefaultHandlers();
 
-      const { result } = renderHook(() => useQuests());
+      const { result } = renderHook(() => useQuests(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
@@ -77,7 +89,7 @@ describe.skip("useQuests", () => {
         })
       );
 
-      const { result } = renderHook(() => useQuests());
+      const { result } = renderHook(() => useQuests(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
@@ -91,7 +103,7 @@ describe.skip("useQuests", () => {
   describe("filtering", () => {
     it("should update filters with setFilters", async () => {
       setupDefaultHandlers();
-      const { result } = renderHook(() => useQuests());
+      const { result } = renderHook(() => useQuests(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
@@ -106,7 +118,7 @@ describe.skip("useQuests", () => {
 
     it("should merge partial filter updates", async () => {
       setupDefaultHandlers();
-      const { result } = renderHook(() => useQuests());
+      const { result } = renderHook(() => useQuests(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
@@ -122,7 +134,7 @@ describe.skip("useQuests", () => {
 
     it("should filter by status client-side", async () => {
       setupDefaultHandlers();
-      const { result } = renderHook(() => useQuests());
+      const { result } = renderHook(() => useQuests(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
@@ -161,7 +173,7 @@ describe.skip("useQuests", () => {
         })
       );
 
-      const { result } = renderHook(() => useQuests());
+      const { result } = renderHook(() => useQuests(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
@@ -178,16 +190,13 @@ describe.skip("useQuests", () => {
   });
 });
 
-// NOTE: All tests in this file are skipped due to React context initialization issues
-// in the vitest+jsdom environment with renderHook(). These tests don't affect production
-// but block CI with false failures. See issue #438 for reimplementation plan.
-describe.skip("useQuestProgress", () => {
+describe("useQuestProgress", () => {
   beforeEach(() => {
     server.resetHandlers();
   });
 
   it("should start with updating false", () => {
-    const { result } = renderHook(() => useQuestProgress());
+    const { result } = renderHook(() => useQuestProgress(), { wrapper: createWrapper() });
     expect(result.current.updating).toBe(false);
   });
 
@@ -198,7 +207,7 @@ describe.skip("useQuestProgress", () => {
       })
     );
 
-    const { result } = renderHook(() => useQuestProgress());
+    const { result } = renderHook(() => useQuestProgress(), { wrapper: createWrapper() });
 
     let success: boolean = false;
     await act(async () => {
@@ -216,7 +225,7 @@ describe.skip("useQuestProgress", () => {
       })
     );
 
-    const { result } = renderHook(() => useQuestProgress());
+    const { result } = renderHook(() => useQuestProgress(), { wrapper: createWrapper() });
 
     let success: boolean = true;
     await act(async () => {
@@ -240,7 +249,7 @@ describe.skip("useQuestProgress", () => {
       })
     );
 
-    const { result } = renderHook(() => useQuestProgress());
+    const { result } = renderHook(() => useQuestProgress(), { wrapper: createWrapper() });
 
     let updatePromise: Promise<boolean>;
     act(() => {
