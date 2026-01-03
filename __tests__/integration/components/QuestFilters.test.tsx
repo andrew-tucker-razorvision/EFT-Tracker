@@ -16,10 +16,7 @@ import { mockTraders } from "../../fixtures/traders";
 import { QuestFilters } from "@/components/quest-tree/QuestFilters";
 import type { QuestFilters as Filters } from "@/types";
 
-// NOTE: Tests skipped due to React context initialization issues in vitest+jsdom
-// when rendering components with hooks. These tests don't affect production but
-// block CI with false failures. See issue #438 for reimplementation plan.
-describe.skip("QuestFilters Integration Tests", () => {
+describe("QuestFilters Integration Tests", () => {
   // Mock session for SessionProvider
   const mockSession = {
     user: { id: "test-user", name: "Test User", email: "test@example.com" },
@@ -122,129 +119,12 @@ describe.skip("QuestFilters Integration Tests", () => {
     });
   });
 
-  describe("Apply Button", () => {
-    it("should show Apply button when there are pending changes", () => {
-      renderWithProviders(
-        <QuestFilters {...defaultProps} hasPendingChanges={true} />
-      );
-
-      const applyButtons = screen.getAllByRole("button", { name: /apply/i });
-      expect(applyButtons.length).toBeGreaterThan(0);
-    });
-
-    it("should call onApplyFilters when Apply button is clicked", async () => {
-      const onApplyFilters = vi.fn();
-      const user = userEvent.setup();
-
-      renderWithProviders(
-        <QuestFilters
-          {...defaultProps}
-          hasPendingChanges={true}
-          onApplyFilters={onApplyFilters}
-        />
-      );
-
-      const applyButton = screen.getAllByRole("button", { name: /apply/i })[0];
-      await user.click(applyButton);
-
-      expect(onApplyFilters).toHaveBeenCalled();
-    });
-
-    it("should disable Apply button when no pending changes", () => {
-      renderWithProviders(
-        <QuestFilters {...defaultProps} hasPendingChanges={false} />
-      );
-
-      const applyButtons = screen.getAllByRole("button", { name: /apply/i });
-      // Button exists but should be disabled when no pending changes
-      expect(applyButtons[0]).toBeDisabled();
-    });
-  });
-
-  describe("Hidden Quests Banner", () => {
-    it("should show banner when quests are hidden by level", () => {
-      renderWithProviders(
-        <QuestFilters {...defaultProps} hiddenByLevelCount={5} />
-      );
-
-      const banner = screen.getByText(/5 quests hidden/i);
-      expect(banner).toBeInTheDocument();
-    });
-
-    it("should not show banner when no quests are hidden", () => {
-      renderWithProviders(
-        <QuestFilters {...defaultProps} hiddenByLevelCount={0} />
-      );
-
-      const banner = screen.queryByText(/quests hidden/i);
-      expect(banner).not.toBeInTheDocument();
-    });
-
-    it("should show Show All button when quests are hidden", () => {
-      renderWithProviders(
-        <QuestFilters {...defaultProps} hiddenByLevelCount={5} />
-      );
-
-      const showAllButton = screen.getByRole("button", { name: /show all/i });
-      expect(showAllButton).toBeInTheDocument();
-    });
-
-    it("should call onFilterChange when Show All is clicked", async () => {
-      const onFilterChange = vi.fn();
-      const user = userEvent.setup();
-
-      renderWithProviders(
-        <QuestFilters
-          {...defaultProps}
-          hiddenByLevelCount={5}
-          onFilterChange={onFilterChange}
-        />
-      );
-
-      const showAllButton = screen.getByRole("button", { name: /show all/i });
-      await user.click(showAllButton);
-
-      expect(onFilterChange).toHaveBeenCalledWith({
-        bypassLevelRequirement: true,
-      });
-    });
-  });
-
-  describe("View Mode Toggle", () => {
-    it("should render view mode toggle buttons", () => {
-      renderWithProviders(<QuestFilters {...defaultProps} />);
-
-      // Tree view button should be present
-      const treeButtons = screen.getAllByTitle(
-        /view quests organized by trader/i
-      );
-      expect(treeButtons.length).toBeGreaterThan(0);
-    });
-
-    it("should call onViewModeChange when clicking a view mode button", async () => {
-      const onViewModeChange = vi.fn();
-      const user = userEvent.setup();
-
-      renderWithProviders(
-        <QuestFilters {...defaultProps} onViewModeChange={onViewModeChange} />
-      );
-
-      // Click level view button (alternative view mode)
-      const levelButtons = screen.queryAllByTitle(
-        /view quests organized by level/i
-      );
-      if (levelButtons.length > 0) {
-        await user.click(levelButtons[0]);
-        // Should call onViewModeChange with any valid mode
-        expect(onViewModeChange).toHaveBeenCalled();
-        const callArg = onViewModeChange.mock.calls[0][0];
-        expect(["tree", "list", "level", "level-timeline"]).toContain(callArg);
-      } else {
-        // If no level button, just verify the callback is defined
-        expect(onViewModeChange).toBeDefined();
-      }
-    });
-  });
+  // NOTE: Tests for Apply Button, Hidden Quests Banner, and View Mode Toggle
+  // were removed because the component was refactored to:
+  // - Auto-apply filters (no manual Apply button)
+  // - Remove hiddenByLevelCount prop
+  // - Remove onViewModeChange prop (view mode is handled at page level)
+  // See GitHub issue #439 for context.
 
   describe("Filter Props", () => {
     it("should display current filter values in UI", () => {
