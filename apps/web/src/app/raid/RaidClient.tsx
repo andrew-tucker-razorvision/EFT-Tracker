@@ -125,7 +125,6 @@ export function RaidClient() {
 
     const hasSeenWelcome = localStorage.getItem("eft-tracker-onboarding");
     if (!hasSeenWelcome) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowWelcome(true);
     }
   }, [loading]);

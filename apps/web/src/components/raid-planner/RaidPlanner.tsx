@@ -58,6 +58,7 @@ export function RaidPlanner({ quests, onQuestDetails }: RaidPlannerProps) {
   // Sync state when URL param changes (e.g., browser back/forward)
   useEffect(() => {
     if (mapParam && MAPS.includes(mapParam) && mapParam !== selectedMap) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Syncing URL state to component state is intentional
       setSelectedMap(mapParam);
     }
   }, [mapParam, selectedMap]);
