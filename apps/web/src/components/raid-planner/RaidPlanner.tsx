@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { MapPin, Circle, Info, Lightbulb } from "lucide-react";
 import {
   Select,
@@ -47,7 +48,19 @@ interface QuestObjective {
 }
 
 export function RaidPlanner({ quests, onQuestDetails }: RaidPlannerProps) {
-  const [selectedMap, setSelectedMap] = useState<string>(MAPS[1]); // Default to Customs
+  const searchParams = useSearchParams();
+  const mapParam = searchParams.get("map");
+
+  // Initialize from URL param if valid, otherwise default to Customs
+  const initialMap = mapParam && MAPS.includes(mapParam) ? mapParam : MAPS[1];
+  const [selectedMap, setSelectedMap] = useState<string>(initialMap);
+
+  // Sync state when URL param changes (e.g., browser back/forward)
+  useEffect(() => {
+    if (mapParam && MAPS.includes(mapParam) && mapParam !== selectedMap) {
+      setSelectedMap(mapParam);
+    }
+  }, [mapParam, selectedMap]);
 
   // Get available quests for the selected map with their objectives
   const raidObjectives = useMemo(() => {

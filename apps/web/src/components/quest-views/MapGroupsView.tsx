@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
 import { LevelQuestCard } from "./LevelQuestCard";
 import type { QuestWithProgress, QuestStatus, Objective } from "@/types";
 
@@ -191,7 +192,11 @@ export function MapGroupsView({
               </h3>
               <div className="space-y-1">
                 {rankedMaps.slice(0, 3).map((item, idx) => (
-                  <div key={item.map} className="flex justify-between text-xs">
+                  <Link
+                    key={item.map}
+                    href={`/raid?map=${encodeURIComponent(item.map)}`}
+                    className="flex justify-between text-xs rounded px-1 -mx-1 transition-colors hover:bg-white/5"
+                  >
                     <span
                       style={{
                         color:
@@ -205,7 +210,7 @@ export function MapGroupsView({
                     <span style={{ color: "var(--text-dim)" }}>
                       {item.available}
                     </span>
-                  </div>
+                  </Link>
                 ))}
                 {rankedMaps.length > 3 && (
                   <div
